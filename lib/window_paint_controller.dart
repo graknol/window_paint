@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:example/window_paint_mode.dart';
+import 'package:window_paint/window_paint_mode.dart';
 import 'package:flutter/foundation.dart';
 
 class WindowPaintController

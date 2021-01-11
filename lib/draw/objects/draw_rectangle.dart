@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:example/draw/draw_object.dart';
-import 'package:example/draw/draw_point.dart';
+import 'package:window_paint/draw/draw_object.dart';
+import 'package:window_paint/draw/draw_point.dart';
 import 'package:flutter/foundation.dart';
 
 class DrawRectangle extends DrawObject {

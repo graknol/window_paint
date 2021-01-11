@@ -1,8 +1,8 @@
-import 'package:example/draw/draw_object.dart';
+import 'package:window_paint/draw/draw_object.dart';
 import 'dart:ui';
 
-import 'package:example/draw/draw_object_adapter.dart';
-import 'package:example/draw/objects/draw_noop.dart';
+import 'package:window_paint/draw/draw_object_adapter.dart';
+import 'package:window_paint/draw/objects/draw_noop.dart';
 
 class PanZoomAdapter extends DrawObjectAdapter {
   const PanZoomAdapter();

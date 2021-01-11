@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:example/draw/draw_object.dart';
+import 'package:window_paint/draw/draw_object.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 

@@ -1,28 +1,28 @@
 import 'dart:ui';
 
-import 'package:example/draw/draw_object_adapter.dart';
-import 'package:example/draw/draw_point.dart';
-import 'package:example/draw/objects/draw_rectangle_cross.dart';
+import 'package:window_paint/draw/draw_object_adapter.dart';
+import 'package:window_paint/draw/draw_point.dart';
+import 'package:window_paint/draw/objects/draw_rectangle.dart';
 
-class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
-  const DrawRectangleCrossAdapter();
+class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
+  const DrawRectangleAdapter();
 
   @override
-  DrawRectangleCross start(Offset focalPoint, Color color) {
+  DrawRectangle start(Offset focalPoint, Color color) {
     final point = _createPoint(focalPoint, color);
-    return DrawRectangleCross(
+    return DrawRectangle(
       anchor: point,
     );
   }
 
   @override
-  bool update(DrawRectangleCross object, Offset focalPoint, Color color) {
+  bool update(DrawRectangle object, Offset focalPoint, Color color) {
     object.endpoint = focalPoint;
     return true;
   }
 
   @override
-  bool end(DrawRectangleCross object, Color color) {
+  bool end(DrawRectangle object, Color color) {
     return true;
   }
 

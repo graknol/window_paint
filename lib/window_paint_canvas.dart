@@ -1,6 +1,6 @@
-import 'package:example/draw/draw_object.dart';
-import 'package:example/draw/draw_object_adapter.dart';
-import 'package:example/window_paint_painter.dart';
+import 'package:window_paint/draw/draw_object.dart';
+import 'package:window_paint/draw/draw_object_adapter.dart';
+import 'package:window_paint/window_paint_painter.dart';
 import 'package:flutter/widgets.dart';
 
 class WindowPaintCanvas extends StatefulWidget {

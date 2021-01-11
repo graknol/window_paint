@@ -1,8 +1,8 @@
 import 'dart:ui';
 
-import 'package:example/draw/draw_object.dart';
-import 'package:example/draw/draw_point.dart';
-import 'package:example/utils/simplify_utils.dart';
+import 'package:window_paint/draw/draw_object.dart';
+import 'package:window_paint/draw/draw_point.dart';
+import 'package:window_paint/utils/simplify_utils.dart';
 
 class DrawPencil extends DrawObject {
   final List<DrawPoint> points;

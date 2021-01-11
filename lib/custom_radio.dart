@@ -1,4 +1,4 @@
-import 'package:example/custom_radio_controller.dart';
+import 'package:window_paint/custom_radio_controller.dart';
 import 'package:flutter/widgets.dart';
 
 typedef IndexedRadioBuilder = Widget Function(

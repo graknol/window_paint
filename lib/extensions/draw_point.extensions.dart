@@ -1,5 +1,5 @@
-import 'package:example/draw/draw_point.dart';
-import 'package:example/extensions/offset.extensions.dart';
+import 'package:window_paint/draw/draw_point.dart';
+import 'package:window_paint/extensions/offset.extensions.dart';
 
 extension DrawPointExtensions on DrawPoint {
   double squaredDistanceTo(DrawPoint other) =>
