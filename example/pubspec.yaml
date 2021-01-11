@@ -1,6 +1,6 @@
 name: example
 description: Demo of window_paint.
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
@@ -11,6 +11,7 @@ dependencies:
     sdk: flutter
   window_paint:
     path: ../
+  flutter_colorpicker: ^0.3.5
 
 dev_dependencies:
   flutter_test:

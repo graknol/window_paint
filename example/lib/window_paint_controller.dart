@@ -1,33 +1,78 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 
 class WindowPaintController
     with WindowPaintEagerListenerMixin, WindowPaintLocalListenersMixin {
+  bool _panEnabled;
+  bool _scaleEnabled;
+  bool _paintEnabled;
+  Color _color;
+
+  WindowPaintController({
+    bool initialPanEnabled = true,
+    bool initialScaleEnabled = true,
+    bool initialPaintEnabled = false,
+    Color initialColor = const Color(0xFF000000),
+  })  : assert(initialPanEnabled != null),
+        assert(initialScaleEnabled != null),
+        assert(initialPaintEnabled != null),
+        assert(initialColor != null),
+        _panEnabled = initialPanEnabled,
+        _scaleEnabled = initialScaleEnabled,
+        _paintEnabled = initialPaintEnabled,
+        _color = initialColor;
+
+  bool get panEnabled => _panEnabled;
+  bool get scaleEnabled => _scaleEnabled;
+  bool get paintEnabled => _paintEnabled;
+  Color get color => _color;
+
+  set panEnabled(bool enabled) {
+    assert(enabled != null);
+    _panEnabled = enabled;
+    notifyListeners();
+  }
+
+  set scaleEnabled(bool enabled) {
+    assert(enabled != null);
+    _scaleEnabled = enabled;
+    notifyListeners();
+  }
+
+  set paintEnabled(bool enabled) {
+    assert(enabled != null);
+    _paintEnabled = enabled;
+    notifyListeners();
+  }
+
+  set color(Color color) {
+    assert(color != null);
+    _color = color;
+    notifyListeners();
+  }
+
+  void update({
+    bool panEnabled,
+    bool scaleEnabled,
+    bool paintEnabled,
+    Color color,
+  }) {
+    assert(panEnabled != null ||
+        scaleEnabled != null ||
+        paintEnabled != null ||
+        color != null);
+    _panEnabled = panEnabled ?? _panEnabled;
+    _scaleEnabled = scaleEnabled ?? _scaleEnabled;
+    _paintEnabled = paintEnabled ?? _paintEnabled;
+    _color = color ?? _color;
+    notifyListeners();
+  }
+
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
-  ///
-  /// The most recently returned [TickerFuture], if any, is marked as having been
-  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
-  /// derivative future completes with a [TickerCanceled] error.
   @override
   void dispose() {
-    // assert(() {
-    //   if (_ticker == null) {
-    //     throw FlutterError.fromParts(<DiagnosticsNode>[
-    //       ErrorSummary(
-    //           'WindowPaintController.dispose() called more than once.'),
-    //       ErrorDescription(
-    //           'A given $runtimeType cannot be disposed more than once.\n'),
-    //       DiagnosticsProperty<WindowPaintController>(
-    //         'The following $runtimeType object was disposed multiple times',
-    //         this,
-    //         style: DiagnosticsTreeStyle.errorProperty,
-    //       ),
-    //     ]);
-    //   }
-    //   return true;
-    // }());
-    // _ticker!.dispose();
-    // _ticker = null;
     super.dispose();
   }
 }

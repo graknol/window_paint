@@ -1,4 +1,5 @@
 import 'package:example/window_paint.dart';
+import 'package:example/window_paint_controller.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -30,6 +31,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _windowPaintController = WindowPaintController(
+    initialColor: Colors.red,
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,7 +45,9 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: const EdgeInsets.all(16.0),
         child: Center(
           child: WindowPaint(
-            child: Image.network('https://picsum.photos/720/480'),
+            controller: _windowPaintController,
+            child: Image.network(
+                'https://www.humanesociety.org/sites/default/files/styles/1240x698/public/2020-07/kitten-510651.jpg?h=f54c7448&itok=ZhplzyJ9'),
           ),
         ),
       ),
