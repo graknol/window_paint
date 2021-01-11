@@ -1,3 +1,4 @@
+import 'package:example/window_paint_control.dart';
 import 'package:window_paint/window_paint.dart';
 import 'package:window_paint/window_paint_controller.dart';
 import 'package:flutter/foundation.dart';
@@ -44,10 +45,17 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
-          child: WindowPaint(
-            controller: _windowPaintController,
-            child: Image.network(
-                'https://www.humanesociety.org/sites/default/files/styles/1240x698/public/2020-07/kitten-510651.jpg?h=f54c7448&itok=ZhplzyJ9'),
+          child: Column(
+            children: [
+              WindowPaintControl(
+                controller: _windowPaintController,
+              ),
+              WindowPaint(
+                controller: _windowPaintController,
+                child: Image.network(
+                    'https://www.humanesociety.org/sites/default/files/styles/1240x698/public/2020-07/kitten-510651.jpg?h=f54c7448&itok=ZhplzyJ9'),
+              ),
+            ],
           ),
         ),
       ),
