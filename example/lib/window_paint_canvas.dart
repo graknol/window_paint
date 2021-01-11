@@ -70,11 +70,11 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
 
   void _onInteractionEnd(ScaleEndDetails details) {
     final object = objects.last;
-    final keep = widget.adapter.end(object, widget.color);
-    if (!keep) {
-      setState(() {
+    setState(() {
+      final keep = widget.adapter.end(object, widget.color);
+      if (!keep) {
         objects.removeLast();
-      });
-    }
+      }
+    });
   }
 }
