@@ -38,6 +38,9 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   }
 
   void _startNewPencilObject() {
+    if (pencilObjects.isNotEmpty) {
+      pencilObjects.last.finalize();
+    }
     pencilObjects.add(DrawPencil());
   }
 

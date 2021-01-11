@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:example/draw/draw_object.dart';
 import 'package:example/draw/draw_point.dart';
+import 'package:example/utils/simplify_utils.dart';
 
 class DrawPencil extends DrawObject {
   final List<DrawPoint> points;
@@ -25,9 +26,18 @@ class DrawPencil extends DrawObject {
   @override
   bool shouldRepaint() => points.length != _lastPaintedCount;
 
+  @override
+  void finalize() {
+    simplify();
+  }
+
   void addPoint(DrawPoint point) {
     points.add(point);
   }
 
-  void simplify() {}
+  void simplify() {
+    final simplified = simplifyPoints(points);
+    points.clear();
+    points.addAll(simplified);
+  }
 }
