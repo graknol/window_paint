@@ -32,11 +32,20 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
 
   void _updateInteractivity() {
     setState(() {
-      widget.controller.update(
-        panEnabled: _customRadioController.currentIndex == 0,
-        scaleEnabled: _customRadioController.currentIndex == 0,
-        paintEnabled: _customRadioController.currentIndex == 1,
-      );
+      switch (_customRadioController.currentIndex) {
+        case 0:
+          widget.controller.mode = 'pan_zoom';
+          break;
+        case 1:
+          widget.controller.mode = 'pencil';
+          break;
+        case 2:
+          widget.controller.mode = 'rectangle';
+          break;
+        case 3:
+          widget.controller.mode = 'rectangle_cross';
+          break;
+      }
     });
   }
 
@@ -69,43 +78,7 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
           ),
           IconButton(
             icon: Icon(Icons.color_lens, color: widget.controller.color),
-            onPressed: () async {
-              Color pickedColor;
-              final confirmed = await showDialog(
-                context: context,
-                child: AlertDialog(
-                  title: const Text('Pick a color'),
-                  content: SingleChildScrollView(
-                    child: BlockPicker(
-                      pickerColor: widget.controller.color,
-                      onColorChanged: (color) {
-                        pickedColor = color;
-                      },
-                      // paletteType: PaletteType.rgb,
-                      // showLabel: false,
-                      // pickerAreaHeightPercent: 0.8,
-                    ),
-                  ),
-                  actions: [
-                    FlatButton(
-                      child: const Text('Cancel'),
-                      onPressed: () {
-                        Navigator.of(context).pop(false);
-                      },
-                    ),
-                    FlatButton(
-                      child: const Text('OK'),
-                      onPressed: () {
-                        Navigator.of(context).pop(true);
-                      },
-                    ),
-                  ],
-                ),
-              );
-              if (confirmed) {
-                widget.controller.color = pickedColor;
-              }
-            },
+            onPressed: _showColorPicker,
           ),
         ],
       ),
@@ -115,5 +88,42 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
   Iterable<Widget> _buildControls(BuildContext context) sync* {
     yield Icon(Icons.pan_tool, color: Colors.black);
     yield Icon(Icons.edit, color: Colors.black);
+    yield Icon(Icons.crop_square, color: Colors.black);
+    yield Icon(Icons.close, color: Colors.black);
+  }
+
+  Future<void> _showColorPicker() async {
+    Color pickedColor;
+    final confirmed = await showDialog(
+      context: context,
+      child: AlertDialog(
+        title: const Text('Pick a color'),
+        content: SingleChildScrollView(
+          child: BlockPicker(
+            pickerColor: widget.controller.color,
+            onColorChanged: (color) {
+              pickedColor = color;
+            },
+          ),
+        ),
+        actions: [
+          FlatButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+          ),
+          FlatButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+          ),
+        ],
+      ),
+    );
+    if (confirmed) {
+      widget.controller.color = pickedColor;
+    }
   }
 }

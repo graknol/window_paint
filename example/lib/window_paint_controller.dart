@@ -1,48 +1,27 @@
 import 'dart:ui';
 
+import 'package:example/window_paint_mode.dart';
 import 'package:flutter/foundation.dart';
 
 class WindowPaintController
     with WindowPaintEagerListenerMixin, WindowPaintLocalListenersMixin {
-  bool _panEnabled;
-  bool _scaleEnabled;
-  bool _paintEnabled;
+  String _mode;
   Color _color;
 
   WindowPaintController({
-    bool initialPanEnabled = true,
-    bool initialScaleEnabled = true,
-    bool initialPaintEnabled = false,
+    String initialMode = 'pan_zoom',
     Color initialColor = const Color(0xFF000000),
-  })  : assert(initialPanEnabled != null),
-        assert(initialScaleEnabled != null),
-        assert(initialPaintEnabled != null),
+  })  : assert(initialMode != null),
         assert(initialColor != null),
-        _panEnabled = initialPanEnabled,
-        _scaleEnabled = initialScaleEnabled,
-        _paintEnabled = initialPaintEnabled,
+        _mode = initialMode,
         _color = initialColor;
 
-  bool get panEnabled => _panEnabled;
-  bool get scaleEnabled => _scaleEnabled;
-  bool get paintEnabled => _paintEnabled;
+  String get mode => _mode;
   Color get color => _color;
 
-  set panEnabled(bool enabled) {
-    assert(enabled != null);
-    _panEnabled = enabled;
-    notifyListeners();
-  }
-
-  set scaleEnabled(bool enabled) {
-    assert(enabled != null);
-    _scaleEnabled = enabled;
-    notifyListeners();
-  }
-
-  set paintEnabled(bool enabled) {
-    assert(enabled != null);
-    _paintEnabled = enabled;
+  set mode(String mode) {
+    assert(mode != null);
+    _mode = mode;
     notifyListeners();
   }
 
@@ -53,18 +32,11 @@ class WindowPaintController
   }
 
   void update({
-    bool panEnabled,
-    bool scaleEnabled,
-    bool paintEnabled,
+    WindowPaintMode mode,
     Color color,
   }) {
-    assert(panEnabled != null ||
-        scaleEnabled != null ||
-        paintEnabled != null ||
-        color != null);
-    _panEnabled = panEnabled ?? _panEnabled;
-    _scaleEnabled = scaleEnabled ?? _scaleEnabled;
-    _paintEnabled = paintEnabled ?? _paintEnabled;
+    assert(mode != null || color != null);
+    _mode = mode ?? _mode;
     _color = color ?? _color;
     notifyListeners();
   }

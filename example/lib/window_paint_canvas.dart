@@ -1,26 +1,20 @@
-import 'package:example/draw/draw_point.dart';
-import 'package:example/draw/objects/draw_pencil.dart';
+import 'package:example/draw/draw_object.dart';
+import 'package:example/draw/draw_object_adapter.dart';
 import 'package:example/window_paint_painter.dart';
 import 'package:flutter/widgets.dart';
 
 class WindowPaintCanvas extends StatefulWidget {
-  final bool panEnabled;
-  final bool scaleEnabled;
-  final bool paintEnabled;
   final Color color;
+  final DrawObjectAdapter adapter;
   final Widget child;
 
   const WindowPaintCanvas({
     Key key,
-    this.panEnabled = true,
-    this.scaleEnabled = true,
-    this.paintEnabled = false,
     this.color = const Color(0xFF000000),
+    @required this.adapter,
     @required this.child,
-  })  : assert(panEnabled != null),
-        assert(scaleEnabled != null),
-        assert(paintEnabled != null),
-        assert(color != null),
+  })  : assert(color != null),
+        assert(adapter != null),
         assert(child != null),
         super(key: key);
 
@@ -29,58 +23,58 @@ class WindowPaintCanvas extends StatefulWidget {
 }
 
 class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
-  final pencilObjects = List<DrawPencil>();
+  final transformationController = TransformationController();
+  final objects = List<DrawObject>();
 
   @override
-  void initState() {
-    super.initState();
-    _startNewPencilObject();
-  }
-
-  void _startNewPencilObject() {
-    if (pencilObjects.isNotEmpty) {
-      pencilObjects.last.finalize();
-    }
-    pencilObjects.add(DrawPencil());
+  void dispose() {
+    transformationController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
-      panEnabled: widget.panEnabled,
-      scaleEnabled: widget.scaleEnabled,
-      onInteractionUpdate: widget.paintEnabled
-          ? (details) {
-              setState(() {
-                final point = _createPoint(details.localFocalPoint);
-                pencilObjects.last.addPoint(point);
-              });
-            }
-          : null,
-      onInteractionEnd: widget.paintEnabled
-          ? (details) {
-              setState(() {
-                _startNewPencilObject();
-              });
-            }
-          : null,
+      transformationController: transformationController,
+      panEnabled: widget.adapter.panEnabled,
+      scaleEnabled: widget.adapter.scaleEnabled,
+      onInteractionStart: _onInteractionStart,
+      onInteractionUpdate: _onInteractionUpdate,
+      onInteractionEnd: _onInteractionEnd,
       child: CustomPaint(
         foregroundPainter: WindowPaintPainter(
-          objects: pencilObjects,
+          objects: objects,
         ),
         child: widget.child,
       ),
     );
   }
 
-  DrawPoint _createPoint(Offset offset) {
-    return DrawPoint(
-      offset: offset,
-      paint: Paint()
-        ..strokeCap = StrokeCap.round
-        ..isAntiAlias = true
-        ..color = widget.color
-        ..strokeWidth = 4,
-    );
+  void _onInteractionStart(ScaleStartDetails details) {
+    final focalPoint =
+        transformationController.toScene(details.localFocalPoint);
+    setState(() {
+      final object = widget.adapter.start(focalPoint, widget.color);
+      objects.add(object);
+    });
+  }
+
+  void _onInteractionUpdate(ScaleUpdateDetails details) {
+    final object = objects.last;
+    final focalPoint = details.localFocalPoint;
+    final repaint = widget.adapter.update(object, focalPoint, widget.color);
+    if (repaint) {
+      setState(() {});
+    }
+  }
+
+  void _onInteractionEnd(ScaleEndDetails details) {
+    final object = objects.last;
+    final keep = widget.adapter.end(object, widget.color);
+    if (!keep) {
+      setState(() {
+        objects.removeLast();
+      });
+    }
   }
 }

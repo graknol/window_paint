@@ -1,3 +1,8 @@
+import 'package:example/draw/draw_object_adapter.dart';
+import 'package:example/draw/objects/adapters/draw_pencil_adapter.dart';
+import 'package:example/draw/objects/adapters/draw_rectangle_adapter.dart';
+import 'package:example/draw/objects/adapters/draw_rectangle_cross_adapter.dart';
+import 'package:example/draw/objects/adapters/pan_zoom_adapter.dart';
 import 'package:example/window_paint_canvas.dart';
 import 'package:example/window_paint_control.dart';
 import 'package:example/window_paint_controller.dart';
@@ -7,12 +12,20 @@ import 'package:flutter/widgets.dart';
 class WindowPaint extends StatefulWidget {
   final Widget child;
   final WindowPaintController controller;
+  final Map<String, DrawObjectAdapter> adapters;
 
   WindowPaint({
     Key key,
     this.controller,
+    this.adapters = const {
+      'pan_zoom': const PanZoomAdapter(),
+      'pencil': const DrawPencilAdapter(),
+      'rectangle': const DrawRectangleAdapter(),
+      'rectangle_cross': const DrawRectangleCrossAdapter(),
+    },
     @required this.child,
   })  : assert(child != null),
+        assert(adapters != null),
         super(key: key);
 
   @override
@@ -49,10 +62,8 @@ class _WindowPaintState extends State<WindowPaint> {
         ),
         ClipRect(
           child: WindowPaintCanvas(
-            panEnabled: _controller.panEnabled,
-            scaleEnabled: _controller.scaleEnabled,
-            paintEnabled: _controller.paintEnabled,
             color: _controller.color,
+            adapter: widget.adapters[_controller.mode],
             child: widget.child,
           ),
         ),
