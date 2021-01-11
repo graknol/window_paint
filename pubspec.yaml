@@ -1,7 +1,8 @@
 name: window_paint
 description: Paint over another widget.
 version: 0.0.1
-author: Sindre van der Linden <sindre@allvis.io>
+authors:
+  - Sindre van der Linden <sindre@allvis.io>
 homepage: https://github.com/Allvis-AS/window_paint
 repository: https://github.com/Allvis-AS/window_paint
 issue_tracker: https://github.com/Allvis-AS/window_paint/issues
