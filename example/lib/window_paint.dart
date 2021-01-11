@@ -1,12 +1,11 @@
+import 'package:example/draw/adapters/draw_pencil_adapter.dart';
+import 'package:example/draw/adapters/draw_rectangle_adapter.dart';
+import 'package:example/draw/adapters/draw_rectangle_cross_adapter.dart';
+import 'package:example/draw/adapters/pan_zoom_adapter.dart';
 import 'package:example/draw/draw_object_adapter.dart';
-import 'package:example/draw/objects/adapters/draw_pencil_adapter.dart';
-import 'package:example/draw/objects/adapters/draw_rectangle_adapter.dart';
-import 'package:example/draw/objects/adapters/draw_rectangle_cross_adapter.dart';
-import 'package:example/draw/objects/adapters/pan_zoom_adapter.dart';
 import 'package:example/window_paint_canvas.dart';
 import 'package:example/window_paint_control.dart';
 import 'package:example/window_paint_controller.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class WindowPaint extends StatefulWidget {
