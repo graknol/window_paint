@@ -11,7 +11,11 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
 
   @override
   FutureOr<DrawPencil?> start(
-      BuildContext context, Offset focalPoint, Color color) {
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+  ) {
     final point = _createPoint(focalPoint, color);
     return DrawPencil(
       points: [point],

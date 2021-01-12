@@ -10,7 +10,11 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
 
   @override
   FutureOr<DrawNoop?> start(
-      BuildContext context, Offset focalPoint, Color color) {
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+  ) {
     return DrawNoop();
   }
 

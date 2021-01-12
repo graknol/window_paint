@@ -11,7 +11,11 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
 
   @override
   FutureOr<DrawRectangleCross?> start(
-      BuildContext context, Offset focalPoint, Color color) {
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+  ) {
     final point = _createPoint(focalPoint, color);
     return DrawRectangleCross(
       anchor: point,

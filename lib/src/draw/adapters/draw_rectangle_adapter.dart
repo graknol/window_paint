@@ -11,7 +11,11 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
 
   @override
   FutureOr<DrawRectangle?> start(
-      BuildContext context, Offset focalPoint, Color color) {
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+  ) {
     final point = _createPoint(focalPoint, color);
     return DrawRectangle(
       anchor: point,

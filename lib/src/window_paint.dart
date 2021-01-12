@@ -1,7 +1,6 @@
 import 'package:window_paint/src/draw/adapters/draw_pencil_adapter.dart';
 import 'package:window_paint/src/draw/adapters/draw_rectangle_adapter.dart';
 import 'package:window_paint/src/draw/adapters/draw_rectangle_cross_adapter.dart';
-import 'package:window_paint/src/draw/adapters/draw_text_adapter.dart';
 import 'package:window_paint/src/draw/adapters/pan_zoom_adapter.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/window_paint_canvas.dart';
@@ -17,7 +16,6 @@ class WindowPaint extends StatefulWidget {
       'pencil': DrawPencilAdapter(),
       'rectangle': DrawRectangleAdapter(),
       'rectangle_cross': DrawRectangleCrossAdapter(),
-      'text': DrawTextAdapter(),
     },
     required this.child,
     this.restorationId,

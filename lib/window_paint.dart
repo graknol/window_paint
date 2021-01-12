@@ -1,3 +1,7 @@
+export 'package:window_paint/src/draw/adapters/draw_pencil_adapter.dart';
+export 'package:window_paint/src/draw/adapters/draw_rectangle_adapter.dart';
+export 'package:window_paint/src/draw/adapters/draw_rectangle_cross_adapter.dart';
+export 'package:window_paint/src/draw/adapters/pan_zoom_adapter.dart';
 export 'package:window_paint/src/draw/draw_object.dart';
 export 'package:window_paint/src/draw/draw_object_adapter.dart';
 export 'package:window_paint/src/draw/draw_point.dart';

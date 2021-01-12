@@ -74,16 +74,31 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
     BuildContext context,
     ScaleStartDetails details,
   ) async {
-    final focalPointScene =
-        _transformationController.toScene(details.localFocalPoint);
-    final result = widget.adapter.start(context, focalPointScene, widget.color);
-    if (result is Future<DrawObject?>) {
-      _pendingObject = result;
-    } else if (result != null) {
-      setState(() {
-        objects.add(result);
-        _hasActiveInteraction = true;
-      });
+    final focalPointScene = _transformationController.toScene(
+      details.localFocalPoint,
+    );
+    final pending = widget.adapter.start(
+      context,
+      focalPointScene,
+      widget.color,
+      _transformationController.value.clone(),
+    );
+    if (pending is DrawObject?) {
+      final object = pending;
+      if (object != null) {
+        setState(() {
+          objects.add(object);
+          _hasActiveInteraction = true;
+        });
+      }
+    } else {
+      _pendingObject = pending;
+      final object = await pending;
+      if (object != null) {
+        setState(() {
+          objects.add(object);
+        });
+      }
     }
   }
 
@@ -92,10 +107,14 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
       return;
     }
     final object = objects.last;
-    final focalPointScene =
-        _transformationController.toScene(details.localFocalPoint);
-    final repaint =
-        widget.adapter.update(object, focalPointScene, widget.color);
+    final focalPointScene = _transformationController.toScene(
+      details.localFocalPoint,
+    );
+    final repaint = widget.adapter.update(
+      object,
+      focalPointScene,
+      widget.color,
+    );
     if (repaint) {
       setState(() {});
     }
