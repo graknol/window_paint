@@ -1,6 +1,8 @@
-# window_paint
+# Painting with power
 
-Paint over another widget.
+`WindowPaint` lets you pan, zoom and paint over any other widget.
+
+It uses the new `InteractiveViewer` together with a `CustomPainter`, giving you the bare minimum to get you started.
 
 ## Getting Started
 
