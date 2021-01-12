@@ -1,6 +1,6 @@
 name: window_paint
 description: Paint over another widget.
-version: 0.0.1
+version: 0.1.0-nullsafety.0
 homepage: https://github.com/Allvis-AS/window_paint
 repository: https://github.com/Allvis-AS/window_paint
 issue_tracker: https://github.com/Allvis-AS/window_paint/issues
