@@ -1,3 +1,4 @@
+import 'package:example/draw/adapters/draw_text_adapter.dart';
 import 'package:example/window_paint_control.dart';
 import 'package:flutter/material.dart';
 import 'package:window_paint/window_paint.dart';
@@ -49,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
+      resizeToAvoidBottomInset: false,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
@@ -59,6 +61,13 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               WindowPaint(
                 controller: _windowPaintController,
+                adapters: const {
+                  'pan_zoom': PanZoomAdapter(),
+                  'pencil': DrawPencilAdapter(),
+                  'rectangle': DrawRectangleAdapter(),
+                  'rectangle_cross': DrawRectangleCrossAdapter(),
+                  'text': DrawTextAdapter(),
+                },
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.amber[100],

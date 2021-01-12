@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/widgets.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/draw/objects/draw_rectangle.dart';
@@ -8,7 +10,12 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
   const DrawRectangleAdapter();
 
   @override
-  DrawRectangle start(Offset focalPoint, Color color) {
+  FutureOr<DrawRectangle?> start(
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+  ) {
     final point = _createPoint(focalPoint, color);
     return DrawRectangle(
       anchor: point,

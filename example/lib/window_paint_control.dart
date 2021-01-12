@@ -41,6 +41,9 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
         case 3:
           widget.controller.mode = 'rectangle_cross';
           break;
+        case 4:
+          widget.controller.mode = 'text';
+          break;
       }
     });
   }
@@ -92,6 +95,7 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
         Icon(Icons.close, color: Colors.black),
       ],
     );
+    yield Icon(Icons.title, color: Colors.black);
   }
 
   Future<void> _showColorPicker() async {

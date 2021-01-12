@@ -5,11 +5,11 @@ import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/utils/simplify_utils.dart';
 
 class DrawPencil extends DrawObject {
-  final List<DrawPoint> points;
-
   DrawPencil({
     List<DrawPoint>? points,
   }) : points = points ?? [];
+
+  final List<DrawPoint> points;
 
   int _lastPaintedCount = 0;
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
@@ -23,6 +25,7 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   final _transformationController = TransformationController();
   final objects = <DrawObject>[];
 
+  Future<DrawObject?>? _pendingObject;
   var _hasActiveInteraction = false;
   late Matrix4 _lockedTransform;
 
@@ -54,7 +57,7 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   Widget build(BuildContext context) {
     return InteractiveViewer(
       transformationController: _transformationController,
-      onInteractionStart: _onInteractionStart,
+      onInteractionStart: (details) => _onInteractionStart(context, details),
       onInteractionUpdate: _onInteractionUpdate,
       onInteractionEnd: _onInteractionEnd,
       child: CustomPaint(
@@ -67,28 +70,61 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
     );
   }
 
-  void _onInteractionStart(ScaleStartDetails details) {
-    final focalPointScene =
-        _transformationController.toScene(details.localFocalPoint);
-    setState(() {
-      final object = widget.adapter.start(focalPointScene, widget.color);
-      objects.add(object);
-      _hasActiveInteraction = true;
-    });
+  Future<void> _onInteractionStart(
+    BuildContext context,
+    ScaleStartDetails details,
+  ) async {
+    final focalPointScene = _transformationController.toScene(
+      details.localFocalPoint,
+    );
+    final pending = widget.adapter.start(
+      context,
+      focalPointScene,
+      widget.color,
+      _transformationController.value.clone(),
+    );
+    if (pending is DrawObject?) {
+      final object = pending;
+      if (object != null) {
+        setState(() {
+          objects.add(object);
+          _hasActiveInteraction = true;
+        });
+      }
+    } else {
+      _pendingObject = pending;
+      final object = await pending;
+      if (object != null) {
+        setState(() {
+          objects.add(object);
+        });
+      }
+    }
   }
 
   void _onInteractionUpdate(ScaleUpdateDetails details) {
+    if (_pendingObject != null) {
+      return;
+    }
     final object = objects.last;
-    final focalPointScene =
-        _transformationController.toScene(details.localFocalPoint);
-    final repaint =
-        widget.adapter.update(object, focalPointScene, widget.color);
+    final focalPointScene = _transformationController.toScene(
+      details.localFocalPoint,
+    );
+    final repaint = widget.adapter.update(
+      object,
+      focalPointScene,
+      widget.color,
+    );
     if (repaint) {
       setState(() {});
     }
   }
 
   void _onInteractionEnd(ScaleEndDetails details) {
+    if (_pendingObject != null) {
+      _pendingObject = null;
+      return;
+    }
     final object = objects.last;
     setState(() {
       final keep = widget.adapter.end(object, widget.color);
