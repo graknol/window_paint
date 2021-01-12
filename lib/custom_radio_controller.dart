@@ -93,7 +93,7 @@ mixin CustomRadioLocalListenersMixin {
   ///
   /// Listeners can be added with [addListener].
   void removeListener(VoidCallback listener) {
-    final bool removed = _listeners.remove(listener);
+    final removed = _listeners.remove(listener);
     if (removed) {
       didUnregisterListener();
     }
@@ -104,10 +104,9 @@ mixin CustomRadioLocalListenersMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   void notifyListeners() {
-    final List<VoidCallback> localListeners =
-        List<VoidCallback>.from(_listeners);
-    for (final VoidCallback listener in localListeners) {
-      InformationCollector collector;
+    final localListeners = List<VoidCallback>.from(_listeners);
+    for (final listener in localListeners) {
+      InformationCollector? collector;
       assert(() {
         collector = () sync* {
           yield DiagnosticsProperty<CustomRadioLocalListenersMixin>(

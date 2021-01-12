@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:window_paint/window_paint_mode.dart';
 import 'package:flutter/foundation.dart';
 
 class WindowPaintController
@@ -11,22 +10,18 @@ class WindowPaintController
   WindowPaintController({
     String initialMode = 'pan_zoom',
     Color initialColor = const Color(0xFF000000),
-  })  : assert(initialMode != null),
-        assert(initialColor != null),
-        _mode = initialMode,
+  })  : _mode = initialMode,
         _color = initialColor;
 
   String get mode => _mode;
   Color get color => _color;
 
   set mode(String mode) {
-    assert(mode != null);
     _mode = mode;
     notifyListeners();
   }
 
   set color(Color color) {
-    assert(color != null);
     _color = color;
     notifyListeners();
   }
@@ -95,7 +90,7 @@ mixin WindowPaintLocalListenersMixin {
   ///
   /// Listeners can be added with [addListener].
   void removeListener(VoidCallback listener) {
-    final bool removed = _listeners.remove(listener);
+    final removed = _listeners.remove(listener);
     if (removed) {
       didUnregisterListener();
     }
@@ -106,10 +101,9 @@ mixin WindowPaintLocalListenersMixin {
   /// If listeners are added or removed during this function, the modifications
   /// will not change which listeners are called during this iteration.
   void notifyListeners() {
-    final List<VoidCallback> localListeners =
-        List<VoidCallback>.from(_listeners);
-    for (final VoidCallback listener in localListeners) {
-      InformationCollector collector;
+    final localListeners = List<VoidCallback>.from(_listeners);
+    for (final listener in localListeners) {
+      InformationCollector? collector;
       assert(() {
         collector = () sync* {
           yield DiagnosticsProperty<WindowPaintLocalListenersMixin>(

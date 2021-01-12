@@ -8,10 +8,10 @@ class DrawPencil extends DrawObject {
   final List<DrawPoint> points;
 
   DrawPencil({
-    List<DrawPoint> points,
-  }) : this.points = points ?? [];
+    List<DrawPoint>? points,
+  }) : points = points ?? [];
 
-  int _lastPaintedCount;
+  int _lastPaintedCount = 0;
 
   @override
   void paint(Canvas canvas, Size size) {

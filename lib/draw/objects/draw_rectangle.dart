@@ -2,17 +2,16 @@ import 'dart:ui';
 
 import 'package:window_paint/draw/draw_object.dart';
 import 'package:window_paint/draw/draw_point.dart';
-import 'package:flutter/foundation.dart';
 
 class DrawRectangle extends DrawObject {
   final DrawPoint anchor;
-  Offset _endpoint;
+  Offset? _endpoint;
 
   DrawRectangle({
-    @required this.anchor,
-  }) : assert(anchor != null);
+    required this.anchor,
+  });
 
-  Offset _lastPaintedEndpoint;
+  Offset? _lastPaintedEndpoint;
 
   set endpoint(Offset endpoint) {
     _endpoint = endpoint;

@@ -5,17 +5,16 @@ typedef IndexedRadioBuilder = Widget Function(
     BuildContext context, int index, bool isActive);
 
 class CustomRadio extends StatefulWidget {
-  final CustomRadioController controller;
+  final CustomRadioController? controller;
   final IndexedRadioBuilder itemBuilder;
   final int itemCount;
 
   CustomRadio({
-    Key key,
+    Key? key,
     this.controller,
-    @required this.itemBuilder,
-    @required this.itemCount,
-  })  : assert(itemBuilder != null),
-        assert(itemCount != null && itemCount > 0),
+    required this.itemBuilder,
+    required this.itemCount,
+  })   : assert(itemCount > 0),
         super(key: key);
 
   @override
@@ -23,7 +22,7 @@ class CustomRadio extends StatefulWidget {
 }
 
 class _CustomRadioState extends State<CustomRadio> {
-  CustomRadioController _controller;
+  late CustomRadioController _controller;
 
   @override
   void initState() {

@@ -1,7 +1,7 @@
+import 'package:flutter/widgets.dart';
 import 'package:window_paint/draw/draw_object.dart';
 import 'package:window_paint/draw/draw_object_adapter.dart';
 import 'package:window_paint/window_paint_painter.dart';
-import 'package:flutter/widgets.dart';
 
 class WindowPaintCanvas extends StatefulWidget {
   final Color color;
@@ -9,14 +9,11 @@ class WindowPaintCanvas extends StatefulWidget {
   final Widget child;
 
   const WindowPaintCanvas({
-    Key key,
+    Key? key,
     this.color = const Color(0xFF000000),
-    @required this.adapter,
-    @required this.child,
-  })  : assert(color != null),
-        assert(adapter != null),
-        assert(child != null),
-        super(key: key);
+    required this.adapter,
+    required this.child,
+  }) : super(key: key);
 
   @override
   _WindowPaintCanvasState createState() => _WindowPaintCanvasState();
@@ -24,7 +21,7 @@ class WindowPaintCanvas extends StatefulWidget {
 
 class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   final transformationController = TransformationController();
-  final objects = List<DrawObject>();
+  final objects = <DrawObject>[];
 
   @override
   void dispose() {

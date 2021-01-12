@@ -35,11 +35,11 @@ List<DrawPoint> _simplifyRadialDist(
   List<DrawPoint> points,
   double sqTolerance,
 ) {
-  DrawPoint point;
-  var prevPoint = points[0];
+  var point = points.first;
+  var prevPoint = points.first;
   final newPoints = [prevPoint];
 
-  for (var i = 1, len = points.length; i < len; i++) {
+  for (var i = 1; i < points.length; i++) {
     point = points[i];
     if (point.squaredDistanceTo(prevPoint) > sqTolerance) {
       newPoints.add(point);
@@ -102,10 +102,6 @@ List<DrawPoint> simplifyPoints(
   double tolerance = 1.0,
   bool fastMode = false,
 }) {
-  assert(points != null);
-  assert(tolerance != null);
-  assert(fastMode != null);
-
   if (points.length <= 2) {
     return points;
   }

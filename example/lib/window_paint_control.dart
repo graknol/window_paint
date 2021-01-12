@@ -95,31 +95,33 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
     Color pickedColor;
     final confirmed = await showDialog(
       context: context,
-      child: AlertDialog(
-        title: const Text('Pick a color'),
-        content: SingleChildScrollView(
-          child: BlockPicker(
-            pickerColor: widget.controller.color,
-            onColorChanged: (color) {
-              pickedColor = color;
-            },
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Pick a color'),
+          content: SingleChildScrollView(
+            child: BlockPicker(
+              pickerColor: widget.controller.color,
+              onColorChanged: (color) {
+                pickedColor = color;
+              },
+            ),
           ),
-        ),
-        actions: [
-          FlatButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(context).pop(false);
-            },
-          ),
-          FlatButton(
-            child: const Text('OK'),
-            onPressed: () {
-              Navigator.of(context).pop(true);
-            },
-          ),
-        ],
-      ),
+          actions: [
+            FlatButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            FlatButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
     );
     if (confirmed) {
       widget.controller.color = pickedColor;

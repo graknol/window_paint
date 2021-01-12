@@ -9,29 +9,27 @@ import 'package:flutter/widgets.dart';
 
 class WindowPaint extends StatefulWidget {
   final Widget child;
-  final WindowPaintController controller;
+  final WindowPaintController? controller;
   final Map<String, DrawObjectAdapter> adapters;
 
   WindowPaint({
-    Key key,
+    Key? key,
     this.controller,
     this.adapters = const {
-      'pan_zoom': const PanZoomAdapter(),
-      'pencil': const DrawPencilAdapter(),
-      'rectangle': const DrawRectangleAdapter(),
-      'rectangle_cross': const DrawRectangleCrossAdapter(),
+      'pan_zoom': PanZoomAdapter(),
+      'pencil': DrawPencilAdapter(),
+      'rectangle': DrawRectangleAdapter(),
+      'rectangle_cross': DrawRectangleCrossAdapter(),
     },
-    @required this.child,
-  })  : assert(child != null),
-        assert(adapters != null),
-        super(key: key);
+    required this.child,
+  }) : super(key: key);
 
   @override
   _WindowPaintState createState() => _WindowPaintState();
 }
 
 class _WindowPaintState extends State<WindowPaint> {
-  WindowPaintController _controller;
+  late WindowPaintController _controller;
 
   @override
   void initState() {
@@ -56,7 +54,7 @@ class _WindowPaintState extends State<WindowPaint> {
     return ClipRect(
       child: WindowPaintCanvas(
         color: _controller.color,
-        adapter: widget.adapters[_controller.mode],
+        adapter: widget.adapters[_controller.mode]!,
         child: widget.child,
       ),
     );
