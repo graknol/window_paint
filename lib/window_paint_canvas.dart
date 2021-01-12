@@ -23,6 +23,27 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   final _transformationController = TransformationController();
   final objects = <DrawObject>[];
 
+  var _hasActiveInteraction = false;
+  late Matrix4 _lockedTransform;
+
+  @override
+  void initState() {
+    super.initState();
+    _lockedTransform = _transformationController.value;
+    _transformationController.addListener(() {
+      /// In newer versions of [InteractiveViewer], the [onInteractionUpdate]
+      /// callback is not called when [panEnabled] and [scaleEnabled] are false.
+      ///
+      /// To overcome this limitation, we have to manually reset the
+      /// transformation with the [transformationController].
+      if (widget.adapter.panEnabled || widget.adapter.scaleEnabled) {
+        _lockedTransform = _transformationController.value;
+      } else if (_transformationController.value != _lockedTransform) {
+        _transformationController.value = _lockedTransform;
+      }
+    });
+  }
+
   @override
   void dispose() {
     _transformationController.dispose();
@@ -33,8 +54,6 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   Widget build(BuildContext context) {
     return InteractiveViewer(
       transformationController: _transformationController,
-      panEnabled: widget.adapter.panEnabled,
-      scaleEnabled: widget.adapter.scaleEnabled,
       onInteractionStart: _onInteractionStart,
       onInteractionUpdate: _onInteractionUpdate,
       onInteractionEnd: _onInteractionEnd,
@@ -42,24 +61,28 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
         foregroundPainter: WindowPaintPainter(
           objects: objects,
         ),
+        willChange: _hasActiveInteraction,
         child: widget.child,
       ),
     );
   }
 
   void _onInteractionStart(ScaleStartDetails details) {
-    final focalPoint =
+    final focalPointScene =
         _transformationController.toScene(details.localFocalPoint);
     setState(() {
-      final object = widget.adapter.start(focalPoint, widget.color);
+      final object = widget.adapter.start(focalPointScene, widget.color);
       objects.add(object);
+      _hasActiveInteraction = true;
     });
   }
 
   void _onInteractionUpdate(ScaleUpdateDetails details) {
     final object = objects.last;
-    final focalPoint = details.localFocalPoint;
-    final repaint = widget.adapter.update(object, focalPoint, widget.color);
+    final focalPointScene =
+        _transformationController.toScene(details.localFocalPoint);
+    final repaint =
+        widget.adapter.update(object, focalPointScene, widget.color);
     if (repaint) {
       setState(() {});
     }
@@ -72,6 +95,7 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
       if (!keep) {
         objects.removeLast();
       }
+      _hasActiveInteraction = false;
     });
   }
 }
