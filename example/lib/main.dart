@@ -23,7 +23,10 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({
+    Key? key,
+    required this.title,
+  }) : super(key: key);
 
   final String title;
 
@@ -35,6 +38,12 @@ class _MyHomePageState extends State<MyHomePage> {
   final _windowPaintController = WindowPaintController(
     initialColor: Colors.red,
   );
+
+  @override
+  void dispose() {
+    _windowPaintController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

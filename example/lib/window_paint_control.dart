@@ -8,17 +8,16 @@ class WindowPaintControl extends StatefulWidget {
   final WindowPaintController controller;
 
   const WindowPaintControl({
-    Key key,
-    @required this.controller,
-  })  : assert(controller != null),
-        super(key: key);
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
 
   @override
   _WindowPaintControlState createState() => _WindowPaintControlState();
 }
 
 class _WindowPaintControlState extends State<WindowPaintControl> {
-  CustomRadioController _customRadioController;
+  late final CustomRadioController _customRadioController;
 
   @override
   void initState() {
@@ -92,7 +91,7 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
   }
 
   Future<void> _showColorPicker() async {
-    Color pickedColor;
+    var pickedColor = widget.controller.color;
     final confirmed = await showDialog(
       context: context,
       builder: (context) {
