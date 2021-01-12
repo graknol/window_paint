@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:window_paint/draw/draw_object.dart';
-import 'package:window_paint/draw/draw_point.dart';
+import 'package:window_paint/src/draw/draw_object.dart';
+import 'package:window_paint/src/draw/draw_point.dart';
 
 class DrawRectangle extends DrawObject {
   final DrawPoint anchor;

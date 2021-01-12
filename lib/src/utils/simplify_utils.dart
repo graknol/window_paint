@@ -1,5 +1,5 @@
-import 'package:window_paint/draw/draw_point.dart';
-import 'package:window_paint/extensions/draw_point.extensions.dart';
+import 'package:window_paint/src/draw/draw_point.dart';
+import 'package:window_paint/src/extensions/draw_point.extensions.dart';
 
 /// Credit goes to mourner for his awesome JavaScript library:
 /// https://github.com/mourner/simplify-js/blob/6930f87d19f87a5b262becaf1fd3080102b0cb51/simplify.js#L1

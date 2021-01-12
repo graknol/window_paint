@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:window_paint/draw/draw_object.dart';
-import 'package:window_paint/draw/draw_object_adapter.dart';
-import 'package:window_paint/window_paint_painter.dart';
+import 'package:window_paint/src/draw/draw_object.dart';
+import 'package:window_paint/src/draw/draw_object_adapter.dart';
+import 'package:window_paint/src/window_paint_painter.dart';
 
 class WindowPaintCanvas extends StatefulWidget {
   final Color color;

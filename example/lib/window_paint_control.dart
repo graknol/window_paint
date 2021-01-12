@@ -2,7 +2,7 @@ import 'package:example/custom_radio.dart';
 import 'package:example/custom_radio_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:window_paint/window_paint_controller.dart';
+import 'package:window_paint/window_paint.dart';
 
 class WindowPaintControl extends StatefulWidget {
   final WindowPaintController controller;

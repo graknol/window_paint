@@ -5,7 +5,7 @@ class DrawPoint {
   final Paint paint;
 
   const DrawPoint({
-    /*required*/ required this.offset,
-    /*required*/ required this.paint,
+    required this.offset,
+    required this.paint,
   });
 }

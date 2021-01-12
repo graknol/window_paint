@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:window_paint/draw/draw_point.dart';
-import 'package:window_paint/draw/objects/draw_rectangle.dart';
+import 'package:window_paint/src/draw/draw_point.dart';
+import 'package:window_paint/src/draw/objects/draw_rectangle.dart';
 
 class DrawRectangleCross extends DrawRectangle {
   DrawRectangleCross({

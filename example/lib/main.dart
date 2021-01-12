@@ -1,8 +1,6 @@
 import 'package:example/window_paint_control.dart';
-import 'package:window_paint/window_paint.dart';
-import 'package:window_paint/window_paint_controller.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:window_paint/window_paint.dart';
 
 void main() {
   runApp(MyApp());
