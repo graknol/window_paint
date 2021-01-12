@@ -1,3 +1,8 @@
+## [0.1.0-nullsafety.1] - TODO: Add date
+
+* Replaced the `example`'s picture with a solid color.
+* Added explanation of the package's name in the README.
+
 ## [0.1.0-nullsafety.0] - Jan 12, 2021
 
 * Solves an issue with how `InteractiveViewer.onInteractionUpdate` on the beta channel behaves. This change is both backward and forward compatible.
