@@ -1,8 +1,8 @@
-import 'package:window_paint/custom_radio.dart';
-import 'package:window_paint/custom_radio_controller.dart';
-import 'package:window_paint/window_paint_controller.dart';
+import 'package:example/custom_radio.dart';
+import 'package:example/custom_radio_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:window_paint/window_paint_controller.dart';
 
 class WindowPaintControl extends StatefulWidget {
   final WindowPaintController controller;
@@ -17,20 +17,18 @@ class WindowPaintControl extends StatefulWidget {
 }
 
 class _WindowPaintControlState extends State<WindowPaintControl> {
-  late final CustomRadioController _customRadioController;
+  final _customRadioController = CustomRadioController();
 
   @override
   void initState() {
     super.initState();
-    _customRadioController = CustomRadioController();
-
     _customRadioController.addListener(_updateInteractivity);
     _updateInteractivity();
   }
 
   void _updateInteractivity() {
     setState(() {
-      switch (_customRadioController.currentIndex) {
+      switch (_customRadioController.index) {
         case 0:
           widget.controller.mode = 'pan_zoom';
           break;

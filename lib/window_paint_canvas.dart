@@ -20,19 +20,19 @@ class WindowPaintCanvas extends StatefulWidget {
 }
 
 class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
-  final transformationController = TransformationController();
+  final _transformationController = TransformationController();
   final objects = <DrawObject>[];
 
   @override
   void dispose() {
-    transformationController.dispose();
+    _transformationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
-      transformationController: transformationController,
+      transformationController: _transformationController,
       panEnabled: widget.adapter.panEnabled,
       scaleEnabled: widget.adapter.scaleEnabled,
       onInteractionStart: _onInteractionStart,
@@ -49,7 +49,7 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
 
   void _onInteractionStart(ScaleStartDetails details) {
     final focalPoint =
-        transformationController.toScene(details.localFocalPoint);
+        _transformationController.toScene(details.localFocalPoint);
     setState(() {
       final object = widget.adapter.start(focalPoint, widget.color);
       objects.add(object);

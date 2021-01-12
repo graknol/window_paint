@@ -1,131 +1,176 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
-class WindowPaintController
-    with WindowPaintEagerListenerMixin, WindowPaintLocalListenersMixin {
-  String _mode;
-  Color _color;
-
-  WindowPaintController({
+class WindowPaintController extends ValueNotifier<WindowPaintValue> {
+  /// Creates a controller for a window paint widget.
+  factory WindowPaintController({
     String initialMode = 'pan_zoom',
     Color initialColor = const Color(0xFF000000),
-  })  : _mode = initialMode,
-        _color = initialColor;
+  }) =>
+      WindowPaintController.fromValue(
+        WindowPaintValue(
+          mode: initialMode,
+          color: initialColor,
+        ),
+      );
 
-  String get mode => _mode;
-  Color get color => _color;
+  /// Creates a controller for a window paint widget from an initial
+  /// [WindowPaintValue].
+  WindowPaintController.fromValue(WindowPaintValue? value)
+      : super(value ?? WindowPaintValue.empty);
 
-  set mode(String mode) {
-    _mode = mode;
-    notifyListeners();
+  /// The current paint mode being used.
+  String get mode => value.mode;
+  // The color of the paint tool.
+  Color get color => value.color;
+
+  /// Setting this will notify all the listeners of this [WindowPaintController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this value should only be set between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  ///
+  /// This property can be set from a listener added to this
+  /// [WindowPaintController]; however, one should not also set [color]
+  /// in a separate statement. To change both the [mode] and the [color]
+  /// change the controller's [value].
+  set mode(String newMode) {
+    value = value.copyWith(
+      mode: newMode,
+    );
   }
 
-  set color(Color color) {
-    _color = color;
-    notifyListeners();
+  /// Setting this will notify all the listeners of this [WindowPaintController]
+  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// this value should only be set between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  ///
+  /// This property can be set from a listener added to this
+  /// [WindowPaintController]; however, one should not also set [mode]
+  /// in a separate statement. To change both the [mode] and the [color]
+  /// change the controller's [value].
+  set color(Color newColor) {
+    value = value.copyWith(
+      color: newColor,
+    );
   }
 
-  void update({
+  @override
+  set value(WindowPaintValue newValue) {
+    super.value = newValue;
+  }
+}
+
+/// The current mode and color state for a [WindowPaint] widget.
+@immutable
+class WindowPaintValue {
+  /// Creates information for painting a widget.
+  ///
+  /// The [mode] and [color] arguments must not be null, but each have default
+  /// values.
+  const WindowPaintValue({
+    this.mode = 'pan_zoom',
+    this.color = const Color(0xFF000000),
+  });
+
+  /// Creates an instance of this class from a JSON object.
+  factory WindowPaintValue.fromJSON(Map<String, dynamic> encoded) {
+    return WindowPaintValue(
+      mode: encoded['mode'] as String,
+      color: Color(encoded['color'] as int),
+    );
+  }
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'mode': mode,
+      'color': color.value,
+    };
+  }
+
+  /// The current paint mode being used.
+  final String mode;
+
+  /// The color of the paint tool.
+  final Color color;
+
+  /// A value that corresponds to the pan/zoom mode and black color.
+  static const WindowPaintValue empty = WindowPaintValue();
+
+  /// Creates a copy of this value but with the given fields replaced with the
+  /// new values.
+  WindowPaintValue copyWith({
     String? mode,
     Color? color,
   }) {
-    assert(mode != null || color != null);
-    _mode = mode ?? _mode;
-    _color = color ?? _color;
-    notifyListeners();
+    return WindowPaintValue(
+      mode: mode ?? this.mode,
+      color: color ?? this.color,
+    );
   }
 
-  /// Release the resources used by this object. The object is no longer usable
-  /// after this method is called.
   @override
-  void dispose() {
-    super.dispose();
+  String toString() =>
+      '${objectRuntimeType(this, 'WindowPaintValue')}(mode: $mode, color: $color)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is WindowPaintValue &&
+        other.mode == mode &&
+        other.color == color;
   }
+
+  @override
+  int get hashCode => hashValues(
+        mode.hashCode,
+        color.hashCode,
+      );
 }
 
-/// A mixin that replaces the [didRegisterListener]/[didUnregisterListener] contract
-/// with a dispose contract.
+/// A [RestorableProperty] that knows how to store and restore a
+/// [WindowPaintController].
 ///
-/// This mixin provides implementations of [didRegisterListener] and [didUnregisterListener],
-/// and therefore can be used in conjunction with mixins that require these methods,
-/// [WindowPaintLocalListenersMixin].
-mixin WindowPaintEagerListenerMixin {
-  /// This implementation ignores listener registrations.
-  void didRegisterListener() {}
+/// The [WindowPaintController] is accessible via the [value] getter. During
+/// state restoration, the property will restore [WindowPaintController.mode]
+/// and [WindowPaintController.color] to the values they had when the
+/// restoration data it is getting restored from was collected.
+class RestorableWindowPaintController
+    extends RestorableChangeNotifier<WindowPaintController> {
+  /// Creates a [RestorableWindowPaintController].
+  factory RestorableWindowPaintController({
+    String initialMode = 'pan_zoom',
+    Color initialColor = const Color(0xFF000000),
+  }) =>
+      RestorableWindowPaintController.fromValue(
+        WindowPaintValue(
+          mode: initialMode,
+          color: initialColor,
+        ),
+      );
 
-  /// This implementation ignores listener registrations.
-  void didUnregisterListener() {}
+  /// Creates a [RestorableWindowPaintController] from an initial
+  /// [WindowPaintValue].
+  RestorableWindowPaintController.fromValue(WindowPaintValue value)
+      : _initialValue = value;
 
-  /// Release the resources used by this object. The object is no longer usable
-  /// after this method is called.
-  @mustCallSuper
-  void dispose() {}
-}
+  final WindowPaintValue _initialValue;
 
-mixin WindowPaintLocalListenersMixin {
-  final ObserverList<VoidCallback> _listeners = ObserverList<VoidCallback>();
-
-  /// Called immediately before a listener is added via [addListener].
-  ///
-  /// At the time this method is called the registered listener is not yet
-  /// notified by [notifyListeners].
-  void didRegisterListener();
-
-  /// Called immediately after a listener is removed via [removeListener].
-  ///
-  /// At the time this method is called the removed listener is no longer
-  /// notified by [notifyListeners].
-  void didUnregisterListener();
-
-  /// Calls the listener every time the value of the animation changes.
-  ///
-  /// Listeners can be removed with [removeListener].
-  void addListener(VoidCallback listener) {
-    didRegisterListener();
-    _listeners.add(listener);
+  @override
+  WindowPaintController createDefaultValue() {
+    return WindowPaintController.fromValue(_initialValue);
   }
 
-  /// Stop calling the listener every time the value of the animation changes.
-  ///
-  /// Listeners can be added with [addListener].
-  void removeListener(VoidCallback listener) {
-    final removed = _listeners.remove(listener);
-    if (removed) {
-      didUnregisterListener();
-    }
+  @override
+  WindowPaintController fromPrimitives(Object? data) {
+    return WindowPaintController.fromValue(
+        WindowPaintValue.fromJSON(data as Map<String, dynamic>));
   }
 
-  /// Calls all the listeners.
-  ///
-  /// If listeners are added or removed during this function, the modifications
-  /// will not change which listeners are called during this iteration.
-  void notifyListeners() {
-    final localListeners = List<VoidCallback>.from(_listeners);
-    for (final listener in localListeners) {
-      InformationCollector? collector;
-      assert(() {
-        collector = () sync* {
-          yield DiagnosticsProperty<WindowPaintLocalListenersMixin>(
-            'The $runtimeType notifying listeners was',
-            this,
-            style: DiagnosticsTreeStyle.errorProperty,
-          );
-        };
-        return true;
-      }());
-      try {
-        if (_listeners.contains(listener)) listener();
-      } catch (exception, stack) {
-        FlutterError.reportError(FlutterErrorDetails(
-          exception: exception,
-          stack: stack,
-          library: 'window_paint library',
-          context:
-              ErrorDescription('while notifying listeners for $runtimeType'),
-          informationCollector: collector,
-        ));
-      }
-    }
+  @override
+  Object toPrimitives() {
+    return value.value.toJSON();
   }
 }
