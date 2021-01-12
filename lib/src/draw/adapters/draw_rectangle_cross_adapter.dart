@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/widgets.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/draw/objects/draw_rectangle_cross.dart';
@@ -8,7 +10,8 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
   const DrawRectangleCrossAdapter();
 
   @override
-  DrawRectangleCross start(Offset focalPoint, Color color) {
+  FutureOr<DrawRectangleCross?> start(
+      BuildContext context, Offset focalPoint, Color color) {
     final point = _createPoint(focalPoint, color);
     return DrawRectangleCross(
       anchor: point,

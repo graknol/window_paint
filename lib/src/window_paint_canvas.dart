@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
@@ -23,6 +25,7 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   final _transformationController = TransformationController();
   final objects = <DrawObject>[];
 
+  Future<DrawObject?>? _pendingObject;
   var _hasActiveInteraction = false;
   late Matrix4 _lockedTransform;
 
@@ -54,7 +57,7 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   Widget build(BuildContext context) {
     return InteractiveViewer(
       transformationController: _transformationController,
-      onInteractionStart: _onInteractionStart,
+      onInteractionStart: (details) => _onInteractionStart(context, details),
       onInteractionUpdate: _onInteractionUpdate,
       onInteractionEnd: _onInteractionEnd,
       child: CustomPaint(
@@ -67,17 +70,27 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
     );
   }
 
-  void _onInteractionStart(ScaleStartDetails details) {
+  Future<void> _onInteractionStart(
+    BuildContext context,
+    ScaleStartDetails details,
+  ) async {
     final focalPointScene =
         _transformationController.toScene(details.localFocalPoint);
-    setState(() {
-      final object = widget.adapter.start(focalPointScene, widget.color);
-      objects.add(object);
-      _hasActiveInteraction = true;
-    });
+    final result = widget.adapter.start(context, focalPointScene, widget.color);
+    if (result is Future<DrawObject?>) {
+      _pendingObject = result;
+    } else if (result != null) {
+      setState(() {
+        objects.add(result);
+        _hasActiveInteraction = true;
+      });
+    }
   }
 
   void _onInteractionUpdate(ScaleUpdateDetails details) {
+    if (_pendingObject != null) {
+      return;
+    }
     final object = objects.last;
     final focalPointScene =
         _transformationController.toScene(details.localFocalPoint);
@@ -89,6 +102,10 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   }
 
   void _onInteractionEnd(ScaleEndDetails details) {
+    if (_pendingObject != null) {
+      _pendingObject = null;
+      return;
+    }
     final object = objects.last;
     setState(() {
       final keep = widget.adapter.end(object, widget.color);

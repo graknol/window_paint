@@ -4,13 +4,13 @@ import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 
 class DrawRectangle extends DrawObject {
-  final DrawPoint anchor;
-  Offset? _endpoint;
-
   DrawRectangle({
     required this.anchor,
   });
 
+  final DrawPoint anchor;
+
+  Offset? _endpoint;
   Offset? _lastPaintedEndpoint;
 
   set endpoint(Offset endpoint) {
