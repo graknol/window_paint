@@ -32,8 +32,8 @@ class WindowPaintController
   }
 
   void update({
-    WindowPaintMode mode,
-    Color color,
+    String? mode,
+    Color? color,
   }) {
     assert(mode != null || color != null);
     _mode = mode ?? _mode;
