@@ -85,7 +85,13 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
     yield Icon(Icons.pan_tool, color: Colors.black);
     yield Icon(Icons.edit, color: Colors.black);
     yield Icon(Icons.crop_square, color: Colors.black);
-    yield Icon(Icons.close, color: Colors.black);
+    yield Stack(
+      alignment: Alignment.center,
+      children: [
+        Icon(Icons.crop_square, color: Colors.black),
+        Icon(Icons.close, color: Colors.black),
+      ],
+    );
   }
 
   Future<void> _showColorPicker() async {
