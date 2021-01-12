@@ -59,8 +59,12 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               WindowPaint(
                 controller: _windowPaintController,
-                child: Image.network(
-                    'https://www.humanesociety.org/sites/default/files/styles/1240x698/public/2020-07/kitten-510651.jpg?h=f54c7448&itok=ZhplzyJ9'),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.amber[100],
+                  ),
+                  height: 400,
+                ),
               ),
             ],
           ),
