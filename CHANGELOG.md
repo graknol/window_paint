@@ -1,7 +1,10 @@
-## [0.1.0-nullsafety.1] - TODO: Add date
+## [0.1.0-nullsafety.1] - Jan 12, 2021
 
 * Replaced the `example`'s picture with a solid color.
 * Added explanation of the package's name in the README.
+* Added `DrawTextAdapter` and `DrawText` to the `example` project.
+* `DrawObjectAdapter.start` returns `FutureOr<DrawObject?>?` to support async operations, i.e. showing a dialog for text input.
+* `DrawObjectAdapter.start` accepts a `BuildContext` and the current transformation `Matrix4`.
 
 ## [0.1.0-nullsafety.0] - Jan 12, 2021
 
