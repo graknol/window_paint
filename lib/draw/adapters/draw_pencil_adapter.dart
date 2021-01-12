@@ -10,7 +10,6 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
   @override
   DrawPencil start(Offset focalPoint, Color color) {
     final point = _createPoint(focalPoint, color);
-    print(color);
     return DrawPencil(
       points: [point],
     );
