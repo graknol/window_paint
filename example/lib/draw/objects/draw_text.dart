@@ -1,7 +1,9 @@
 import 'dart:ui';
 
+import 'package:example/draw/adapters/draw_text_adapter.dart';
 import 'package:flutter/painting.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
+import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 
 class DrawText extends DrawObject {
@@ -15,7 +17,7 @@ class DrawText extends DrawObject {
 
   String text;
   double fontSize;
-  String? _lastPaintedText;
+  String? _paintedText;
 
   TextStyle get textStyle => TextStyle(
         color: anchor.paint.color,
@@ -36,12 +38,18 @@ class DrawText extends DrawObject {
         maxWidth: size.width - anchor.offset.dx,
       );
     textPainter.paint(canvas, anchor.offset);
-    _lastPaintedText = text;
+    _paintedText = text;
   }
 
   @override
-  bool shouldRepaint() => text != _lastPaintedText;
+  bool shouldRepaint() => text != _paintedText;
 
   @override
   void finalize() {}
+
+  @override
+  DrawObjectAdapter<DrawObject> get adapter => const DrawTextAdapter();
+
+  @override
+  Color get primaryColor => anchor.paint.color;
 }

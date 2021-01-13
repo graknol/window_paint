@@ -51,6 +51,11 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   WindowPaintController get _effectiveController =>
       widget.controller ?? _controller!.value;
 
+  /// The color of the [controller] before an object was selected, if any.
+  /// Will be restored to the controller when the selected object is no
+  /// longer selected.
+  Color? _colorBeforeSelection;
+
   @override
   void initState() {
     super.initState();
@@ -109,8 +114,19 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
         valueListenable: _effectiveController,
         builder: (context, value, child) {
           return WindowPaintCanvas(
-            color: _effectiveController.color,
-            adapter: widget.adapters[_effectiveController.mode]!,
+            color: value.color,
+            onSelectionStart: (object) {
+              _colorBeforeSelection = _effectiveController.color;
+              _effectiveController.color = object.primaryColor;
+            },
+            onSelectionEnd: (object) {
+              final colorToRestore = _colorBeforeSelection;
+              if (colorToRestore != null) {
+                _colorBeforeSelection = null;
+                _effectiveController.color = colorToRestore;
+              }
+            },
+            adapter: widget.adapters[value.mode]!,
             child: child!,
           );
         },

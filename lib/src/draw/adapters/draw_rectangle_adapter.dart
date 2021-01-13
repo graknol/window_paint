@@ -7,23 +7,25 @@ import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/draw/objects/draw_rectangle.dart';
 
 class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
-  const DrawRectangleAdapter();
+  const DrawRectangleAdapter({
+    this.debugHitboxes = false,
+  });
+
+  final bool debugHitboxes;
 
   @override
   FutureOr<DrawRectangle?> start(
-    BuildContext context,
-    Offset focalPoint,
-    Color color,
-    Matrix4 transform,
-  ) {
+      BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
     final point = _createPoint(focalPoint, color);
     return DrawRectangle(
       anchor: point,
+      debugHitboxes: debugHitboxes,
     );
   }
 
   @override
-  bool update(DrawRectangle object, Offset focalPoint, Color color) {
+  bool update(
+      DrawRectangle object, Offset focalPoint, Color color, Matrix4 transform) {
     object.endpoint = focalPoint;
     return true;
   }
@@ -31,6 +33,43 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
   @override
   bool end(DrawRectangle object, Color color) {
     return true;
+  }
+
+  @override
+  bool querySelect(DrawRectangle object, Offset focalPoint, Matrix4 transform) {
+    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint));
+  }
+
+  @override
+  void select(DrawRectangle object) {
+    object.selected = true;
+  }
+
+  @override
+  void cancelSelect(DrawRectangle object) {
+    object.selected = false;
+  }
+
+  @override
+  bool selectedStart(
+      DrawRectangle object, Offset focalPoint, Matrix4 transform) {
+    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint));
+  }
+
+  @override
+  bool selectedUpdate(
+      DrawRectangle object, Offset focalPoint, Matrix4 transform) {
+    return false;
+  }
+
+  @override
+  bool selectedEnd(DrawRectangle object) {
+    return true;
+  }
+
+  @override
+  void selectUpdateColor(DrawRectangle object, Color color) {
+    object.anchor.paint.color = color;
   }
 
   DrawPoint _createPoint(Offset offset, Color color) {

@@ -1,17 +1,75 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart';
+import 'package:window_paint/src/draw/adapters/draw_pencil_adapter.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
+import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
+import 'package:window_paint/src/geometry/line.dart';
 import 'package:window_paint/src/utils/simplify_utils.dart';
 
 class DrawPencil extends DrawObject {
   DrawPencil({
     List<DrawPoint>? points,
+    this.debugHitboxes = false,
   }) : points = points ?? [];
 
   final List<DrawPoint> points;
+  final bool debugHitboxes;
 
-  int _lastPaintedCount = 0;
+  bool selected = false;
+
+  int _paintedCount = 0;
+  bool _paintedSelected = false;
+
+  Rect get rect {
+    var minX = double.infinity;
+    var minY = double.infinity;
+    var maxX = double.negativeInfinity;
+    var maxY = double.negativeInfinity;
+    for (final point in points) {
+      if (point.offset.dx < minX) {
+        minX = point.offset.dx;
+      }
+      if (point.offset.dy < minY) {
+        minY = point.offset.dy;
+      }
+      if (point.offset.dx > maxX) {
+        maxX = point.offset.dx;
+      }
+      if (point.offset.dy > maxY) {
+        maxY = point.offset.dy;
+      }
+    }
+    return Rect.fromLTRB(minX, minY, maxX, maxY);
+  }
+
+  Iterable<Rect> get aabbHitboxes sync* {
+    for (var i = 0; i < points.length - 1; i++) {
+      final from = points[i];
+      final to = points[i + 1];
+      yield Rect.fromPoints(from.offset, to.offset).inflate(5.0);
+    }
+  }
+
+  Iterable<Line> get hitboxes sync* {
+    for (var i = 0; i < points.length - 1; i++) {
+      final from = points[i];
+      final to = points[i + 1];
+      final diff = to.offset - from.offset;
+      final extent = Vector2(diff.dx, diff.dy)
+        ..normalize()
+        ..scale(5.0);
+      yield Line(
+        start: from.offset.translate(-extent.x, -extent.y),
+        end: to.offset.translate(extent.x, extent.y),
+        width: 5.0,
+      );
+    }
+  }
+
+  Rect get outline => rect.inflate(5.0);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -20,11 +78,45 @@ class DrawPencil extends DrawObject {
       final to = points[i + 1];
       canvas.drawLine(from.offset, to.offset, from.paint);
     }
-    _lastPaintedCount = points.length;
+    if (selected) {
+      _paintOutline(canvas, size);
+    }
+    if (!kReleaseMode && debugHitboxes) {
+      _paintHitboxes(canvas, size);
+    }
+    _paintedCount = points.length;
+    _paintedSelected = selected;
+  }
+
+  void _paintOutline(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(0x8A000000)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+    canvas.drawRect(outline, paint);
+  }
+
+  /// Useful for debugging hitboxes.
+  void _paintHitboxes(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(0x8A000000)
+      ..strokeWidth = 1
+      ..style = PaintingStyle.stroke;
+    for (final hitbox in hitboxes) {
+      final a = Offset(hitbox.a.x, hitbox.a.y);
+      final b = Offset(hitbox.b.x, hitbox.b.y);
+      final c = Offset(hitbox.c.x, hitbox.c.y);
+      final d = Offset(hitbox.d.x, hitbox.d.y);
+      canvas.drawLine(a, b, paint);
+      canvas.drawLine(b, c, paint);
+      canvas.drawLine(c, d, paint);
+      canvas.drawLine(d, a, paint);
+    }
   }
 
   @override
-  bool shouldRepaint() => points.length != _lastPaintedCount;
+  bool shouldRepaint() =>
+      points.length != _paintedCount || selected != _paintedSelected;
 
   @override
   void finalize() {
@@ -40,4 +132,10 @@ class DrawPencil extends DrawObject {
     points.clear();
     points.addAll(simplified);
   }
+
+  @override
+  DrawObjectAdapter<DrawPencil> get adapter => const DrawPencilAdapter();
+
+  @override
+  Color get primaryColor => points.first.paint.color;
 }

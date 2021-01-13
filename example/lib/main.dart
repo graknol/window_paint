@@ -1,5 +1,6 @@
 import 'package:example/draw/adapters/draw_text_adapter.dart';
 import 'package:example/window_paint_control.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:window_paint/window_paint.dart';
 
@@ -38,6 +39,8 @@ class _MyHomePageState extends State<MyHomePage> {
     initialColor: Colors.red,
   );
 
+  var debugHitboxes = false;
+
   @override
   void dispose() {
     _windowPaintController.dispose();
@@ -61,11 +64,17 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               WindowPaint(
                 controller: _windowPaintController,
-                adapters: const {
+                adapters: {
                   'pan_zoom': PanZoomAdapter(),
-                  'pencil': DrawPencilAdapter(),
-                  'rectangle': DrawRectangleAdapter(),
-                  'rectangle_cross': DrawRectangleCrossAdapter(),
+                  'pencil': DrawPencilAdapter(
+                    debugHitboxes: debugHitboxes,
+                  ),
+                  'rectangle': DrawRectangleAdapter(
+                    debugHitboxes: debugHitboxes,
+                  ),
+                  'rectangle_cross': DrawRectangleCrossAdapter(
+                    debugHitboxes: debugHitboxes,
+                  ),
                   'text': DrawTextAdapter(),
                 },
                 child: Container(
@@ -73,6 +82,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.amber[100],
                   ),
                   height: 400,
+                ),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  setState(() {
+                    debugHitboxes = !debugHitboxes;
+                  });
+                },
+                color: debugHitboxes ? Colors.green : Colors.amber,
+                child: SizedBox(
+                  width: 92.0,
+                  child: Center(
+                    child: Text('Hitboxes ${debugHitboxes ? 'ON' : 'OFF'}'),
+                  ),
                 ),
               ),
             ],

@@ -29,13 +29,53 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
   }
 
   @override
-  bool update(DrawText object, Offset focalPoint, Color color) {
+  bool update(
+      DrawText object, Offset focalPoint, Color color, Matrix4 transform) {
     return false;
   }
 
   @override
   bool end(DrawText object, Color color) {
     return true;
+  }
+
+  @override
+  bool querySelect(DrawText object, Offset focalPoint, Matrix4 transform) {
+    // TODO: implement querySelect
+    return false;
+  }
+
+  @override
+  void select(DrawText object) {
+    // TODO: implement select
+  }
+
+  @override
+  void cancelSelect(DrawText object) {
+    // TODO: implement cancelSelect
+  }
+
+  @override
+  bool selectedStart(DrawText object, Offset focalPoint, Matrix4 transform) {
+    // TODO: implement selectedStart
+    return false;
+  }
+
+  @override
+  bool selectedUpdate(DrawText object, Offset focalPoint, Matrix4 transform) {
+    // TODO: implement selectedUpdate
+    return false;
+  }
+
+  @override
+  bool selectedEnd(DrawText object) {
+    // TODO: implement selectedEnd
+    return false;
+  }
+
+  @override
+  void selectUpdateColor(DrawText object, Color color) {
+    object.anchor.paint.color = color;
   }
 
   DrawPoint _createPoint(Offset offset, Color color) {
