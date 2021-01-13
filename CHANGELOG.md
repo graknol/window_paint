@@ -1,3 +1,21 @@
+## [0.1.0-nullsafety.2] - Jan 13, 2021
+
+* Added a button for toggling hitboxes in the `example` app.
+* The framework now supports selecting objects. It's the adapter's
+  responsibility to perform hit-testing, (de)selecting, rendering
+  outlines and resize handles, and moving the objects. This gives
+  the greatest flexibility and gives a tool the opportunity to
+  include only the features it needs.
+* The reference `DrawObject` and `DrawObjectAdapter` implementations
+  demonstrate both simple ([AABB](https://en.wikipedia.org/wiki/Bounding_volume#Common_types))
+  and complex ([OBB](https://en.wikipedia.org/wiki/Bounding_volume#Common_types)) 
+  hit-testing techniques.
+* The `Line` class has been added to make it easier to work with
+  lines of a given width. Its `contains` method makes it easy to
+  perform OBB hit-testing.
+* Added a dependency on [vector_math: ^2.1.0-nullsafety.5](https://pub.dev/packages/vector_math/versions/2.1.0-nullsafety.5)
+* Lots of other small changes to the API.
+
 ## [0.1.0-nullsafety.1] - Jan 12, 2021
 
 * Replaced the `example`'s picture with a solid color.
