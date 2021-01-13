@@ -19,4 +19,4 @@ dev_dependencies:
     sdk: flutter
   pedantic: ^1.10.0-nullsafety
 
-flutter: null
+flutter:
