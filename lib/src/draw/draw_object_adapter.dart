@@ -37,6 +37,11 @@ abstract class DrawObjectAdapter<T extends DrawObject> {
   /// NOTE: Will not be called if [start] returned a [Future].
   bool end(T object, Color color);
 
+  /// Returning [true] will select the object.
+  ///
+  /// This is useful when you only want to select an object by its visible area.
+  bool select(T object, Offset focalPoint, Matrix4 transform) => true;
+
   bool get panScaleEnabled => false;
   bool get selectEnabled => false;
 }
