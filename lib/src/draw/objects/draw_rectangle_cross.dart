@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:vector_math/vector_math_64.dart';
 import 'package:window_paint/src/draw/adapters/draw_rectangle_cross_adapter.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
