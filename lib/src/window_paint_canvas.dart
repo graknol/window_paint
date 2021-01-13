@@ -23,11 +23,22 @@ class WindowPaintCanvas extends StatefulWidget {
 
 class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   final _transformationController = TransformationController();
-  final objects = <DrawObject>[];
 
-  Future<DrawObject?>? _pendingObject;
-  var _hasActiveInteraction = false;
+  /// List of drawable objects to render.
+  final _objects = <DrawObject>[];
+
+  /// Used by [_transformationController]'s listener to discard any
+  /// transformation when [panScaleEnabled] is [false].
   late Matrix4 _lockedTransform;
+
+  /// Used to signal [CustomPaint.willChange] so that the raster cache knows
+  /// that the painter most likely will change next frame.
+  var _hasActiveInteraction = false;
+
+  /// The [Future] returned by the adapter's [start] method, if any. Signals to
+  /// [onInteractiveUpdate] and [onInteractiveEnd] that they should discard
+  /// their events for this interaction.
+  Future<DrawObject?>? _pendingObject;
 
   @override
   void initState() {
@@ -62,7 +73,7 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
       onInteractionEnd: _onInteractionEnd,
       child: CustomPaint(
         foregroundPainter: WindowPaintPainter(
-          objects: objects,
+          objects: _objects,
         ),
         willChange: _hasActiveInteraction,
         child: widget.child,
@@ -77,28 +88,38 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
     final focalPointScene = _transformationController.toScene(
       details.localFocalPoint,
     );
+    final transform = _transformationController.value.clone();
     final pending = widget.adapter.start(
       context,
       focalPointScene,
       widget.color,
-      _transformationController.value.clone(),
+      transform,
     );
     if (pending is DrawObject?) {
-      final object = pending;
-      if (object != null) {
-        setState(() {
-          objects.add(object);
-          _hasActiveInteraction = true;
-        });
-      }
+      _onInteractionStartSync(pending);
     } else {
-      _pendingObject = pending;
-      final object = await pending;
-      if (object != null) {
-        setState(() {
-          objects.add(object);
-        });
-      }
+      await _onInteractionStartAsync(pending);
+    }
+  }
+
+  void _onInteractionStartSync(DrawObject? object) {
+    if (object != null) {
+      setState(() {
+        _objects.add(object);
+        _hasActiveInteraction = true;
+      });
+    }
+  }
+
+  Future<void> _onInteractionStartAsync(Future<DrawObject?> pending) async {
+    /// We do not need to call [setState] when setting [_pendingObject] as it's
+    /// not used in the [build] method.
+    _pendingObject = pending;
+    final object = await pending;
+    if (object != null) {
+      setState(() {
+        _objects.add(object);
+      });
     }
   }
 
@@ -106,7 +127,7 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
     if (_pendingObject != null) {
       return;
     }
-    final object = objects.last;
+    final object = _objects.last;
     final focalPointScene = _transformationController.toScene(
       details.localFocalPoint,
     );
@@ -122,14 +143,16 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
 
   void _onInteractionEnd(ScaleEndDetails details) {
     if (_pendingObject != null) {
+      /// We do not need to call [setState] when setting [_pendingObject] as
+      /// it's not used in the [build] method.
       _pendingObject = null;
       return;
     }
-    final object = objects.last;
+    final object = _objects.last;
     setState(() {
       final keep = widget.adapter.end(object, widget.color);
       if (!keep) {
-        objects.removeLast();
+        _objects.removeLast();
       }
       _hasActiveInteraction = false;
     });
