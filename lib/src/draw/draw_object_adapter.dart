@@ -40,6 +40,6 @@ abstract class DrawObjectAdapter<T extends DrawObject> {
   /// NOTE: Will not be called if [start] returned a [Future].
   bool end(T object, Color color);
 
-  bool get panEnabled => false;
-  bool get scaleEnabled => false;
+  bool get panScaleEnabled => false;
+  bool get selectEnabled => false;
 }

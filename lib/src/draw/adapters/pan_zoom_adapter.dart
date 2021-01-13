@@ -27,7 +27,7 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
   }
 
   @override
-  bool get panEnabled => true;
+  bool get panScaleEnabled => true;
   @override
-  bool get scaleEnabled => true;
+  bool get selectEnabled => true;
 }

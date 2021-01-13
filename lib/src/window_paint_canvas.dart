@@ -35,11 +35,11 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
     _lockedTransform = _transformationController.value;
     _transformationController.addListener(() {
       /// In newer versions of [InteractiveViewer], the [onInteractionUpdate]
-      /// callback is not called when [panEnabled] and [scaleEnabled] are false.
+      /// callback is not called when [panScaleEnabled] is [false].
       ///
       /// To overcome this limitation, we have to manually reset the
       /// transformation with the [transformationController].
-      if (widget.adapter.panEnabled || widget.adapter.scaleEnabled) {
+      if (widget.adapter.panScaleEnabled) {
         _lockedTransform = _transformationController.value;
       } else if (_transformationController.value != _lockedTransform) {
         _transformationController.value = _lockedTransform;
