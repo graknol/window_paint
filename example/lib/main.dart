@@ -39,6 +39,8 @@ class _MyHomePageState extends State<MyHomePage> {
     initialColor: Colors.red,
   );
 
+  var debugHitboxes = false;
+
   @override
   void dispose() {
     _windowPaintController.dispose();
@@ -47,7 +49,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    const debugHitboxes = false;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -63,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               WindowPaint(
                 controller: _windowPaintController,
-                adapters: const {
+                adapters: {
                   'pan_zoom': PanZoomAdapter(),
                   'pencil': DrawPencilAdapter(
                     debugHitboxes: debugHitboxes,
@@ -81,6 +82,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.amber[100],
                   ),
                   height: 400,
+                ),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  setState(() {
+                    debugHitboxes = !debugHitboxes;
+                  });
+                },
+                color: debugHitboxes ? Colors.green : Colors.amber,
+                child: SizedBox(
+                  width: 92.0,
+                  child: Center(
+                    child: Text('Hitboxes ${debugHitboxes ? 'ON' : 'OFF'}'),
+                  ),
                 ),
               ),
             ],
