@@ -23,7 +23,8 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
 
   /// The current paint mode being used.
   String get mode => value.mode;
-  // The color of the paint tool.
+
+  /// The color of the paint tool.
   Color get color => value.color;
 
   /// Setting this will notify all the listeners of this [WindowPaintController]
@@ -32,9 +33,9 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   /// actions, not during the build, layout, or paint phases.
   ///
   /// This property can be set from a listener added to this
-  /// [WindowPaintController]; however, one should not also set [color]
-  /// in a separate statement. To change both the [mode] and the [color]
-  /// change the controller's [value].
+  /// [WindowPaintController]; however, one should not also set [color] in a
+  /// separate statement. To change both the [mode] and the [color] change the
+  /// controller's [value].
   set mode(String newMode) {
     value = value.copyWith(
       mode: newMode,
@@ -47,9 +48,9 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   /// actions, not during the build, layout, or paint phases.
   ///
   /// This property can be set from a listener added to this
-  /// [WindowPaintController]; however, one should not also set [mode]
-  /// in a separate statement. To change both the [mode] and the [color]
-  /// change the controller's [value].
+  /// [WindowPaintController]; however, one should not also set [mode] in a
+  /// separate statement. To change both the [mode] and the [color] change the
+  /// controller's [value].
   set color(Color newColor) {
     value = value.copyWith(
       color: newColor,

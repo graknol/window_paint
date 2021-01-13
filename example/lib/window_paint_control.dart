@@ -76,7 +76,12 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
             },
           ),
           IconButton(
-            icon: Icon(Icons.color_lens, color: widget.controller.color),
+            icon: ValueListenableBuilder<WindowPaintValue>(
+              valueListenable: widget.controller,
+              builder: (context, value, child) {
+                return Icon(Icons.color_lens, color: widget.controller.color);
+              },
+            ),
             onPressed: _showColorPicker,
           ),
         ],
@@ -100,7 +105,7 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
 
   Future<void> _showColorPicker() async {
     var pickedColor = widget.controller.color;
-    final confirmed = await showDialog(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -130,7 +135,7 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
         );
       },
     );
-    if (confirmed) {
+    if (confirmed == true) {
       widget.controller.color = pickedColor;
     }
   }

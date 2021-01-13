@@ -1,5 +1,6 @@
 import 'package:example/draw/adapters/draw_text_adapter.dart';
 import 'package:example/window_paint_control.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:window_paint/window_paint.dart';
 
@@ -46,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    const debugHitboxes = false;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -63,9 +65,15 @@ class _MyHomePageState extends State<MyHomePage> {
                 controller: _windowPaintController,
                 adapters: const {
                   'pan_zoom': PanZoomAdapter(),
-                  'pencil': DrawPencilAdapter(),
-                  'rectangle': DrawRectangleAdapter(),
-                  'rectangle_cross': DrawRectangleCrossAdapter(),
+                  'pencil': DrawPencilAdapter(
+                    debugHitboxes: debugHitboxes,
+                  ),
+                  'rectangle': DrawRectangleAdapter(
+                    debugHitboxes: debugHitboxes,
+                  ),
+                  'rectangle_cross': DrawRectangleCrossAdapter(
+                    debugHitboxes: debugHitboxes,
+                  ),
                   'text': DrawTextAdapter(),
                 },
                 child: Container(
