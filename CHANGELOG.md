@@ -1,5 +1,6 @@
 ## [0.1.0-nullsafety.3] - TODO: Add date
 
+* `InteractiveViewer`'s `minScale` and `maxScale` are now configurable.
 * Scale objects, outlines, hitboxes and path-simplification tolerance relative to the zoom-level.
 
 ## [0.1.0-nullsafety.2] - Jan 13, 2021
