@@ -8,16 +8,22 @@ import 'package:window_paint/src/draw/objects/draw_pencil.dart';
 
 class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
   const DrawPencilAdapter({
+    this.width = 1.0,
     this.debugHitboxes = false,
   });
 
+  /// The width of a pencil-stroke.
+  final double width;
+
+  /// Render the areas that would cause that object to be selected.
   final bool debugHitboxes;
 
   @override
   FutureOr<DrawPencil?> start(
       BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
-    final point = _createPoint(focalPoint, color);
+    final point = _createPoint(focalPoint, color, transform);
     return DrawPencil(
+      adapter: this,
       points: [point],
       debugHitboxes: debugHitboxes,
     );
@@ -26,7 +32,7 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
   @override
   bool update(
       DrawPencil object, Offset focalPoint, Color color, Matrix4 transform) {
-    final point = _createPoint(focalPoint, color);
+    final point = _createPoint(focalPoint, color, transform);
     object.addPoint(point);
     return true;
   }
@@ -74,7 +80,8 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
     }
   }
 
-  DrawPoint _createPoint(Offset offset, Color color) {
+  DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
+    final scale = transform.getMaxScaleOnAxis();
     return DrawPoint(
       offset: offset,
       paint: Paint()
@@ -82,7 +89,8 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
         ..isAntiAlias = true
         ..color = color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 4,
+        ..strokeWidth = width / scale,
+      scale: scale,
     );
   }
 }

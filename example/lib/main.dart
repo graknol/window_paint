@@ -64,15 +64,19 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               WindowPaint(
                 controller: _windowPaintController,
+                maxScale: 10.0,
                 adapters: {
                   'pan_zoom': PanZoomAdapter(),
                   'pencil': DrawPencilAdapter(
+                    width: 2.0,
                     debugHitboxes: debugHitboxes,
                   ),
                   'rectangle': DrawRectangleAdapter(
+                    width: 2.0,
                     debugHitboxes: debugHitboxes,
                   ),
                   'rectangle_cross': DrawRectangleCrossAdapter(
+                    width: 2.0,
                     debugHitboxes: debugHitboxes,
                   ),
                   'text': DrawTextAdapter(),

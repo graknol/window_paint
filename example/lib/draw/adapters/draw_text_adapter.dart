@@ -16,7 +16,7 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
     Color color,
     Matrix4 transform,
   ) async {
-    final point = _createPoint(focalPoint, color);
+    final point = _createPoint(focalPoint, color, transform);
     final text = await showInputDialog(context);
     if (text != null && text.isNotEmpty) {
       return DrawText(
@@ -78,10 +78,12 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
     object.anchor.paint.color = color;
   }
 
-  DrawPoint _createPoint(Offset offset, Color color) {
+  DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
+    final scale = transform.getMaxScaleOnAxis();
     return DrawPoint(
       offset: offset,
       paint: Paint()..color = color,
+      scale: scale,
     );
   }
 

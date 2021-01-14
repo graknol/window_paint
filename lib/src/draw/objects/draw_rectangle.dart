@@ -1,16 +1,19 @@
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:window_paint/src/draw/adapters/draw_rectangle_adapter.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 
 class DrawRectangle extends DrawObject {
   DrawRectangle({
+    required this.adapter,
     required this.anchor,
     this.debugHitboxes = false,
   });
+
+  @override
+  final DrawObjectAdapter<DrawRectangle> adapter;
 
   final DrawPoint anchor;
   final bool debugHitboxes;
@@ -34,16 +37,16 @@ class DrawRectangle extends DrawObject {
     final a = anchor.offset;
     final e = effectiveEndpoint;
     // top
-    yield Rect.fromLTRB(a.dx, a.dy, e.dx, a.dy).inflate(5.0);
+    yield Rect.fromLTRB(a.dx, a.dy, e.dx, a.dy).inflate(5.0 / anchor.scale);
     // right
-    yield Rect.fromLTRB(e.dx, a.dy, e.dx, e.dy).inflate(5.0);
+    yield Rect.fromLTRB(e.dx, a.dy, e.dx, e.dy).inflate(5.0 / anchor.scale);
     // bottom
-    yield Rect.fromLTRB(a.dx, e.dy, e.dx, e.dy).inflate(5.0);
+    yield Rect.fromLTRB(a.dx, e.dy, e.dx, e.dy).inflate(5.0 / anchor.scale);
     // left
-    yield Rect.fromLTRB(a.dx, a.dy, a.dx, e.dy).inflate(5.0);
+    yield Rect.fromLTRB(a.dx, a.dy, a.dx, e.dy).inflate(5.0 / anchor.scale);
   }
 
-  Rect get outline => rect.inflate(5.0);
+  Rect get outline => rect.inflate(5.0 / anchor.scale);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -61,7 +64,7 @@ class DrawRectangle extends DrawObject {
   void _paintOutline(Canvas canvas, Sizesize) {
     final paint = Paint()
       ..color = Color(0x8A000000)
-      ..strokeWidth = 1
+      ..strokeWidth = 1.0 / anchor.scale
       ..style = PaintingStyle.stroke;
     canvas.drawRect(outline, paint);
   }
@@ -71,7 +74,7 @@ class DrawRectangle extends DrawObject {
   void paintHitboxes(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Color(0x8A000000)
-      ..strokeWidth = 1
+      ..strokeWidth = 1.0 / anchor.scale
       ..style = PaintingStyle.stroke;
     for (final hitbox in hitboxes) {
       canvas.drawRect(hitbox, paint);
@@ -84,9 +87,6 @@ class DrawRectangle extends DrawObject {
 
   @override
   void finalize() {}
-
-  @override
-  DrawObjectAdapter<DrawRectangle> get adapter => const DrawRectangleAdapter();
 
   @override
   Color get primaryColor => anchor.paint.color;

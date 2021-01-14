@@ -17,7 +17,24 @@ class DrawText extends DrawObject {
 
   String text;
   double fontSize;
+
   String? _paintedText;
+  Size? _paintedSize;
+
+  Rect get rect => Rect.fromLTWH(
+        anchor.offset.dx,
+        anchor.offset.dy,
+        _paintedSize?.width ?? 0.0,
+        _paintedSize?.height ?? 0.0,
+      );
+
+  Iterable<Rect> get hitboxes sync* {
+    if (_paintedSize != null) {
+      yield rect.inflate(5.0 / anchor.scale);
+    }
+  }
+
+  Rect get outline => rect.inflate(5.0 / anchor.scale);
 
   TextStyle get textStyle => TextStyle(
         color: anchor.paint.color,
@@ -39,6 +56,7 @@ class DrawText extends DrawObject {
       );
     textPainter.paint(canvas, anchor.offset);
     _paintedText = text;
+    _paintedSize = textPainter.size;
   }
 
   @override

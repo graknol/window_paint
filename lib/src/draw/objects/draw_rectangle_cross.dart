@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:window_paint/src/draw/adapters/draw_rectangle_cross_adapter.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/draw/objects/draw_rectangle.dart';
@@ -8,12 +7,18 @@ import 'package:window_paint/src/geometry/line.dart';
 
 class DrawRectangleCross extends DrawRectangle {
   DrawRectangleCross({
+    required DrawObjectAdapter<DrawRectangleCross> adapter,
     required DrawPoint anchor,
     bool debugHitboxes = false,
   }) : super(
+          adapter: adapter,
           anchor: anchor,
           debugHitboxes: debugHitboxes,
         );
+
+  @override
+  DrawObjectAdapter<DrawRectangleCross> get adapter =>
+      super.adapter as DrawObjectAdapter<DrawRectangleCross>;
 
   Iterable<Line> get innerHitboxes sync* {
     final a = anchor.offset;
@@ -22,13 +27,13 @@ class DrawRectangleCross extends DrawRectangle {
     yield Line(
       start: a,
       end: e,
-      width: 5.0,
+      width: 5.0 / anchor.scale,
     );
     // bottom-left -> top-right
     yield Line(
       start: Offset(a.dx, e.dy),
       end: Offset(e.dx, a.dy),
-      width: 5.0,
+      width: 5.0 / anchor.scale,
     );
   }
 
@@ -45,7 +50,7 @@ class DrawRectangleCross extends DrawRectangle {
     super.paintHitboxes(canvas, size);
     final paint = Paint()
       ..color = Color(0x8A000000)
-      ..strokeWidth = 1
+      ..strokeWidth = 1.0 / anchor.scale
       ..style = PaintingStyle.stroke;
     for (final hitbox in innerHitboxes) {
       final a = Offset(hitbox.a.x, hitbox.a.y);
@@ -58,8 +63,4 @@ class DrawRectangleCross extends DrawRectangle {
       canvas.drawLine(d, a, paint);
     }
   }
-
-  @override
-  DrawObjectAdapter<DrawRectangleCross> get adapter =>
-      const DrawRectangleCrossAdapter();
 }

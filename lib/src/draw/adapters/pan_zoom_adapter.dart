@@ -11,7 +11,9 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
   @override
   FutureOr<DrawNoop?> start(
       BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
-    return DrawNoop();
+    return DrawNoop(
+      adapter: this,
+    );
   }
 
   @override
@@ -31,14 +33,10 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
   }
 
   @override
-  void select(DrawNoop object) {
-    // TODO: implement select
-  }
+  void select(DrawNoop object) {}
 
   @override
-  void cancelSelect(DrawNoop object) {
-    // TODO: implement cancelSelect
-  }
+  void cancelSelect(DrawNoop object) {}
 
   @override
   bool selectedStart(DrawNoop object, Offset focalPoint, Matrix4 transform) {

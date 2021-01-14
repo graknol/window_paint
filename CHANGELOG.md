@@ -1,3 +1,7 @@
+## [0.1.0-nullsafety.3] - TODO: Add date
+
+* Scale objects, outlines, hitboxes and path-simplification tolerance relative to the zoom-level.
+
 ## [0.1.0-nullsafety.2] - Jan 13, 2021
 
 * Added a button for toggling hitboxes in the `example` app.

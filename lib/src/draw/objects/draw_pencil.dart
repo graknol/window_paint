@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
-import 'package:window_paint/src/draw/adapters/draw_pencil_adapter.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
@@ -11,9 +10,13 @@ import 'package:window_paint/src/utils/simplify_utils.dart';
 
 class DrawPencil extends DrawObject {
   DrawPencil({
+    required this.adapter,
     List<DrawPoint>? points,
     this.debugHitboxes = false,
   }) : points = points ?? [];
+
+  @override
+  final DrawObjectAdapter<DrawPencil> adapter;
 
   final List<DrawPoint> points;
   final bool debugHitboxes;
@@ -22,6 +25,8 @@ class DrawPencil extends DrawObject {
 
   int _paintedCount = 0;
   bool _paintedSelected = false;
+
+  double get _scale => points.isNotEmpty ? points.first.scale : 1.0;
 
   Rect get rect {
     var minX = double.infinity;
@@ -49,7 +54,7 @@ class DrawPencil extends DrawObject {
     for (var i = 0; i < points.length - 1; i++) {
       final from = points[i];
       final to = points[i + 1];
-      yield Rect.fromPoints(from.offset, to.offset).inflate(5.0);
+      yield Rect.fromPoints(from.offset, to.offset).inflate(5.0 / _scale);
     }
   }
 
@@ -60,16 +65,16 @@ class DrawPencil extends DrawObject {
       final diff = to.offset - from.offset;
       final extent = Vector2(diff.dx, diff.dy)
         ..normalize()
-        ..scale(5.0);
+        ..scale(5.0 / _scale);
       yield Line(
         start: from.offset.translate(-extent.x, -extent.y),
         end: to.offset.translate(extent.x, extent.y),
-        width: 5.0,
+        width: 5.0 / _scale,
       );
     }
   }
 
-  Rect get outline => rect.inflate(5.0);
+  Rect get outline => rect.inflate(5.0 / _scale);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -91,7 +96,7 @@ class DrawPencil extends DrawObject {
   void _paintOutline(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Color(0x8A000000)
-      ..strokeWidth = 1
+      ..strokeWidth = 1.0 / _scale
       ..style = PaintingStyle.stroke;
     canvas.drawRect(outline, paint);
   }
@@ -100,7 +105,7 @@ class DrawPencil extends DrawObject {
   void _paintHitboxes(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Color(0x8A000000)
-      ..strokeWidth = 1
+      ..strokeWidth = 1.0 / _scale
       ..style = PaintingStyle.stroke;
     for (final hitbox in hitboxes) {
       final a = Offset(hitbox.a.x, hitbox.a.y);
@@ -128,13 +133,10 @@ class DrawPencil extends DrawObject {
   }
 
   void simplify() {
-    final simplified = simplifyPoints(points);
+    final simplified = simplifyPoints(points, tolerance: 1.0 / _scale);
     points.clear();
     points.addAll(simplified);
   }
-
-  @override
-  DrawObjectAdapter<DrawPencil> get adapter => const DrawPencilAdapter();
 
   @override
   Color get primaryColor => points.first.paint.color;

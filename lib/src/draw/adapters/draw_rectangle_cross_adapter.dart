@@ -8,16 +8,22 @@ import 'package:window_paint/src/draw/objects/draw_rectangle_cross.dart';
 
 class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
   const DrawRectangleCrossAdapter({
+    this.width = 1.0,
     this.debugHitboxes = false,
   });
 
+  /// The width of each line.
+  final double width;
+
+  /// Render the areas that would cause that object to be selected.
   final bool debugHitboxes;
 
   @override
   FutureOr<DrawRectangleCross?> start(
       BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
-    final point = _createPoint(focalPoint, color);
+    final point = _createPoint(focalPoint, color, transform);
     return DrawRectangleCross(
+      adapter: this,
       anchor: point,
       debugHitboxes: debugHitboxes,
     );
@@ -76,7 +82,8 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
     object.anchor.paint.color = color;
   }
 
-  DrawPoint _createPoint(Offset offset, Color color) {
+  DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
+    final scale = transform.getMaxScaleOnAxis();
     return DrawPoint(
       offset: offset,
       paint: Paint()
@@ -84,7 +91,8 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
         ..isAntiAlias = true
         ..color = color
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 4,
+        ..strokeWidth = width / scale,
+      scale: scale,
     );
   }
 }
