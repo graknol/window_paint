@@ -6,20 +6,24 @@ import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/window_paint_painter.dart';
 
 class WindowPaintCanvas extends StatefulWidget {
-  final Color color;
-  final DrawObjectAdapter adapter;
-  final Widget child;
-  final void Function(DrawObject)? onSelectionStart;
-  final void Function(DrawObject)? onSelectionEnd;
-
   const WindowPaintCanvas({
     Key? key,
     this.color = const Color(0xFF000000),
+    this.minScale = 1.0,
+    this.maxScale = 2.5,
     this.onSelectionStart,
     this.onSelectionEnd,
     required this.adapter,
     required this.child,
   }) : super(key: key);
+
+  final Color color;
+  final double minScale;
+  final double maxScale;
+  final void Function(DrawObject)? onSelectionStart;
+  final void Function(DrawObject)? onSelectionEnd;
+  final DrawObjectAdapter adapter;
+  final Widget child;
 
   @override
   _WindowPaintCanvasState createState() => _WindowPaintCanvasState();
@@ -93,6 +97,8 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   Widget build(BuildContext context) {
     return InteractiveViewer(
       transformationController: _transformationController,
+      minScale: widget.minScale,
+      maxScale: widget.maxScale,
       onInteractionStart: (details) => _onInteractionStart(context, details),
       onInteractionUpdate: _onInteractionUpdate,
       onInteractionEnd: _onInteractionEnd,

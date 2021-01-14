@@ -10,6 +10,8 @@ import 'package:flutter/widgets.dart';
 class WindowPaint extends StatefulWidget {
   WindowPaint({
     Key? key,
+    this.minScale = 1.0,
+    this.maxScale = 2.5,
     this.controller,
     this.adapters = const {
       'pan_zoom': PanZoomAdapter(),
@@ -21,6 +23,8 @@ class WindowPaint extends StatefulWidget {
     this.restorationId,
   }) : super(key: key);
 
+  final double minScale;
+  final double maxScale;
   final WindowPaintController? controller;
   final Map<String, DrawObjectAdapter> adapters;
   final Widget child;
@@ -115,6 +119,8 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
         builder: (context, value, child) {
           return WindowPaintCanvas(
             color: value.color,
+            minScale: widget.minScale,
+            maxScale: widget.maxScale,
             onSelectionStart: (object) {
               _colorBeforeSelection = _effectiveController.color;
               _effectiveController.color = object.primaryColor;
