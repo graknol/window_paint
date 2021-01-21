@@ -1,7 +1,8 @@
-## [0.1.0-nullsafety.3] - TODO: Add date
+## [0.1.0-nullsafety.3] - Jan 21, 2021
 
 * `InteractiveViewer`'s `minScale` and `maxScale` are now configurable.
-* Scale objects, outlines, hitboxes and path-simplification tolerance relative to the zoom-level.
+* Scale objects, outlines, hitboxes, and path-simplification tolerance relative to the zoom-level.
+* `DrawRectangle._paintOutline` parameter `Sizesize` corrected to `Size size`.
 
 ## [0.1.0-nullsafety.2] - Jan 13, 2021
 
