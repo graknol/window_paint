@@ -61,7 +61,7 @@ class DrawRectangle extends DrawObject {
     _paintedSelected = selected;
   }
 
-  void _paintOutline(Canvas canvas, Sizesize) {
+  void _paintOutline(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Color(0x8A000000)
       ..strokeWidth = 1.0 / anchor.scale
