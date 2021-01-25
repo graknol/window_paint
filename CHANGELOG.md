@@ -1,3 +1,7 @@
+## [0.1.0-nullsafety.4] - Jan 25, 2021
+
+* Expose `TransformationController` on `WindowPaintCanvas`/`WindowPaint`.
+
 ## [0.1.0-nullsafety.3] - Jan 21, 2021
 
 * `InteractiveViewer`'s `minScale` and `maxScale` are now configurable.
