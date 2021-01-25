@@ -8,6 +8,7 @@ import 'package:window_paint/src/window_paint_painter.dart';
 class WindowPaintCanvas extends StatefulWidget {
   const WindowPaintCanvas({
     Key? key,
+    this.controller,
     this.color = const Color(0xFF000000),
     this.minScale = 1.0,
     this.maxScale = 2.5,
@@ -17,6 +18,7 @@ class WindowPaintCanvas extends StatefulWidget {
     required this.child,
   }) : super(key: key);
 
+  final TransformationController? controller;
   final Color color;
   final double minScale;
   final double maxScale;
@@ -30,7 +32,7 @@ class WindowPaintCanvas extends StatefulWidget {
 }
 
 class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
-  final _transformationController = TransformationController();
+  late final TransformationController _controller;
 
   /// List of drawable objects to render.
   final _objects = <DrawObject>[];
@@ -57,28 +59,23 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
   @override
   void initState() {
     super.initState();
-    _lockedTransform = _transformationController.value;
-    _transformationController.addListener(_transformationControllerListener);
-  }
-
-  void _transformationControllerListener() {
-    /// In newer versions of [InteractiveViewer], the [onInteractionUpdate]
-    /// callback is not called when [panScaleEnabled] is [false].
-    ///
-    /// To overcome this limitation, we have to manually reset the
-    /// transformation with the [transformationController].
-    ///
-    /// We also do this if an object is selected.
-    if (widget.adapter.panScaleEnabled && _selectedObject == null) {
-      _lockedTransform = _transformationController.value;
-    } else if (_transformationController.value != _lockedTransform) {
-      _transformationController.value = _lockedTransform;
-    }
+    _controller = widget.controller != null
+        ? TransformationController(widget.controller!.value)
+        : TransformationController();
+    _lockedTransform = _controller.value;
+    _controller.addListener(_onTransformationControllerChange);
+    widget.controller?.addListener(_onParentTransformationControllerChange);
   }
 
   @override
   void didUpdateWidget(WindowPaintCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.controller == null && oldWidget.controller != null) {
+      oldWidget.controller!
+          .removeListener(_onParentTransformationControllerChange);
+    } else if (widget.controller != null && oldWidget.controller == null) {
+      widget.controller!.addListener(_onParentTransformationControllerChange);
+    }
     if (_isSelecting) {
       if (widget.color != oldWidget.color) {
         _selectedObject!.adapter
@@ -87,16 +84,57 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
     }
   }
 
+  void _onTransformationControllerChange() {
+    /// In newer versions of [InteractiveViewer], the [onInteractionUpdate]
+    /// callback is not called when [panScaleEnabled] is [false].
+    ///
+    /// To overcome this limitation, we have to manually reset the
+    /// transformation with the [transformationController].
+    ///
+    /// We also do this if an object is selected.
+    if (widget.adapter.panScaleEnabled && _selectedObject == null) {
+      _lockedTransform = _controller.value;
+
+      /// This two-way relationship between the parent and
+      /// local [TransformationController] could cause infinite
+      /// nested callbacks.
+      ///
+      /// Therefore we need to check if the value is different before notifying
+      /// listeners of any change.
+      if (widget.controller != null &&
+          widget.controller?.value != _controller.value) {
+        widget.controller?.value = _controller.value;
+      }
+    } else if (_controller.value != _lockedTransform) {
+      _controller.value = _lockedTransform;
+    }
+  }
+
+  void _onParentTransformationControllerChange() {
+    _lockedTransform = widget.controller!.value;
+
+    /// This two-way relationship between the parent and
+    /// local [TransformationController] could cause infinite nested callbacks.
+    ///
+    /// Therefore we need to check if the value is different before notifying
+    /// listeners of any change.
+    if (_controller.value != widget.controller!.value) {
+      _controller.value = widget.controller!.value;
+    }
+  }
+
   @override
   void dispose() {
-    _transformationController.dispose();
+    widget.controller?.removeListener(_onParentTransformationControllerChange);
+    _controller.removeListener(_onTransformationControllerChange);
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return InteractiveViewer(
-      transformationController: _transformationController,
+      transformationController: _controller,
       minScale: widget.minScale,
       maxScale: widget.maxScale,
       onInteractionStart: (details) => _onInteractionStart(context, details),
@@ -116,10 +154,10 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
     BuildContext context,
     ScaleStartDetails details,
   ) async {
-    final focalPointScene = _transformationController.toScene(
+    final focalPointScene = _controller.toScene(
       details.localFocalPoint,
     );
-    final transform = _transformationController.value.clone();
+    final transform = _controller.value.clone();
     if (_isSelecting) {
       _onInteractionStartSelected(_selectedObject!, focalPointScene, transform);
       if (_isSelecting) {
@@ -175,10 +213,10 @@ class _WindowPaintCanvasState extends State<WindowPaintCanvas> {
       return;
     }
     if (_hasActiveInteraction) {
-      final focalPointScene = _transformationController.toScene(
+      final focalPointScene = _controller.toScene(
         details.localFocalPoint,
       );
-      final transform = _transformationController.value.clone();
+      final transform = _controller.value.clone();
       final repaint = _isSelecting
           ? _selectedObject!.adapter.selectedUpdate(
               _selectedObject!,

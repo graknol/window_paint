@@ -13,6 +13,7 @@ class WindowPaint extends StatefulWidget {
     this.minScale = 1.0,
     this.maxScale = 2.5,
     this.controller,
+    this.transformationController,
     this.adapters = const {
       'pan_zoom': PanZoomAdapter(),
       'pencil': DrawPencilAdapter(),
@@ -26,6 +27,7 @@ class WindowPaint extends StatefulWidget {
   final double minScale;
   final double maxScale;
   final WindowPaintController? controller;
+  final TransformationController? transformationController;
   final Map<String, DrawObjectAdapter> adapters;
   final Widget child;
 
@@ -118,6 +120,7 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
         valueListenable: _effectiveController,
         builder: (context, value, child) {
           return WindowPaintCanvas(
+            controller: widget.transformationController,
             color: value.color,
             minScale: widget.minScale,
             maxScale: widget.maxScale,
