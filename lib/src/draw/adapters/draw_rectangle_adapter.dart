@@ -27,11 +27,16 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
   final bool debugHitboxes;
 
   @override
+  String get typeId => 'rectangle';
+
+  @override
   FutureOr<DrawRectangle?> start(
       BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
     final point = _createPoint(focalPoint, color, transform);
     return DrawRectangle(
       adapter: this,
+      color: color,
+      strokeWidth: width / transform.getMaxScaleOnAxis(),
       anchor: point,
       hitboxExtent: hitboxExtent,
       debugHitboxes: debugHitboxes,
@@ -84,20 +89,17 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
 
   @override
   void selectUpdateColor(DrawRectangle object, Color color) {
-    object.anchor.paint.color = color;
+    object.color = color;
   }
 
+  @override
+  DrawRectangle fromJSON(Map<String, dynamic> encoded) =>
+      DrawRectangle.fromJSON(this, encoded);
+
   DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
-    final scale = transform.getMaxScaleOnAxis();
     return DrawPoint(
       offset: offset,
-      paint: Paint()
-        ..strokeCap = StrokeCap.round
-        ..isAntiAlias = true
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = width / scale,
-      scale: scale,
+      scale: transform.getMaxScaleOnAxis(),
     );
   }
 }

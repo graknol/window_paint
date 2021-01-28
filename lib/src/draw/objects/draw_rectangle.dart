@@ -8,6 +8,8 @@ import 'package:window_paint/src/draw/draw_point.dart';
 class DrawRectangle extends DrawObject {
   DrawRectangle({
     required this.adapter,
+    required this.color,
+    required this.strokeWidth,
     required this.anchor,
     this.hitboxExtent = 5.0,
     this.debugHitboxes = false,
@@ -16,6 +18,8 @@ class DrawRectangle extends DrawObject {
   @override
   final DrawObjectAdapter<DrawRectangle> adapter;
 
+  Color color;
+  final double strokeWidth;
   final DrawPoint anchor;
   final double hitboxExtent;
   final bool debugHitboxes;
@@ -24,6 +28,7 @@ class DrawRectangle extends DrawObject {
 
   Offset? _endpoint;
 
+  Color? _paintedColor;
   Offset? _paintedEndpoint;
   bool _paintedSelected = false;
 
@@ -55,14 +60,24 @@ class DrawRectangle extends DrawObject {
   Rect get outline => rect.inflate(hitboxExtent / anchor.scale);
 
   @override
+  Color get primaryColor => color;
+
+  @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(rect, anchor.paint);
+    final paint = Paint()
+      ..strokeCap = StrokeCap.round
+      ..isAntiAlias = true
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawRect(rect, paint);
     if (selected) {
       _paintOutline(canvas, size);
     }
     if (!kReleaseMode && debugHitboxes) {
       paintHitboxes(canvas, size);
     }
+    _paintedColor = color;
     _paintedEndpoint = _endpoint;
     _paintedSelected = selected;
   }
@@ -89,11 +104,35 @@ class DrawRectangle extends DrawObject {
 
   @override
   bool shouldRepaint() =>
-      _endpoint != _paintedEndpoint || selected != _paintedSelected;
+      color != _paintedColor ||
+      _endpoint != _paintedEndpoint ||
+      selected != _paintedSelected;
 
   @override
   void finalize() {}
 
+  factory DrawRectangle.fromJSON(
+    DrawObjectAdapter<DrawRectangle> adapter,
+    Map<String, dynamic> encoded,
+  ) {
+    return DrawRectangle(
+      adapter: adapter,
+      color: Color(encoded['color'] as int),
+      strokeWidth: encoded['strokeWidth'] as double,
+      anchor: DrawPoint.fromJSON(encoded['anchor']),
+      hitboxExtent: encoded['hitboxExtent'] as double,
+      debugHitboxes: encoded['debugHitboxes'] as bool,
+    );
+  }
+
   @override
-  Color get primaryColor => anchor.paint.color;
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'color': color.value,
+      'strokeWidth': strokeWidth,
+      'anchor': anchor.toJSON(),
+      'hitboxExtent': hitboxExtent,
+      'debugHitboxes': debugHitboxes,
+    };
+  }
 }

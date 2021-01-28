@@ -12,6 +12,9 @@ class DrawNoop extends DrawObject {
   final DrawObjectAdapter<DrawObject> adapter;
 
   @override
+  Color get primaryColor => Color(0xFF000000);
+
+  @override
   void paint(Canvas canvas, Size size) {}
 
   @override
@@ -20,6 +23,17 @@ class DrawNoop extends DrawObject {
   @override
   void finalize() {}
 
+  factory DrawNoop.fromJSON(
+    DrawObjectAdapter<DrawNoop> adapter,
+    Map<String, dynamic> encoded,
+  ) {
+    return DrawNoop(
+      adapter: adapter,
+    );
+  }
+
   @override
-  Color get primaryColor => Color(0xFF000000);
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{};
+  }
 }

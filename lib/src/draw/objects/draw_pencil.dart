@@ -11,6 +11,8 @@ import 'package:window_paint/src/utils/simplify_utils.dart';
 class DrawPencil extends DrawObject {
   DrawPencil({
     required this.adapter,
+    required this.color,
+    required this.strokeWidth,
     List<DrawPoint>? points,
     this.hitboxExtent = 5.0,
     this.debugHitboxes = false,
@@ -19,12 +21,15 @@ class DrawPencil extends DrawObject {
   @override
   final DrawObjectAdapter<DrawPencil> adapter;
 
+  Color color;
+  final double strokeWidth;
   final List<DrawPoint> points;
-  final bool debugHitboxes;
   final double hitboxExtent;
+  final bool debugHitboxes;
 
   bool selected = false;
 
+  Color? _paintedColor;
   int _paintedCount = 0;
   bool _paintedSelected = false;
 
@@ -80,11 +85,20 @@ class DrawPencil extends DrawObject {
   Rect get outline => rect.inflate(hitboxExtent / _scale);
 
   @override
+  Color get primaryColor => color;
+
+  @override
   void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..strokeCap = StrokeCap.round
+      ..isAntiAlias = true
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
     for (var i = 0; i < points.length - 1; i++) {
       final from = points[i];
       final to = points[i + 1];
-      canvas.drawLine(from.offset, to.offset, from.paint);
+      canvas.drawLine(from.offset, to.offset, paint);
     }
     if (selected) {
       _paintOutline(canvas, size);
@@ -92,6 +106,7 @@ class DrawPencil extends DrawObject {
     if (!kReleaseMode && debugHitboxes) {
       _paintHitboxes(canvas, size);
     }
+    _paintedColor = color;
     _paintedCount = points.length;
     _paintedSelected = selected;
   }
@@ -124,7 +139,9 @@ class DrawPencil extends DrawObject {
 
   @override
   bool shouldRepaint() =>
-      points.length != _paintedCount || selected != _paintedSelected;
+      color != _paintedColor ||
+      points.length != _paintedCount ||
+      selected != _paintedSelected;
 
   @override
   void finalize() {
@@ -141,6 +158,30 @@ class DrawPencil extends DrawObject {
     points.addAll(simplified);
   }
 
+  factory DrawPencil.fromJSON(
+    DrawObjectAdapter<DrawPencil> adapter,
+    Map<String, dynamic> encoded,
+  ) {
+    return DrawPencil(
+      adapter: adapter,
+      color: Color(encoded['color'] as int),
+      strokeWidth: encoded['strokeWidth'] as double,
+      points: (encoded['points'] as List)
+          .map((p) => DrawPoint.fromJSON(p))
+          .toList(),
+      hitboxExtent: encoded['hitboxExtent'] as double,
+      debugHitboxes: encoded['debugHitboxes'] as bool,
+    );
+  }
+
   @override
-  Color get primaryColor => points.first.paint.color;
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'color': color.value,
+      'strokeWidth': strokeWidth,
+      'points': points.map((p) => p.toJSON()).toList(),
+      'hitboxExtent': hitboxExtent,
+      'debugHitboxes': debugHitboxes,
+    };
+  }
 }

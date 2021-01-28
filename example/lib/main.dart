@@ -5,7 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:window_paint/window_paint.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    RootRestorationScope(
+      restorationId: 'root',
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -34,16 +39,48 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  final _windowPaintController = WindowPaintController(
-    initialColor: Colors.red,
-  );
+class _MyHomePageState extends State<MyHomePage> with RestorationMixin {
+  static const debugHitboxes = false;
 
-  var debugHitboxes = false;
+  final adapters = <DrawObjectAdapter>[
+    PanZoomAdapter(),
+    DrawPencilAdapter(
+      width: 2.0,
+      debugHitboxes: debugHitboxes,
+    ),
+    DrawRectangleAdapter(
+      width: 2.0,
+      debugHitboxes: debugHitboxes,
+    ),
+    DrawRectangleCrossAdapter(
+      width: 2.0,
+      debugHitboxes: debugHitboxes,
+    ),
+    DrawTextAdapter(),
+  ];
+
+  late final RestorableWindowPaintController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = RestorableWindowPaintController(
+      adapters,
+      initialColor: Colors.red,
+    );
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    registerForRestoration(_controller, 'controller');
+  }
+
+  @override
+  String? get restorationId => 'main_page';
 
   @override
   void dispose() {
-    _windowPaintController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -60,46 +97,17 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Column(
             children: [
               WindowPaintControl(
-                controller: _windowPaintController,
+                controller: _controller.value,
               ),
               WindowPaint(
-                controller: _windowPaintController,
+                controller: _controller.value,
                 maxScale: 10.0,
-                adapters: {
-                  'pan_zoom': PanZoomAdapter(),
-                  'pencil': DrawPencilAdapter(
-                    width: 2.0,
-                    debugHitboxes: debugHitboxes,
-                  ),
-                  'rectangle': DrawRectangleAdapter(
-                    width: 2.0,
-                    debugHitboxes: debugHitboxes,
-                  ),
-                  'rectangle_cross': DrawRectangleCrossAdapter(
-                    width: 2.0,
-                    debugHitboxes: debugHitboxes,
-                  ),
-                  'text': DrawTextAdapter(),
-                },
+                adapters: adapters,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.amber[100],
                   ),
                   height: 400,
-                ),
-              ),
-              RaisedButton(
-                onPressed: () {
-                  setState(() {
-                    debugHitboxes = !debugHitboxes;
-                  });
-                },
-                color: debugHitboxes ? Colors.green : Colors.amber,
-                child: SizedBox(
-                  width: 92.0,
-                  child: Center(
-                    child: Text('Hitboxes ${debugHitboxes ? 'ON' : 'OFF'}'),
-                  ),
                 ),
               ),
             ],

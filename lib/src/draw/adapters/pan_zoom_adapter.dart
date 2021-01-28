@@ -9,6 +9,15 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
   const PanZoomAdapter();
 
   @override
+  bool get panScaleEnabled => true;
+
+  @override
+  bool get selectEnabled => true;
+
+  @override
+  String get typeId => 'pan_zoom';
+
+  @override
   FutureOr<DrawNoop?> start(
       BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
     return DrawNoop(
@@ -55,7 +64,6 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
   void selectUpdateColor(DrawNoop object, Color color) {}
 
   @override
-  bool get panScaleEnabled => true;
-  @override
-  bool get selectEnabled => true;
+  DrawNoop fromJSON(Map<String, dynamic> encoded) =>
+      DrawNoop.fromJSON(this, encoded);
 }

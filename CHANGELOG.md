@@ -1,3 +1,13 @@
+## [0.1.0-nullsafety.5] - Jan 28, 2021
+
+* Make hitbox extents configurable.
+* Move objects into `WindowPaintController`.
+* Move object selection into `WindowPaintController`.
+* Update the selected object's color when setting `WindowPaintController.color`.
+* Support serialization and restoration of `DrawObject` through `RestorableWindowPaintController`.
+* Merge `WindowPaintCanvas` into `WindowPaint`.
+* Update example project.
+
 ## [0.1.0-nullsafety.4] - Jan 25, 2021
 
 * Expose `TransformationController` on `WindowPaintCanvas`/`WindowPaint`.

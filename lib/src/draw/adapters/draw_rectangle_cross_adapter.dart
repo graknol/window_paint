@@ -27,11 +27,16 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
   final bool debugHitboxes;
 
   @override
+  String get typeId => 'rectangle_cross';
+
+  @override
   FutureOr<DrawRectangleCross?> start(
       BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
     final point = _createPoint(focalPoint, color, transform);
     return DrawRectangleCross(
       adapter: this,
+      color: color,
+      strokeWidth: width / transform.getMaxScaleOnAxis(),
       anchor: point,
       hitboxExtent: hitboxExtent,
       debugHitboxes: debugHitboxes,
@@ -88,19 +93,17 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
 
   @override
   void selectUpdateColor(DrawRectangleCross object, Color color) {
-    object.anchor.paint.color = color;
+    object.color = color;
   }
+
+  @override
+  DrawRectangleCross fromJSON(Map<String, dynamic> encoded) =>
+      DrawRectangleCross.fromJSON(this, encoded);
 
   DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
     final scale = transform.getMaxScaleOnAxis();
     return DrawPoint(
       offset: offset,
-      paint: Paint()
-        ..strokeCap = StrokeCap.round
-        ..isAntiAlias = true
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = width / scale,
       scale: scale,
     );
   }

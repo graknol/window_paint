@@ -1,33 +1,38 @@
+import 'dart:async';
+
+import 'package:flutter/widgets.dart';
 import 'package:window_paint/src/draw/adapters/draw_pencil_adapter.dart';
 import 'package:window_paint/src/draw/adapters/draw_rectangle_adapter.dart';
 import 'package:window_paint/src/draw/adapters/draw_rectangle_cross_adapter.dart';
 import 'package:window_paint/src/draw/adapters/pan_zoom_adapter.dart';
+import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
-import 'package:window_paint/src/window_paint_canvas.dart';
 import 'package:window_paint/src/window_paint_controller.dart';
-import 'package:flutter/widgets.dart';
+import 'package:window_paint/src/window_paint_painter.dart';
 
 class WindowPaint extends StatefulWidget {
   WindowPaint({
     Key? key,
-    this.minScale = 1.0,
-    this.maxScale = 2.5,
     this.controller,
     this.transformationController,
-    this.adapters = const {
-      'pan_zoom': PanZoomAdapter(),
-      'pencil': DrawPencilAdapter(),
-      'rectangle': DrawRectangleAdapter(),
-      'rectangle_cross': DrawRectangleCrossAdapter(),
-    },
+    this.minScale = 1.0,
+    this.maxScale = 2.5,
+    List<DrawObjectAdapter> adapters = const [
+      PanZoomAdapter(),
+      DrawPencilAdapter(),
+      DrawRectangleAdapter(),
+      DrawRectangleCrossAdapter(),
+    ],
     required this.child,
     this.restorationId,
-  }) : super(key: key);
+  })  : adapters = Map<String, DrawObjectAdapter>.fromIterable(adapters,
+            key: (a) => a.typeId),
+        super(key: key);
 
-  final double minScale;
-  final double maxScale;
   final WindowPaintController? controller;
   final TransformationController? transformationController;
+  final double minScale;
+  final double maxScale;
   final Map<String, DrawObjectAdapter> adapters;
   final Widget child;
 
@@ -57,10 +62,23 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   WindowPaintController get _effectiveController =>
       widget.controller ?? _controller!.value;
 
-  /// The color of the [controller] before an object was selected, if any.
-  /// Will be restored to the controller when the selected object is no
-  /// longer selected.
-  Color? _colorBeforeSelection;
+  late final TransformationController _transformationController;
+
+  /// Used by [_transformationController]'s listener to discard any
+  /// transformation when [panScaleEnabled] is [false].
+  late Matrix4 _lockedTransform;
+
+  /// Used to signal [CustomPaint.willChange] so that the raster cache knows
+  /// that the painter most likely will change next frame.
+  var _hasActiveInteraction = false;
+
+  /// The [Future] returned by the adapter's [start] method, if any. Signals to
+  /// [onInteractiveUpdate] and [onInteractiveEnd] that they should discard
+  /// their events for this interaction.
+  Future<DrawObject?>? _pendingObject;
+
+  DrawObjectAdapter get _activeAdapter =>
+      widget.adapters[_effectiveController.mode]!;
 
   @override
   void initState() {
@@ -68,6 +86,14 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
     if (widget.controller == null) {
       _createLocalController();
     }
+
+    _transformationController = widget.transformationController != null
+        ? TransformationController(widget.transformationController!.value)
+        : TransformationController();
+    _lockedTransform = _transformationController.value;
+    _transformationController.addListener(_onTransformationControllerChange);
+    widget.transformationController
+        ?.addListener(_onParentTransformationControllerChange);
   }
 
   @override
@@ -79,6 +105,58 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
       unregisterFromRestoration(_controller!);
       _controller!.dispose();
       _controller = null;
+    }
+
+    if (widget.transformationController == null &&
+        oldWidget.transformationController != null) {
+      oldWidget.transformationController!
+          .removeListener(_onParentTransformationControllerChange);
+    } else if (widget.transformationController != null &&
+        oldWidget.transformationController == null) {
+      widget.transformationController!
+          .addListener(_onParentTransformationControllerChange);
+    }
+  }
+
+  void _onTransformationControllerChange() {
+    /// In newer versions of [InteractiveViewer], the [onInteractionUpdate]
+    /// callback is not called when [panScaleEnabled] is [false].
+    ///
+    /// To overcome this limitation, we have to manually reset the
+    /// transformation with the [transformationController].
+    ///
+    /// We also do this if an object is selected.
+    if (_activeAdapter.panScaleEnabled && !_effectiveController.isSelecting) {
+      _lockedTransform = _transformationController.value;
+
+      /// This two-way relationship between the parent and
+      /// local [TransformationController] could cause infinite
+      /// nested callbacks.
+      ///
+      /// Therefore we need to check if the value is different before notifying
+      /// listeners of any change.
+      if (widget.transformationController != null &&
+          widget.transformationController?.value !=
+              _transformationController.value) {
+        widget.transformationController?.value =
+            _transformationController.value;
+      }
+    } else if (_transformationController.value != _lockedTransform) {
+      _transformationController.value = _lockedTransform;
+    }
+  }
+
+  void _onParentTransformationControllerChange() {
+    _lockedTransform = widget.transformationController!.value;
+
+    /// This two-way relationship between the parent and
+    /// local [TransformationController] could cause infinite nested callbacks.
+    ///
+    /// Therefore we need to check if the value is different before notifying
+    /// listeners of any change.
+    if (_transformationController.value !=
+        widget.transformationController!.value) {
+      _transformationController.value = widget.transformationController!.value;
     }
   }
 
@@ -97,8 +175,9 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   void _createLocalController([WindowPaintValue? value]) {
     assert(_controller == null);
     _controller = value == null
-        ? RestorableWindowPaintController()
-        : RestorableWindowPaintController.fromValue(value);
+        ? RestorableWindowPaintController(widget.adapters.values.toList())
+        : RestorableWindowPaintController.fromValue(
+            widget.adapters.values.toList(), value);
     if (!restorePending) {
       _registerController();
     }
@@ -110,37 +189,187 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   @override
   void dispose() {
     _controller?.dispose();
+    widget.transformationController
+        ?.removeListener(_onParentTransformationControllerChange);
+    _transformationController.removeListener(_onTransformationControllerChange);
+    _transformationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: ValueListenableBuilder<WindowPaintValue>(
-        valueListenable: _effectiveController,
-        builder: (context, value, child) {
-          return WindowPaintCanvas(
-            controller: widget.transformationController,
-            color: value.color,
-            minScale: widget.minScale,
-            maxScale: widget.maxScale,
-            onSelectionStart: (object) {
-              _colorBeforeSelection = _effectiveController.color;
-              _effectiveController.color = object.primaryColor;
-            },
-            onSelectionEnd: (object) {
-              final colorToRestore = _colorBeforeSelection;
-              if (colorToRestore != null) {
-                _colorBeforeSelection = null;
-                _effectiveController.color = colorToRestore;
-              }
-            },
-            adapter: widget.adapters[value.mode]!,
-            child: child!,
-          );
-        },
+    return InteractiveViewer(
+      transformationController: _transformationController,
+      minScale: widget.minScale,
+      maxScale: widget.maxScale,
+      onInteractionStart: (details) => _onInteractionStart(context, details),
+      onInteractionUpdate: _onInteractionUpdate,
+      onInteractionEnd: _onInteractionEnd,
+      child: CustomPaint(
+        foregroundPainter: WindowPaintPainter(
+          objects: _effectiveController.objects,
+        ),
+        willChange: _hasActiveInteraction,
         child: widget.child,
       ),
     );
+  }
+
+  Future<void> _onInteractionStart(
+    BuildContext context,
+    ScaleStartDetails details,
+  ) async {
+    final focalPointScene = _transformationController.toScene(
+      details.localFocalPoint,
+    );
+    final transform = _transformationController.value.clone();
+    if (_effectiveController.isSelecting) {
+      _onInteractionStartSelected(focalPointScene, transform);
+      if (_effectiveController.isSelecting) {
+        return;
+      }
+    }
+    if (_trySelectObject(focalPointScene, transform)) {
+      return;
+    }
+    final pending = _activeAdapter.start(
+      context,
+      focalPointScene,
+      _effectiveController.color,
+      transform,
+    );
+    if (pending is DrawObject?) {
+      _onInteractionStartSync(pending);
+    } else {
+      await _onInteractionStartAsync(pending);
+    }
+  }
+
+  void _onInteractionStartSelected(
+    Offset focalPoint,
+    Matrix4 transform,
+  ) {
+    final object = _effectiveController.selectedObject!;
+    if (object.adapter.selectedStart(object, focalPoint, transform)) {
+      _startInteraction();
+    }
+    _cancelSelectObject();
+  }
+
+  void _onInteractionStartSync(DrawObject? object) {
+    if (object != null) {
+      _addObject(object);
+      _startInteraction();
+    }
+  }
+
+  Future<void> _onInteractionStartAsync(Future<DrawObject?> pending) async {
+    /// We do not need to call [setState] when setting [_pendingObject] as it's
+    /// not used in the [build] method.
+    _pendingObject = pending;
+    final object = await pending;
+    if (object != null) {
+      _addObject(object);
+    }
+  }
+
+  void _onInteractionUpdate(ScaleUpdateDetails details) {
+    if (_pendingObject != null) {
+      return;
+    }
+    if (_hasActiveInteraction) {
+      final focalPointScene = _transformationController.toScene(
+        details.localFocalPoint,
+      );
+      final transform = _transformationController.value.clone();
+      final selectedObject = _effectiveController.selectedObject;
+      final repaint = selectedObject != null
+          ? selectedObject.adapter.selectedUpdate(
+              selectedObject,
+              focalPointScene,
+              transform,
+            )
+          : _effectiveController.objects.last.adapter.update(
+              _effectiveController.objects.last,
+              focalPointScene,
+              _effectiveController.color,
+              transform,
+            );
+      if (repaint) {
+        setState(() {});
+      }
+    }
+  }
+
+  void _onInteractionEnd(ScaleEndDetails details) {
+    if (_pendingObject != null) {
+      /// We do not need to call [setState] when setting [_pendingObject] as
+      /// it's not used in the [build] method.
+      _pendingObject = null;
+      return;
+    }
+    if (_hasActiveInteraction) {
+      if (_effectiveController.isSelecting) {
+        final object = _effectiveController.selectedObject!;
+        final remain = object.adapter.selectedEnd(object);
+        if (!remain) {
+          _cancelSelectObject();
+        }
+      } else {
+        final object = _effectiveController.objects.last;
+        final keep = object.adapter.end(object, _effectiveController.color);
+        if (!keep) {
+          _removeObject(object);
+        }
+      }
+      _endInteraction();
+    }
+  }
+
+  bool _trySelectObject(Offset focalPoint, Matrix4 transform) {
+    if (_activeAdapter.selectEnabled) {
+      for (final object in _effectiveController.objects.reversed) {
+        if (object.adapter.querySelect(object, focalPoint, transform)) {
+          _selectObject(object);
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  void _startInteraction() {
+    setState(() {
+      _hasActiveInteraction = true;
+    });
+  }
+
+  void _endInteraction() {
+    setState(() {
+      _hasActiveInteraction = false;
+    });
+  }
+
+  void _addObject(DrawObject object) {
+    _effectiveController.addObject(object);
+  }
+
+  void _removeObject(DrawObject object) {
+    _effectiveController.removeObject(object);
+  }
+
+  void _selectObject(DrawObject object) {
+    final index = _effectiveController.objects.indexOf(object);
+    object.adapter.select(object);
+    _effectiveController.selectObject(index);
+  }
+
+  void _cancelSelectObject() {
+    final object = _effectiveController.selectedObject;
+    if (object != null) {
+      object.adapter.cancelSelect(object);
+      _effectiveController.cancelSelectObject();
+    }
+    _endInteraction();
   }
 }

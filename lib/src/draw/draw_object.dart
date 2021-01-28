@@ -12,4 +12,7 @@ abstract class DrawObject {
 
   /// Used primarily for updating [WindowPaintController.color] when selected.
   Color get primaryColor;
+
+  /// Returns a representation of this object as a JSON object.
+  Map<String, dynamic> toJSON();
 }

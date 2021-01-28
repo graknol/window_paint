@@ -8,16 +8,23 @@ import 'package:window_paint/src/draw/draw_point.dart';
 
 class DrawText extends DrawObject {
   DrawText({
+    required this.adapter,
+    required this.color,
     required this.anchor,
     this.text = '',
     this.fontSize = 16,
   });
 
+  @override
+  final DrawObjectAdapter<DrawText> adapter;
+
+  Color color;
   final DrawPoint anchor;
 
   String text;
   double fontSize;
 
+  Color? _paintedColor;
   String? _paintedText;
   Size? _paintedSize;
 
@@ -37,13 +44,16 @@ class DrawText extends DrawObject {
   Rect get outline => rect.inflate(5.0 / anchor.scale);
 
   TextStyle get textStyle => TextStyle(
-        color: anchor.paint.color,
+        color: color,
         fontSize: fontSize,
       );
   TextSpan get textSpan => TextSpan(
         text: text,
         style: textStyle,
       );
+
+  @override
+  Color get primaryColor => color;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -55,19 +65,37 @@ class DrawText extends DrawObject {
         maxWidth: size.width - anchor.offset.dx,
       );
     textPainter.paint(canvas, anchor.offset);
+    _paintedColor = color;
     _paintedText = text;
     _paintedSize = textPainter.size;
   }
 
   @override
-  bool shouldRepaint() => text != _paintedText;
+  bool shouldRepaint() => color != _paintedColor || text != _paintedText;
 
   @override
   void finalize() {}
 
-  @override
-  DrawObjectAdapter<DrawObject> get adapter => const DrawTextAdapter();
+  factory DrawText.fromJSON(
+    DrawObjectAdapter<DrawText> adapter,
+    Map<String, dynamic> encoded,
+  ) {
+    return DrawText(
+      adapter: adapter,
+      color: Color(encoded['color'] as int),
+      anchor: DrawPoint.fromJSON(encoded['anchor']),
+      text: encoded['text'] as String,
+      fontSize: encoded['fontSize'] as double,
+    );
+  }
 
   @override
-  Color get primaryColor => anchor.paint.color;
+  Map<String, dynamic> toJSON() {
+    return <String, dynamic>{
+      'color': color.value,
+      'anchor': anchor.toJSON(),
+      'text': text,
+      'fontSize': fontSize,
+    };
+  }
 }

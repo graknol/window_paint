@@ -10,18 +10,23 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
   const DrawTextAdapter();
 
   @override
+  String get typeId => 'text';
+
+  @override
   FutureOr<DrawText?> start(
     BuildContext context,
     Offset focalPoint,
     Color color,
     Matrix4 transform,
   ) async {
-    final point = _createPoint(focalPoint, color, transform);
+    final point = _createPoint(focalPoint, transform);
     final text = await showInputDialog(context);
     if (text != null && text.isNotEmpty) {
       return DrawText(
+        adapter: this,
         anchor: point,
         text: text,
+        color: color,
         fontSize: 16.0 / transform.getMaxScaleOnAxis(),
       );
     }
@@ -75,15 +80,17 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
 
   @override
   void selectUpdateColor(DrawText object, Color color) {
-    object.anchor.paint.color = color;
+    object.color = color;
   }
 
-  DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
-    final scale = transform.getMaxScaleOnAxis();
+  @override
+  DrawText fromJSON(Map<String, dynamic> encoded) =>
+      DrawText.fromJSON(this, encoded);
+
+  DrawPoint _createPoint(Offset offset, Matrix4 transform) {
     return DrawPoint(
       offset: offset,
-      paint: Paint()..color = color,
-      scale: scale,
+      scale: transform.getMaxScaleOnAxis(),
     );
   }
 

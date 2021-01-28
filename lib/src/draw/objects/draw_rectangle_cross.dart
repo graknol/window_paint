@@ -8,11 +8,15 @@ import 'package:window_paint/src/geometry/line.dart';
 class DrawRectangleCross extends DrawRectangle {
   DrawRectangleCross({
     required DrawObjectAdapter<DrawRectangleCross> adapter,
+    required Color color,
+    required double strokeWidth,
     required DrawPoint anchor,
     double hitboxExtent = 5.0,
     bool debugHitboxes = false,
   }) : super(
           adapter: adapter,
+          color: color,
+          strokeWidth: strokeWidth,
           anchor: anchor,
           hitboxExtent: hitboxExtent,
           debugHitboxes: debugHitboxes,
@@ -42,9 +46,15 @@ class DrawRectangleCross extends DrawRectangle {
   @override
   void paint(Canvas canvas, Size size) {
     super.paint(canvas, size);
-    canvas.drawRect(rect, anchor.paint);
-    canvas.drawLine(rect.topLeft, rect.bottomRight, anchor.paint);
-    canvas.drawLine(rect.bottomLeft, rect.topRight, anchor.paint);
+    final paint = Paint()
+      ..strokeCap = StrokeCap.round
+      ..isAntiAlias = true
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+    canvas.drawRect(rect, paint);
+    canvas.drawLine(rect.topLeft, rect.bottomRight, paint);
+    canvas.drawLine(rect.bottomLeft, rect.topRight, paint);
   }
 
   @override
@@ -64,5 +74,19 @@ class DrawRectangleCross extends DrawRectangle {
       canvas.drawLine(c, d, paint);
       canvas.drawLine(d, a, paint);
     }
+  }
+
+  factory DrawRectangleCross.fromJSON(
+    DrawObjectAdapter<DrawRectangleCross> adapter,
+    Map<String, dynamic> encoded,
+  ) {
+    return DrawRectangleCross(
+      adapter: adapter,
+      color: Color(encoded['color'] as int),
+      strokeWidth: encoded['strokeWidth'] as double,
+      anchor: DrawPoint.fromJSON(encoded['anchor']),
+      hitboxExtent: encoded['hitboxExtent'] as double,
+      debugHitboxes: encoded['debugHitboxes'] as bool,
+    );
   }
 }
