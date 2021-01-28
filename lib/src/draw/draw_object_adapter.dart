@@ -14,7 +14,7 @@ abstract class DrawObjectAdapter<T extends DrawObject> {
   /// Returning a [Future] will prevent [update] and [end] from being called.
   /// The reason for this is that there's no good way of delaying those events
   /// until the [Future] completes. The [Future] should complete with either
-  /// a fully constructed [DrawObject], or [null] to discard it.
+  /// a fully constructed [DrawObject] or [null] to discard it.
   FutureOr<T?> start(
       BuildContext context, Offset focalPoint, Color color, Matrix4 transform);
 
