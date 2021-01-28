@@ -12,6 +12,7 @@ class DrawPencil extends DrawObject {
   DrawPencil({
     required this.adapter,
     List<DrawPoint>? points,
+    this.hitboxExtent = 5.0,
     this.debugHitboxes = false,
   }) : points = points ?? [];
 
@@ -20,6 +21,7 @@ class DrawPencil extends DrawObject {
 
   final List<DrawPoint> points;
   final bool debugHitboxes;
+  final double hitboxExtent;
 
   bool selected = false;
 
@@ -54,7 +56,8 @@ class DrawPencil extends DrawObject {
     for (var i = 0; i < points.length - 1; i++) {
       final from = points[i];
       final to = points[i + 1];
-      yield Rect.fromPoints(from.offset, to.offset).inflate(5.0 / _scale);
+      yield Rect.fromPoints(from.offset, to.offset)
+          .inflate(hitboxExtent / _scale);
     }
   }
 
@@ -65,16 +68,16 @@ class DrawPencil extends DrawObject {
       final diff = to.offset - from.offset;
       final extent = Vector2(diff.dx, diff.dy)
         ..normalize()
-        ..scale(5.0 / _scale);
+        ..scale(hitboxExtent / _scale);
       yield Line(
         start: from.offset.translate(-extent.x, -extent.y),
         end: to.offset.translate(extent.x, extent.y),
-        width: 5.0 / _scale,
+        extent: hitboxExtent / _scale,
       );
     }
   }
 
-  Rect get outline => rect.inflate(5.0 / _scale);
+  Rect get outline => rect.inflate(hitboxExtent / _scale);
 
   @override
   void paint(Canvas canvas, Size size) {

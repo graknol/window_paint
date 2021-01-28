@@ -9,11 +9,19 @@ import 'package:window_paint/src/draw/objects/draw_pencil.dart';
 class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
   const DrawPencilAdapter({
     this.width = 1.0,
+    this.hitboxExtent = 5.0,
     this.debugHitboxes = false,
   });
 
   /// The width of a pencil-stroke.
   final double width;
+
+  /// Half the width of the hitboxes.
+  ///
+  /// The hitboxes are laid out along the lines of the pencil-stroke.
+  /// Their width is equal to `2 * hitboxExtent` and length equal
+  /// to `length + (2 * hitboxExtent)`.
+  final double hitboxExtent;
 
   /// Render the areas that would cause that object to be selected.
   final bool debugHitboxes;
@@ -25,6 +33,7 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
     return DrawPencil(
       adapter: this,
       points: [point],
+      hitboxExtent: hitboxExtent,
       debugHitboxes: debugHitboxes,
     );
   }

@@ -9,11 +9,19 @@ import 'package:window_paint/src/draw/objects/draw_rectangle.dart';
 class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
   const DrawRectangleAdapter({
     this.width = 1.0,
+    this.hitboxExtent = 5.0,
     this.debugHitboxes = false,
   });
 
   /// The width of each line.
   final double width;
+
+  /// Half the width of the hitboxes.
+  ///
+  /// The hitboxes are laid out along the lines of the rectangle.
+  /// Their width is equal to `2 * hitboxExtent` and length equal
+  /// to `length + (2 * hitboxExtent)`.
+  final double hitboxExtent;
 
   /// Render the areas that would cause that object to be selected.
   final bool debugHitboxes;
@@ -25,6 +33,7 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
     return DrawRectangle(
       adapter: this,
       anchor: point,
+      hitboxExtent: hitboxExtent,
       debugHitboxes: debugHitboxes,
     );
   }

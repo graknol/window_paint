@@ -9,6 +9,7 @@ class DrawRectangle extends DrawObject {
   DrawRectangle({
     required this.adapter,
     required this.anchor,
+    this.hitboxExtent = 5.0,
     this.debugHitboxes = false,
   });
 
@@ -16,6 +17,7 @@ class DrawRectangle extends DrawObject {
   final DrawObjectAdapter<DrawRectangle> adapter;
 
   final DrawPoint anchor;
+  final double hitboxExtent;
   final bool debugHitboxes;
 
   bool selected = false;
@@ -37,16 +39,20 @@ class DrawRectangle extends DrawObject {
     final a = anchor.offset;
     final e = effectiveEndpoint;
     // top
-    yield Rect.fromLTRB(a.dx, a.dy, e.dx, a.dy).inflate(5.0 / anchor.scale);
+    yield Rect.fromLTRB(a.dx, a.dy, e.dx, a.dy)
+        .inflate(hitboxExtent / anchor.scale);
     // right
-    yield Rect.fromLTRB(e.dx, a.dy, e.dx, e.dy).inflate(5.0 / anchor.scale);
+    yield Rect.fromLTRB(e.dx, a.dy, e.dx, e.dy)
+        .inflate(hitboxExtent / anchor.scale);
     // bottom
-    yield Rect.fromLTRB(a.dx, e.dy, e.dx, e.dy).inflate(5.0 / anchor.scale);
+    yield Rect.fromLTRB(a.dx, e.dy, e.dx, e.dy)
+        .inflate(hitboxExtent / anchor.scale);
     // left
-    yield Rect.fromLTRB(a.dx, a.dy, a.dx, e.dy).inflate(5.0 / anchor.scale);
+    yield Rect.fromLTRB(a.dx, a.dy, a.dx, e.dy)
+        .inflate(hitboxExtent / anchor.scale);
   }
 
-  Rect get outline => rect.inflate(5.0 / anchor.scale);
+  Rect get outline => rect.inflate(hitboxExtent / anchor.scale);
 
   @override
   void paint(Canvas canvas, Size size) {

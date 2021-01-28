@@ -6,13 +6,13 @@ class Line {
   Line({
     required this.start,
     required this.end,
-    this.width = 1.0,
+    this.extent = 1.0,
   }) {
     final dx = end.dx - start.dx;
     final dy = end.dy - start.dy;
     normal = Vector2(-dy, dx)
       ..normalize()
-      ..scale(width);
+      ..scale(extent);
 
     final s = Vector2(start.dx, start.dy);
     final e = Vector2(end.dx, end.dy);
@@ -22,16 +22,16 @@ class Line {
     d = s - normal;
   }
 
-  /// Start of the line.
+  /// Start of this.
   final Offset start;
 
-  /// End of the line.
+  /// End of this.
   final Offset end;
 
-  /// Width of the line.
-  final double width;
+  /// Half the width of this.
+  final double extent;
 
-  /// The normal vector to this. Its magnitude is equal to [width].
+  /// The normal vector to this. Its magnitude is equal to [extent].
   late final Vector2 normal;
 
   /// The A corner.

@@ -9,10 +9,12 @@ class DrawRectangleCross extends DrawRectangle {
   DrawRectangleCross({
     required DrawObjectAdapter<DrawRectangleCross> adapter,
     required DrawPoint anchor,
+    double hitboxExtent = 5.0,
     bool debugHitboxes = false,
   }) : super(
           adapter: adapter,
           anchor: anchor,
+          hitboxExtent: hitboxExtent,
           debugHitboxes: debugHitboxes,
         );
 
@@ -27,13 +29,13 @@ class DrawRectangleCross extends DrawRectangle {
     yield Line(
       start: a,
       end: e,
-      width: 5.0 / anchor.scale,
+      extent: hitboxExtent / anchor.scale,
     );
     // bottom-left -> top-right
     yield Line(
       start: Offset(a.dx, e.dy),
       end: Offset(e.dx, a.dy),
-      width: 5.0 / anchor.scale,
+      extent: hitboxExtent / anchor.scale,
     );
   }
 
