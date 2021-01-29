@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:example/draw/adapters/draw_text_adapter.dart';
 import 'package:flutter/painting.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
