@@ -27,11 +27,11 @@ class DrawPencil extends DrawObject {
   final double hitboxExtent;
   final bool debugHitboxes;
 
-  bool selected = false;
+  var selected = false;
 
   Color? _paintedColor;
-  int _paintedCount = 0;
-  bool _paintedSelected = false;
+  int? _paintedCount;
+  bool? _paintedSelected;
 
   double get _scale => points.isNotEmpty ? points.first.scale : 1.0;
 

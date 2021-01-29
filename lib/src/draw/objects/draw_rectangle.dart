@@ -24,13 +24,13 @@ class DrawRectangle extends DrawObject {
   final double hitboxExtent;
   final bool debugHitboxes;
 
-  bool selected = false;
+  var selected = false;
 
   Offset? _endpoint;
 
   Color? _paintedColor;
   Offset? _paintedEndpoint;
-  bool _paintedSelected = false;
+  bool? _paintedSelected;
 
   set endpoint(Offset endpoint) {
     _endpoint = endpoint;
