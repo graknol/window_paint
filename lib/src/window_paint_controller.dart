@@ -53,7 +53,7 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
       isSelecting ? value.objects[value.selectedObjectIndex] : null;
 
   /// Setting this will notify all the listeners of this [WindowPaintController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// that they need to update (it calls [notifyListeners()]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   ///
@@ -68,7 +68,7 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   }
 
   /// Setting this will notify all the listeners of this [WindowPaintController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// that they need to update (it calls [notifyListeners()]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   ///
@@ -91,7 +91,7 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   }
 
   /// Setting this will notify all the listeners of this [WindowPaintController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// that they need to update (it calls [notifyListeners()]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   ///
@@ -106,20 +106,20 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   }
 
   /// Calling this will notify all the listeners of this [WindowPaintController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// that they need to update (it calls [notifyListeners()]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   ///
   /// This method can be called from a listener added to this
   /// [WindowPaintController]; however, one should not call it repeatedly.
-  /// To add multiple [DrawObject] call [addObjects].
+  /// To add multiple [DrawObject] call [addObjects()].
   void addObject(DrawObject object) {
     objects.add(object);
     notifyListeners();
   }
 
   /// Calling this will notify all the listeners of this [WindowPaintController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// that they need to update (it calls [notifyListeners()]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   ///
@@ -131,20 +131,20 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   }
 
   /// Calling this will notify all the listeners of this [WindowPaintController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// that they need to update (it calls [notifyListeners()]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   ///
   /// This method can be called from a listener added to this
   /// [WindowPaintController]; however, one should not call it repeatedly.
-  /// To remove multiple [DrawObject] call [removeObjectsWhere].
+  /// To remove multiple [DrawObject] call [removeObjectsWhere()].
   void removeObject(DrawObject object) {
     objects.remove(object);
     notifyListeners();
   }
 
   /// Calling this will notify all the listeners of this [WindowPaintController]
-  /// that they need to update (it calls [notifyListeners]). For this reason,
+  /// that they need to update (it calls [notifyListeners()]). For this reason,
   /// this value should only be set between frames, e.g. in response to user
   /// actions, not during the build, layout, or paint phases.
   ///
@@ -155,6 +155,16 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
     notifyListeners();
   }
 
+  /// Stores the [color] so that it can be restored when the selection
+  /// gets cancelled.
+  ///
+  /// Calling this will notify all the listeners of this [WindowPaintController]
+  /// that they need to update (it calls [notifyListeners()]). For this reason,
+  /// this value should only be set between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  ///
+  /// This method can be called from a listener added to this
+  /// [WindowPaintController].
   void selectObject(int index) {
     final object = objects[index];
     value = value.copyWith(
@@ -164,6 +174,15 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
     );
   }
 
+  /// Restores [color] to the value it had before the object was selected.
+  ///
+  /// Calling this will notify all the listeners of this [WindowPaintController]
+  /// that they need to update (it calls [notifyListeners()]). For this reason,
+  /// this value should only be set between frames, e.g. in response to user
+  /// actions, not during the build, layout, or paint phases.
+  ///
+  /// This method can be called from a listener added to this
+  /// [WindowPaintController].
   void cancelSelectObject() {
     value = value.copyWith(
       color: value.colorBeforeSelection,
