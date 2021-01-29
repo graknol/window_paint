@@ -205,7 +205,6 @@ class WindowPaintValue {
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
-    print('TOOOO JSONNN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
     return <String, dynamic>{
       'mode': mode,
       'color': color.value,
@@ -323,14 +322,12 @@ class RestorableWindowPaintController
 
   @override
   WindowPaintController fromPrimitives(Object? data) {
-    print('B');
     return WindowPaintController.fromValue(
         WindowPaintValue.fromJSON(_adapters, data as Map<String, dynamic>));
   }
 
   @override
   Object toPrimitives() {
-    print('A');
     return value.value.toJSON();
   }
 }
