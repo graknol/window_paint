@@ -9,7 +9,7 @@ class DrawPoint {
     required this.scale,
   });
 
-  factory DrawPoint.fromJSON(Map<String, dynamic> encoded) {
+  factory DrawPoint.fromJSON(Map encoded) {
     return DrawPoint(
       offset: Offset(encoded['x'] as double, encoded['y'] as double),
       scale: encoded['s'] as double,

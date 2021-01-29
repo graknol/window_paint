@@ -93,8 +93,7 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
   }
 
   @override
-  DrawPencil fromJSON(Map<String, dynamic> encoded) =>
-      DrawPencil.fromJSON(this, encoded);
+  DrawPencil fromJSON(Map encoded) => DrawPencil.fromJSON(this, encoded);
 
   DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
     return DrawPoint(

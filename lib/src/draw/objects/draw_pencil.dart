@@ -159,15 +159,13 @@ class DrawPencil extends DrawObject {
   }
 
   factory DrawPencil.fromJSON(
-    DrawObjectAdapter<DrawPencil> adapter,
-    Map<String, dynamic> encoded,
-  ) {
+      DrawObjectAdapter<DrawPencil> adapter, Map encoded) {
     return DrawPencil(
       adapter: adapter,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
       points: (encoded['points'] as List)
-          .map((p) => DrawPoint.fromJSON(p))
+          .map((p) => DrawPoint.fromJSON(p as Map))
           .toList(),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,

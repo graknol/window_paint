@@ -84,8 +84,7 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
   }
 
   @override
-  DrawText fromJSON(Map<String, dynamic> encoded) =>
-      DrawText.fromJSON(this, encoded);
+  DrawText fromJSON(Map encoded) => DrawText.fromJSON(this, encoded);
 
   DrawPoint _createPoint(Offset offset, Matrix4 transform) {
     return DrawPoint(

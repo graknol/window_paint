@@ -9,7 +9,7 @@ List<dynamic> drawObjectsToJSON(List<DrawObject> objects) => objects
     .toList();
 
 List<DrawObject> drawObjectsFromJSON(
-    List<dynamic> encoded, List<DrawObjectAdapter> adapters) {
+    List encoded, List<DrawObjectAdapter> adapters) {
   final adaptersMap = Map<String, DrawObjectAdapter>.fromIterable(
     adapters,
     key: (a) => a.typeId,
@@ -18,7 +18,7 @@ List<DrawObject> drawObjectsFromJSON(
       .map((e) {
         final typeId = e['t'] as String;
         final adapter = adaptersMap[typeId];
-        return adapter?.fromJSON(e['d']);
+        return adapter?.fromJSON(e['d'] as Map);
       })
       .where((o) => o != null)
       .cast<DrawObject>()

@@ -112,14 +112,12 @@ class DrawRectangle extends DrawObject {
   void finalize() {}
 
   factory DrawRectangle.fromJSON(
-    DrawObjectAdapter<DrawRectangle> adapter,
-    Map<String, dynamic> encoded,
-  ) {
+      DrawObjectAdapter<DrawRectangle> adapter, Map encoded) {
     return DrawRectangle(
       adapter: adapter,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
-      anchor: DrawPoint.fromJSON(encoded['anchor']),
+      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
     );

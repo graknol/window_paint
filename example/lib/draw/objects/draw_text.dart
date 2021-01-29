@@ -75,14 +75,11 @@ class DrawText extends DrawObject {
   @override
   void finalize() {}
 
-  factory DrawText.fromJSON(
-    DrawObjectAdapter<DrawText> adapter,
-    Map<String, dynamic> encoded,
-  ) {
+  factory DrawText.fromJSON(DrawObjectAdapter<DrawText> adapter, Map encoded) {
     return DrawText(
       adapter: adapter,
       color: Color(encoded['color'] as int),
-      anchor: DrawPoint.fromJSON(encoded['anchor']),
+      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
       text: encoded['text'] as String,
       fontSize: encoded['fontSize'] as double,
     );

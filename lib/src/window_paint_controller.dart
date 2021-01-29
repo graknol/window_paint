@@ -195,11 +195,11 @@ class WindowPaintValue {
 
   /// Creates an instance of this class from a JSON object.
   factory WindowPaintValue.fromJSON(
-      List<DrawObjectAdapter> adapters, Map<String, dynamic> encoded) {
+      List<DrawObjectAdapter> adapters, Map encoded) {
     return WindowPaintValue(
       mode: encoded['mode'] as String,
       color: Color(encoded['color'] as int),
-      objects: drawObjectsFromJSON(encoded['objects'], adapters),
+      objects: drawObjectsFromJSON(encoded['objects'] as List, adapters),
     );
   }
 
@@ -323,7 +323,7 @@ class RestorableWindowPaintController
   @override
   WindowPaintController fromPrimitives(Object? data) {
     return WindowPaintController.fromValue(
-        WindowPaintValue.fromJSON(_adapters, data as Map<String, dynamic>));
+        WindowPaintValue.fromJSON(_adapters, data! as Map));
   }
 
   @override

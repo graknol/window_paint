@@ -80,5 +80,5 @@ abstract class DrawObjectAdapter<T extends DrawObject> {
   void selectUpdateColor(T object, Color color);
 
   /// Creates an instance of [DrawObject] from a JSON object.
-  T fromJSON(Map<String, dynamic> encoded);
+  T fromJSON(Map encoded);
 }

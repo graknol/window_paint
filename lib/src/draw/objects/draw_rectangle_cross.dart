@@ -77,14 +77,12 @@ class DrawRectangleCross extends DrawRectangle {
   }
 
   factory DrawRectangleCross.fromJSON(
-    DrawObjectAdapter<DrawRectangleCross> adapter,
-    Map<String, dynamic> encoded,
-  ) {
+      DrawObjectAdapter<DrawRectangleCross> adapter, Map encoded) {
     return DrawRectangleCross(
       adapter: adapter,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
-      anchor: DrawPoint.fromJSON(encoded['anchor']),
+      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
     );

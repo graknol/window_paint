@@ -23,10 +23,7 @@ class DrawNoop extends DrawObject {
   @override
   void finalize() {}
 
-  factory DrawNoop.fromJSON(
-    DrawObjectAdapter<DrawNoop> adapter,
-    Map<String, dynamic> encoded,
-  ) {
+  factory DrawNoop.fromJSON(DrawObjectAdapter<DrawNoop> adapter, Map encoded) {
     return DrawNoop(
       adapter: adapter,
     );

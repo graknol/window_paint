@@ -64,6 +64,5 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
   void selectUpdateColor(DrawNoop object, Color color) {}
 
   @override
-  DrawNoop fromJSON(Map<String, dynamic> encoded) =>
-      DrawNoop.fromJSON(this, encoded);
+  DrawNoop fromJSON(Map encoded) => DrawNoop.fromJSON(this, encoded);
 }

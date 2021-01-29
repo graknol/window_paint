@@ -97,7 +97,7 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
   }
 
   @override
-  DrawRectangleCross fromJSON(Map<String, dynamic> encoded) =>
+  DrawRectangleCross fromJSON(Map encoded) =>
       DrawRectangleCross.fromJSON(this, encoded);
 
   DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
