@@ -1,3 +1,13 @@
+## [0.1.0-nullsafety.6] - Jan 29, 2021
+
+* Fix a bug where `Line.contains()` always returns `true` when `start == end`.
+* Encapsulate `InteractiveViewer` in a `ClipRect` to prevent overflow when zooming and painting.
+* Paint each `DrawObject` in their own `CustomPaint`.
+* Use `Map<dynamic, dynamic>` instead of `Map<String, dynamic>` in restoration, due to casting issues.
+* Restore `DrawRectangle.endpoint` during restoration.
+* Call `WindowPaintController.notifyListeners()` when interaction ends to fully restore the last object that was interacted with.
+* Improve documentation and README.
+
 ## [0.1.0-nullsafety.5] - Jan 28, 2021
 
 * Make hitbox extents configurable.
