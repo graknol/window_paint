@@ -47,20 +47,6 @@ class CustomRadioValue {
     this.index = 0,
   }) : assert(index >= 0);
 
-  /// Creates an instance of this class from a JSON object.
-  factory CustomRadioValue.fromJSON(Map<String, dynamic> encoded) {
-    return CustomRadioValue(
-      index: encoded['index'] as int,
-    );
-  }
-
-  /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJSON() {
-    return <String, dynamic>{
-      'index': index,
-    };
-  }
-
   /// The index of the currently selected radio element.
   final int index;
 
@@ -126,7 +112,7 @@ class RestorableCustomRadioController
   CustomRadioController fromPrimitives(Object? data) {
     return CustomRadioController.fromValue(
       CustomRadioValue(
-        index: data as int,
+        index: data! as int,
       ),
     );
   }
