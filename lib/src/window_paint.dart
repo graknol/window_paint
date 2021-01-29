@@ -198,7 +198,8 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
 
   @override
   Widget build(BuildContext context) {
-    return InteractiveViewer(
+    return ClipRect(
+      child: InteractiveViewer(
       transformationController: _transformationController,
       minScale: widget.minScale,
       maxScale: widget.maxScale,
@@ -211,6 +212,7 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
         ),
         willChange: _hasActiveInteraction,
         child: widget.child,
+      ),
       ),
     );
   }
