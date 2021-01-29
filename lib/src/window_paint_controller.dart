@@ -191,6 +191,18 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
     );
   }
 
+  /// Calling this will notify all the listeners of this [WindowPaintController]
+  /// that the last object is done. This is basically just a wrapper
+  /// around [notifyListeners()].
+  ///
+  /// Used to restore the last [DrawObject] that was interacted with in its
+  /// entirety, not just its start or intermediate state. The reason being that
+  /// we add the objects before they are done, thus [notifyListeners()] gets
+  /// called only once at the start of the interaction.
+  void objectWasUpdated() {
+    notifyListeners();
+  }
+
   @override
   set value(WindowPaintValue newValue) {
     super.value = newValue;

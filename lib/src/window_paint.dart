@@ -215,10 +215,10 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
                 ...value.objects.map((object) {
                   return Positioned.fill(
                     child: CustomPaint(
-                    painter: WindowPaintPainter(
-                      object: object,
-                    ),
-                    willChange: _hasActiveInteraction,
+                      painter: WindowPaintPainter(
+                        object: object,
+                      ),
+                      willChange: _hasActiveInteraction,
                     ),
                   );
                 }).toList(),
@@ -363,6 +363,7 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   void _endInteraction() {
     setState(() {
       _hasActiveInteraction = false;
+      _effectiveController.objectWasUpdated();
     });
   }
 
