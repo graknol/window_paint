@@ -58,9 +58,6 @@ class Line {
     var dotAMAD = am.dot(ad);
     var dotADAD = ad.dot(ad);
 
-    return 0 <= dotAMAB &&
-        dotAMAB <= dotABAB &&
-        0 <= dotAMAD &&
-        dotAMAD <= dotADAD;
+    return 0 < dotAMAB && dotAMAB < dotABAB && 0 < dotAMAD && dotAMAD < dotADAD;
   }
 }
