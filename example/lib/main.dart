@@ -5,12 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:window_paint/window_paint.dart';
 
 void main() {
-  runApp(
-    RootRestorationScope(
-      restorationId: 'root',
-      child: MyApp(),
-    ),
-  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -23,6 +18,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Window Paint Demo Page'),
+      restorationScopeId: 'root',
     );
   }
 }
