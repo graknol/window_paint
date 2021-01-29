@@ -46,36 +46,45 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
 
   @override
   bool querySelect(DrawText object, Offset focalPoint, Matrix4 transform) {
-    // TODO: implement querySelect
-    return false;
+    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint));
   }
 
   @override
   void select(DrawText object) {
-    // TODO: implement select
+    object.selected = true;
   }
 
   @override
   void cancelSelect(DrawText object) {
-    // TODO: implement cancelSelect
+    object.selected = false;
   }
 
   @override
   bool selectedStart(DrawText object, Offset focalPoint, Matrix4 transform) {
-    // TODO: implement selectedStart
+    if (object.hitboxes.any((hitbox) => hitbox.contains(focalPoint))) {
+      object.dragHandleToAnchorOffset = focalPoint - object.anchor.offset;
+      return true;
+    }
     return false;
   }
 
   @override
   bool selectedUpdate(DrawText object, Offset focalPoint, Matrix4 transform) {
-    // TODO: implement selectedUpdate
+    final adjustedAnchor =
+        (object.dragHandleToAnchorOffset! + object.anchor.offset);
+    if (adjustedAnchor != focalPoint) {
+      object.anchor = object.anchor.copyWith(
+        offset: focalPoint - object.dragHandleToAnchorOffset!,
+      );
+      return true;
+    }
     return false;
   }
 
   @override
   bool selectedEnd(DrawText object) {
-    // TODO: implement selectedEnd
-    return false;
+    object.dragHandleToAnchorOffset = null;
+    return true;
   }
 
   @override

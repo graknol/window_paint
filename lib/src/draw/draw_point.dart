@@ -23,4 +23,24 @@ class DrawPoint {
       's': scale,
     };
   }
+
+  DrawPoint copyWith({
+    Offset? offset,
+    double? scale,
+  }) {
+    return DrawPoint(
+      offset: offset ?? this.offset,
+      scale: scale ?? this.scale,
+    );
+  }
+
+  @override
+  bool operator ==(Object o) {
+    if (identical(this, o)) return true;
+
+    return o is DrawPoint && o.offset == offset && o.scale == scale;
+  }
+
+  @override
+  int get hashCode => offset.hashCode ^ scale.hashCode;
 }

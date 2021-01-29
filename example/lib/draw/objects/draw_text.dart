@@ -18,14 +18,19 @@ class DrawText extends DrawObject {
   final DrawObjectAdapter<DrawText> adapter;
 
   Color color;
-  final DrawPoint anchor;
+  DrawPoint anchor;
 
   String text;
   double fontSize;
 
+  var selected = false;
+  Offset? dragHandleToAnchorOffset;
+
   Color? _paintedColor;
+  DrawPoint? _paintedAnchor;
   String? _paintedText;
   Size? _paintedSize;
+  bool? _paintedSelected;
 
   Rect get rect => Rect.fromLTWH(
         anchor.offset.dx,
@@ -64,13 +69,30 @@ class DrawText extends DrawObject {
         maxWidth: size.width - anchor.offset.dx,
       );
     textPainter.paint(canvas, anchor.offset);
+    if (selected) {
+      _paintOutline(canvas, size);
+    }
     _paintedColor = color;
+    _paintedAnchor = anchor;
     _paintedText = text;
     _paintedSize = textPainter.size;
+    _paintedSelected = selected;
+  }
+
+  void _paintOutline(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(0x8A000000)
+      ..strokeWidth = 1.0 / anchor.scale
+      ..style = PaintingStyle.stroke;
+    canvas.drawRect(outline, paint);
   }
 
   @override
-  bool shouldRepaint() => color != _paintedColor || text != _paintedText;
+  bool shouldRepaint() =>
+      color != _paintedColor ||
+      anchor != _paintedAnchor ||
+      text != _paintedText ||
+      selected != _paintedSelected;
 
   @override
   void finalize() {}
