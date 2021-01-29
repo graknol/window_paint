@@ -239,13 +239,7 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
       details.localFocalPoint,
     );
     final transform = _transformationController.value.clone();
-    if (_effectiveController.isSelecting) {
-      _onInteractionStartSelected(focalPointScene, transform);
-      if (_effectiveController.isSelecting) {
-        return;
-      }
-    }
-    if (_trySelectObject(focalPointScene, transform)) {
+    if (_attemptToSelect(focalPointScene, transform)) {
       return;
     }
     final pending = _activeAdapter.start(
@@ -261,15 +255,38 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
     }
   }
 
-  void _onInteractionStartSelected(
-    Offset focalPoint,
-    Matrix4 transform,
-  ) {
+  /// Attempts to select an object and returns [true] if an object is
+  /// being selected.
+  bool _attemptToSelect(Offset focalPoint, Matrix4 transform) {
+    void _selectIfNoneAlready() {
+      if (!_effectiveController.isSelecting) {
+        _trySelectObject(focalPoint, transform);
+      }
+    }
+
+    bool _attemptInteraction() {
+      if (_effectiveController.isSelecting) {
+        _onInteractionStartSelected(focalPoint, transform);
+      }
+      return _effectiveController.isSelecting;
+    }
+
+    _selectIfNoneAlready();
+    if (!_attemptInteraction()) {
+      _selectIfNoneAlready();
+      _attemptInteraction();
+    }
+
+    return _effectiveController.isSelecting;
+  }
+
+  void _onInteractionStartSelected(Offset focalPoint, Matrix4 transform) {
     final object = _effectiveController.selectedObject!;
     if (object.adapter.selectedStart(object, focalPoint, transform)) {
       _startInteraction();
+    } else {
+      _cancelSelectObject();
     }
-    _cancelSelectObject();
   }
 
   void _onInteractionStartSync(DrawObject? object) {
