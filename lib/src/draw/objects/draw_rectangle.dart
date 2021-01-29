@@ -120,7 +120,10 @@ class DrawRectangle extends DrawObject {
       anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
-    );
+    )..endpoint = Offset(
+        encoded['endpointX'] as double,
+        encoded['endpointY'] as double,
+      );
   }
 
   @override
@@ -129,6 +132,8 @@ class DrawRectangle extends DrawObject {
       'color': color.value,
       'strokeWidth': strokeWidth,
       'anchor': anchor.toJSON(),
+      'endpointX': effectiveEndpoint.dx,
+      'endpointY': effectiveEndpoint.dy,
       'hitboxExtent': hitboxExtent,
       'debugHitboxes': debugHitboxes,
     };

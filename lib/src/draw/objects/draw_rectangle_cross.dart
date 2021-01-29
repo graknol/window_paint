@@ -85,6 +85,9 @@ class DrawRectangleCross extends DrawRectangle {
       anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
-    );
+    )..endpoint = Offset(
+        encoded['endpointX'] as double,
+        encoded['endpointY'] as double,
+      );
   }
 }
