@@ -200,19 +200,31 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   Widget build(BuildContext context) {
     return ClipRect(
       child: InteractiveViewer(
-      transformationController: _transformationController,
-      minScale: widget.minScale,
-      maxScale: widget.maxScale,
-      onInteractionStart: (details) => _onInteractionStart(context, details),
-      onInteractionUpdate: _onInteractionUpdate,
-      onInteractionEnd: _onInteractionEnd,
-      child: CustomPaint(
-        foregroundPainter: WindowPaintPainter(
-          objects: _effectiveController.objects,
+        transformationController: _transformationController,
+        minScale: widget.minScale,
+        maxScale: widget.maxScale,
+        onInteractionStart: (details) => _onInteractionStart(context, details),
+        onInteractionUpdate: _onInteractionUpdate,
+        onInteractionEnd: _onInteractionEnd,
+        child: ValueListenableBuilder<WindowPaintValue>(
+          valueListenable: _effectiveController,
+          builder: (context, value, child) {
+            return Stack(
+              children: [
+                child!,
+                ...value.objects.map((object) {
+                  return CustomPaint(
+                    painter: WindowPaintPainter(
+                      object: object,
+                    ),
+                    willChange: _hasActiveInteraction,
+                  );
+                }).toList(),
+              ],
+            );
+          },
+          child: widget.child,
         ),
-        willChange: _hasActiveInteraction,
-        child: widget.child,
-      ),
       ),
     );
   }
