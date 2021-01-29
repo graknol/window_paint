@@ -16,19 +16,13 @@ class WindowPaintControl extends StatefulWidget {
   _WindowPaintControlState createState() => _WindowPaintControlState();
 }
 
-class _WindowPaintControlState extends State<WindowPaintControl> {
-  final _customRadioController = CustomRadioController();
-
-  @override
-  void initState() {
-    super.initState();
-    _customRadioController.addListener(_updateInteractivity);
-    _updateInteractivity();
-  }
+class _WindowPaintControlState extends State<WindowPaintControl>
+    with RestorationMixin {
+  final _customRadioController = RestorableCustomRadioController();
 
   void _updateInteractivity() {
     setState(() {
-      switch (_customRadioController.index) {
+      switch (_customRadioController.value.index) {
         case 0:
           widget.controller.mode = 'pan_zoom';
           break;
@@ -49,6 +43,28 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (!restorePending) {
+      _registerController();
+    }
+
+    _customRadioController.addListener(_updateInteractivity);
+  }
+
+  @override
+  void restoreState(RestorationBucket? oldBucket, bool initialRestore) {
+    _registerController();
+  }
+
+  void _registerController() {
+    registerForRestoration(_customRadioController, 'custom_radio_controller');
+  }
+
+  @override
+  String? get restorationId => 'window_paint_control';
+
+  @override
   void dispose() {
     _customRadioController.dispose();
     super.dispose();
@@ -62,7 +78,7 @@ class _WindowPaintControlState extends State<WindowPaintControl> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           CustomRadio(
-            controller: _customRadioController,
+            controller: _customRadioController.value,
             itemCount: controls.length,
             itemBuilder: (context, index, isActive) {
               return Container(
