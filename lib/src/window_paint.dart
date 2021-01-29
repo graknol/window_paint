@@ -213,11 +213,13 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
               children: [
                 child!,
                 ...value.objects.map((object) {
-                  return CustomPaint(
+                  return Positioned.fill(
+                    child: CustomPaint(
                     painter: WindowPaintPainter(
                       object: object,
                     ),
                     willChange: _hasActiveInteraction,
+                    ),
                   );
                 }).toList(),
               ],
