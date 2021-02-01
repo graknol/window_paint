@@ -74,16 +74,22 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
 
   @override
   bool selectedStart(DrawPencil object, Offset focalPoint, Matrix4 transform) {
-    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint));
-  }
-
-  @override
-  bool selectedUpdate(DrawPencil object, Offset focalPoint, Matrix4 transform) {
+    if (object.hitboxes.any((hitbox) => hitbox.contains(focalPoint))) {
+      object.prepareDragHandle(focalPoint);
+      return true;
+    }
     return false;
   }
 
   @override
+  bool selectedUpdate(DrawPencil object, Offset focalPoint, Matrix4 transform) {
+    object.updateDragHandle(focalPoint);
+    return true;
+  }
+
+  @override
   bool selectedEnd(DrawPencil object) {
+    object.finalizeDragHandle();
     return true;
   }
 

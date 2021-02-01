@@ -4,13 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
+import 'package:window_paint/src/mixins/drag_handle_mixin.dart';
 
-class DrawRectangle extends DrawObject {
+class DrawRectangle extends DrawObject with DragHandleMixin {
   DrawRectangle({
     required this.adapter,
     required this.color,
-    required this.strokeWidth,
     required this.anchor,
+    required this.strokeWidth,
     this.hitboxExtent = 5.0,
     this.debugHitboxes = false,
   });
@@ -19,8 +20,8 @@ class DrawRectangle extends DrawObject {
   final DrawObjectAdapter<DrawRectangle> adapter;
 
   Color color;
+  DrawPoint anchor;
   final double strokeWidth;
-  final DrawPoint anchor;
   final double hitboxExtent;
   final bool debugHitboxes;
 
@@ -29,6 +30,7 @@ class DrawRectangle extends DrawObject {
   Offset? _endpoint;
 
   Color? _paintedColor;
+  DrawPoint? _paintedAnchor;
   Offset? _paintedEndpoint;
   bool? _paintedSelected;
 
@@ -70,6 +72,7 @@ class DrawRectangle extends DrawObject {
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
+    prePaintDragHandle(canvas);
     canvas.drawRect(rect, paint);
     if (selected) {
       _paintOutline(canvas, size);
@@ -77,7 +80,9 @@ class DrawRectangle extends DrawObject {
     if (!kReleaseMode && debugHitboxes) {
       paintHitboxes(canvas, size);
     }
+    postPaintDragHandle(canvas);
     _paintedColor = color;
+    _paintedAnchor = anchor;
     _paintedEndpoint = _endpoint;
     _paintedSelected = selected;
   }
@@ -104,12 +109,22 @@ class DrawRectangle extends DrawObject {
 
   @override
   bool shouldRepaint() =>
+      super.shouldRepaint() ||
       color != _paintedColor ||
+      anchor != _paintedAnchor ||
       _endpoint != _paintedEndpoint ||
       selected != _paintedSelected;
 
   @override
-  void finalize() {}
+  @protected
+  void finalizeDragHandlePoints(Offset offset) {
+    anchor = anchor.copyWith(
+      offset: anchor.offset + offset,
+    );
+    if (_endpoint != null) {
+      _endpoint = _endpoint! + offset;
+    }
+  }
 
   factory DrawRectangle.fromJSON(
       DrawObjectAdapter<DrawRectangle> adapter, Map encoded) {

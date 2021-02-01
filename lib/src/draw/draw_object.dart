@@ -6,7 +6,6 @@ abstract class DrawObject {
 
   void paint(Canvas canvas, Size size);
   bool shouldRepaint();
-  void finalize();
 
   DrawObjectAdapter get adapter;
 

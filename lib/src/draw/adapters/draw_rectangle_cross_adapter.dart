@@ -75,19 +75,24 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
   @override
   bool selectedStart(
       DrawRectangleCross object, Offset focalPoint, Matrix4 transform) {
-    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint));
+    if (object.hitboxes.any((hitbox) => hitbox.contains(focalPoint)) ||
+        object.innerHitboxes.any((hitbox) => hitbox.contains(focalPoint))) {
+      object.prepareDragHandle(focalPoint);
+      return true;
+    }
+    return false;
   }
 
   @override
   bool selectedUpdate(
       DrawRectangleCross object, Offset focalPoint, Matrix4 transform) {
-    // TODO: implement selectedUpdate
+    object.updateDragHandle(focalPoint);
     return true;
   }
 
   @override
   bool selectedEnd(DrawRectangleCross object) {
-    // TODO: implement selectedEnd
+    object.finalizeDragHandle();
     return true;
   }
 

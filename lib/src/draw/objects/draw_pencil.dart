@@ -6,9 +6,10 @@ import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/geometry/line.dart';
+import 'package:window_paint/src/mixins/drag_handle_mixin.dart';
 import 'package:window_paint/src/utils/simplify_utils.dart';
 
-class DrawPencil extends DrawObject {
+class DrawPencil extends DrawObject with DragHandleMixin {
   DrawPencil({
     required this.adapter,
     required this.color,
@@ -95,6 +96,7 @@ class DrawPencil extends DrawObject {
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
+    prePaintDragHandle(canvas);
     for (var i = 0; i < points.length - 1; i++) {
       final from = points[i];
       final to = points[i + 1];
@@ -106,6 +108,7 @@ class DrawPencil extends DrawObject {
     if (!kReleaseMode && debugHitboxes) {
       _paintHitboxes(canvas, size);
     }
+    postPaintDragHandle(canvas);
     _paintedColor = color;
     _paintedCount = points.length;
     _paintedSelected = selected;
@@ -139,13 +142,20 @@ class DrawPencil extends DrawObject {
 
   @override
   bool shouldRepaint() =>
+      super.shouldRepaint() ||
       color != _paintedColor ||
       points.length != _paintedCount ||
       selected != _paintedSelected;
 
   @override
-  void finalize() {
-    simplify();
+  @protected
+  void finalizeDragHandlePoints(Offset offset) {
+    for (var i = 0; i < points.length; i++) {
+      final point = points[i];
+      points[i] = point.copyWith(
+        offset: point.offset + offset,
+      );
+    }
   }
 
   void addPoint(DrawPoint point) {

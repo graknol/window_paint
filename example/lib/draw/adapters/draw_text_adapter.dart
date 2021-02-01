@@ -62,7 +62,7 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
   @override
   bool selectedStart(DrawText object, Offset focalPoint, Matrix4 transform) {
     if (object.hitboxes.any((hitbox) => hitbox.contains(focalPoint))) {
-      object.dragHandleToAnchorOffset = focalPoint - object.anchor.offset;
+      object.prepareDragHandle(focalPoint);
       return true;
     }
     return false;
@@ -70,20 +70,13 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
 
   @override
   bool selectedUpdate(DrawText object, Offset focalPoint, Matrix4 transform) {
-    final adjustedAnchor =
-        (object.dragHandleToAnchorOffset! + object.anchor.offset);
-    if (adjustedAnchor != focalPoint) {
-      object.anchor = object.anchor.copyWith(
-        offset: focalPoint - object.dragHandleToAnchorOffset!,
-      );
-      return true;
-    }
-    return false;
+    object.updateDragHandle(focalPoint);
+    return true;
   }
 
   @override
   bool selectedEnd(DrawText object) {
-    object.dragHandleToAnchorOffset = null;
+    object.finalizeDragHandle();
     return true;
   }
 

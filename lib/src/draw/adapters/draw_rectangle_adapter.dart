@@ -73,17 +73,23 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
   @override
   bool selectedStart(
       DrawRectangle object, Offset focalPoint, Matrix4 transform) {
-    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint));
+    if (object.hitboxes.any((hitbox) => hitbox.contains(focalPoint))) {
+      object.prepareDragHandle(focalPoint);
+      return true;
+    }
+    return false;
   }
 
   @override
   bool selectedUpdate(
       DrawRectangle object, Offset focalPoint, Matrix4 transform) {
-    return false;
+    object.updateDragHandle(focalPoint);
+    return true;
   }
 
   @override
   bool selectedEnd(DrawRectangle object) {
+    object.finalizeDragHandle();
     return true;
   }
 

@@ -1,11 +1,13 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
+import 'package:window_paint/src/mixins/drag_handle_mixin.dart';
 
-class DrawText extends DrawObject {
+class DrawText extends DrawObject with DragHandleMixin {
   DrawText({
     required this.adapter,
     required this.color,
@@ -19,12 +21,10 @@ class DrawText extends DrawObject {
 
   Color color;
   DrawPoint anchor;
-
   String text;
   double fontSize;
 
   var selected = false;
-  Offset? dragHandleToAnchorOffset;
 
   Color? _paintedColor;
   DrawPoint? _paintedAnchor;
@@ -68,10 +68,12 @@ class DrawText extends DrawObject {
     )..layout(
         maxWidth: size.width - anchor.offset.dx,
       );
+    prePaintDragHandle(canvas);
     textPainter.paint(canvas, anchor.offset);
     if (selected) {
       _paintOutline(canvas, size);
     }
+    postPaintDragHandle(canvas);
     _paintedColor = color;
     _paintedAnchor = anchor;
     _paintedText = text;
@@ -89,13 +91,19 @@ class DrawText extends DrawObject {
 
   @override
   bool shouldRepaint() =>
+      super.shouldRepaint() ||
       color != _paintedColor ||
       anchor != _paintedAnchor ||
       text != _paintedText ||
       selected != _paintedSelected;
 
   @override
-  void finalize() {}
+  @protected
+  void finalizeDragHandlePoints(Offset offset) {
+    anchor = anchor.copyWith(
+      offset: anchor.offset + offset,
+    );
+  }
 
   factory DrawText.fromJSON(DrawObjectAdapter<DrawText> adapter, Map encoded) {
     return DrawText(

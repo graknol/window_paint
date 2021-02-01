@@ -20,9 +20,6 @@ class DrawNoop extends DrawObject {
   @override
   bool shouldRepaint() => false;
 
-  @override
-  void finalize() {}
-
   factory DrawNoop.fromJSON(DrawObjectAdapter<DrawNoop> adapter, Map encoded) {
     return DrawNoop(
       adapter: adapter,
