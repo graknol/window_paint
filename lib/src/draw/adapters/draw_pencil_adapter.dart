@@ -64,12 +64,12 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
 
   @override
   void select(DrawPencil object) {
-    object.selected = true;
+    object.showSelectOutline();
   }
 
   @override
   void cancelSelect(DrawPencil object) {
-    object.selected = false;
+    object.hideSelectOutline();
   }
 
   @override

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 
 mixin DragHandleMixin on DrawObject {
@@ -10,9 +10,9 @@ mixin DragHandleMixin on DrawObject {
   Offset? _paintedDragHandleOffset;
   Offset? _paintedDragHandleFocalPoint;
 
-  @override
-  @mustCallSuper
-  bool shouldRepaint() =>
+  /// Must be called in [shouldRepaint()].
+  @protected
+  bool shouldRepaintDragHandle() =>
       _dragHandleFocalPoint != _paintedDragHandleFocalPoint ||
       _dragHandleOffset != _paintedDragHandleOffset;
 
@@ -21,7 +21,7 @@ mixin DragHandleMixin on DrawObject {
   /// Must be called at the start of [paint()].
   @protected
   @mustCallSuper
-  void prePaintDragHandle(Canvas canvas) {
+  void prePaintDragHandle(Canvas canvas, Size size) {
     canvas.save();
     canvas.translate(_dragHandleOffset.dx, _dragHandleOffset.dy);
   }
@@ -31,7 +31,7 @@ mixin DragHandleMixin on DrawObject {
   /// Must be called at the end of [paint()].
   @protected
   @mustCallSuper
-  void postPaintDragHandle(Canvas canvas) {
+  void postPaintDragHandle(Canvas canvas, Size size) {
     canvas.restore();
     _paintedDragHandleFocalPoint = _dragHandleFocalPoint;
     _paintedDragHandleOffset = _dragHandleOffset;

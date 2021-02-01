@@ -52,11 +52,11 @@ class DrawRectangleCross extends DrawRectangle {
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
-    prePaintDragHandle(canvas);
+    prePaintDragHandle(canvas, size);
     canvas.drawRect(rect, paint);
     canvas.drawLine(rect.topLeft, rect.bottomRight, paint);
     canvas.drawLine(rect.bottomLeft, rect.topRight, paint);
-    postPaintDragHandle(canvas);
+    postPaintDragHandle(canvas, size);
   }
 
   @override

@@ -51,12 +51,12 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
 
   @override
   void select(DrawText object) {
-    object.selected = true;
+    object.showSelectOutline();
   }
 
   @override
   void cancelSelect(DrawText object) {
-    object.selected = false;
+    object.hideSelectOutline();
   }
 
   @override

@@ -5,9 +5,11 @@ import 'package:flutter/painting.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
+import 'package:window_paint/src/draw/rect_paint.dart';
 import 'package:window_paint/src/mixins/drag_handle_mixin.dart';
+import 'package:window_paint/src/mixins/select_outline_mixin.dart';
 
-class DrawText extends DrawObject with DragHandleMixin {
+class DrawText extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   DrawText({
     required this.adapter,
     required this.color,
@@ -24,13 +26,10 @@ class DrawText extends DrawObject with DragHandleMixin {
   String text;
   double fontSize;
 
-  var selected = false;
-
   Color? _paintedColor;
   DrawPoint? _paintedAnchor;
   String? _paintedText;
   Size? _paintedSize;
-  bool? _paintedSelected;
 
   Rect get rect => Rect.fromLTWH(
         anchor.offset.dx,
@@ -45,8 +44,6 @@ class DrawText extends DrawObject with DragHandleMixin {
     }
   }
 
-  Rect get outline => rect.inflate(5.0 / anchor.scale);
-
   TextStyle get textStyle => TextStyle(
         color: color,
         fontSize: fontSize,
@@ -60,6 +57,15 @@ class DrawText extends DrawObject with DragHandleMixin {
   Color get primaryColor => color;
 
   @override
+  RectPaint get selectOutline => RectPaint(
+        rect: rect.inflate(5.0 / anchor.scale),
+        paint: Paint()
+          ..color = Color(0x8A000000)
+          ..strokeWidth = 1.0 / anchor.scale
+          ..style = PaintingStyle.stroke,
+      );
+
+  @override
   void paint(Canvas canvas, Size size) {
     final textPainter = TextPainter(
       text: textSpan,
@@ -68,34 +74,23 @@ class DrawText extends DrawObject with DragHandleMixin {
     )..layout(
         maxWidth: size.width - anchor.offset.dx,
       );
-    prePaintDragHandle(canvas);
+    prePaintDragHandle(canvas, size);
     textPainter.paint(canvas, anchor.offset);
-    if (selected) {
-      _paintOutline(canvas, size);
-    }
-    postPaintDragHandle(canvas);
+    paintSelectOutline(canvas, size);
+    postPaintDragHandle(canvas, size);
     _paintedColor = color;
     _paintedAnchor = anchor;
     _paintedText = text;
     _paintedSize = textPainter.size;
-    _paintedSelected = selected;
-  }
-
-  void _paintOutline(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Color(0x8A000000)
-      ..strokeWidth = 1.0 / anchor.scale
-      ..style = PaintingStyle.stroke;
-    canvas.drawRect(outline, paint);
   }
 
   @override
   bool shouldRepaint() =>
-      super.shouldRepaint() ||
+      shouldRepaintSelectOutline() ||
+      shouldRepaintDragHandle() ||
       color != _paintedColor ||
       anchor != _paintedAnchor ||
-      text != _paintedText ||
-      selected != _paintedSelected;
+      text != _paintedText;
 
   @override
   @protected

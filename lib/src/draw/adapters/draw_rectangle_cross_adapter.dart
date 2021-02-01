@@ -64,12 +64,12 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
 
   @override
   void select(DrawRectangleCross object) {
-    object.selected = true;
+    object.showSelectOutline();
   }
 
   @override
   void cancelSelect(DrawRectangleCross object) {
-    object.selected = false;
+    object.hideSelectOutline();
   }
 
   @override

@@ -62,12 +62,12 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
 
   @override
   void select(DrawRectangle object) {
-    object.selected = true;
+    object.showSelectOutline();
   }
 
   @override
   void cancelSelect(DrawRectangle object) {
-    object.selected = false;
+    object.hideSelectOutline();
   }
 
   @override

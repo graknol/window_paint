@@ -4,9 +4,12 @@ import 'package:flutter/foundation.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
+import 'package:window_paint/src/draw/rect_paint.dart';
 import 'package:window_paint/src/mixins/drag_handle_mixin.dart';
+import 'package:window_paint/src/mixins/select_outline_mixin.dart';
 
-class DrawRectangle extends DrawObject with DragHandleMixin {
+class DrawRectangle extends DrawObject
+    with SelectOutlineMixin, DragHandleMixin {
   DrawRectangle({
     required this.adapter,
     required this.color,
@@ -25,14 +28,11 @@ class DrawRectangle extends DrawObject with DragHandleMixin {
   final double hitboxExtent;
   final bool debugHitboxes;
 
-  var selected = false;
-
   Offset? _endpoint;
 
   Color? _paintedColor;
   DrawPoint? _paintedAnchor;
   Offset? _paintedEndpoint;
-  bool? _paintedSelected;
 
   set endpoint(Offset endpoint) {
     _endpoint = endpoint;
@@ -59,10 +59,17 @@ class DrawRectangle extends DrawObject with DragHandleMixin {
         .inflate(hitboxExtent / anchor.scale);
   }
 
-  Rect get outline => rect.inflate(hitboxExtent / anchor.scale);
-
   @override
   Color get primaryColor => color;
+
+  @override
+  RectPaint get selectOutline => RectPaint(
+        rect: rect.inflate(hitboxExtent / anchor.scale),
+        paint: Paint()
+          ..color = Color(0x8A000000)
+          ..strokeWidth = 1.0 / anchor.scale
+          ..style = PaintingStyle.stroke,
+      );
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -72,27 +79,16 @@ class DrawRectangle extends DrawObject with DragHandleMixin {
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
-    prePaintDragHandle(canvas);
+    prePaintDragHandle(canvas, size);
     canvas.drawRect(rect, paint);
-    if (selected) {
-      _paintOutline(canvas, size);
-    }
     if (!kReleaseMode && debugHitboxes) {
       paintHitboxes(canvas, size);
     }
-    postPaintDragHandle(canvas);
+    paintSelectOutline(canvas, size);
+    postPaintDragHandle(canvas, size);
     _paintedColor = color;
     _paintedAnchor = anchor;
     _paintedEndpoint = _endpoint;
-    _paintedSelected = selected;
-  }
-
-  void _paintOutline(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Color(0x8A000000)
-      ..strokeWidth = 1.0 / anchor.scale
-      ..style = PaintingStyle.stroke;
-    canvas.drawRect(outline, paint);
   }
 
   /// Useful for debugging hitboxes.
@@ -109,11 +105,11 @@ class DrawRectangle extends DrawObject with DragHandleMixin {
 
   @override
   bool shouldRepaint() =>
-      super.shouldRepaint() ||
+      shouldRepaintSelectOutline() ||
+      shouldRepaintDragHandle() ||
       color != _paintedColor ||
       anchor != _paintedAnchor ||
-      _endpoint != _paintedEndpoint ||
-      selected != _paintedSelected;
+      _endpoint != _paintedEndpoint;
 
   @override
   @protected
