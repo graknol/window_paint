@@ -1,3 +1,9 @@
+## [0.1.0-nullsafety.7] - Feb 01, 2021
+
+* Simplify the selection logic, while also allowing for more natural transitioning between selection, non-selection and inter-object selection.
+* Generalize drag handle logic with DragHandleMixin.
+* Generalize select outline painting with SelectOutlineMixin.
+
 ## [0.1.0-nullsafety.6] - Jan 29, 2021
 
 * Fix a bug where `Line.contains()` always returns `true` when `start == end`.

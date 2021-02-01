@@ -1,6 +1,6 @@
 name: window_paint
 description: WindowPaint lets you pan, zoom and paint over any other widget. It uses the new InteractiveViewer together with a CustomPainter, giving you the bare minimum to get you started.
-version: 0.1.0-nullsafety.6
+version: 0.1.0-nullsafety.7
 homepage: https://github.com/Allvis-AS/window_paint
 repository: https://github.com/Allvis-AS/window_paint
 issue_tracker: https://github.com/Allvis-AS/window_paint/issues
