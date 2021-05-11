@@ -46,16 +46,16 @@ class DrawRectangle extends DrawObject
     final a = anchor.offset;
     final e = effectiveEndpoint;
     // top
-    yield Rect.fromLTRB(a.dx, a.dy, e.dx, a.dy)
+    yield Rect.fromPoints(Offset(a.dx, a.dy), Offset(e.dx, a.dy))
         .inflate(hitboxExtent / anchor.scale);
     // right
-    yield Rect.fromLTRB(e.dx, a.dy, e.dx, e.dy)
+    yield Rect.fromPoints(Offset(e.dx, a.dy), Offset(e.dx, e.dy))
         .inflate(hitboxExtent / anchor.scale);
     // bottom
-    yield Rect.fromLTRB(a.dx, e.dy, e.dx, e.dy)
+    yield Rect.fromPoints(Offset(a.dx, e.dy), Offset(e.dx, e.dy))
         .inflate(hitboxExtent / anchor.scale);
     // left
-    yield Rect.fromLTRB(a.dx, a.dy, a.dx, e.dy)
+    yield Rect.fromPoints(Offset(a.dx, a.dy), Offset(a.dx, e.dy))
         .inflate(hitboxExtent / anchor.scale);
   }
 

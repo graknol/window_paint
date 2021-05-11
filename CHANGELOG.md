@@ -1,3 +1,7 @@
+## [0.1.0-nullsafety.8] - May 11, 2021
+
+* Compute hitbox of `DrawRectangle` correctly so it works for all orientations and not just when drawing from *top-left* -> *bottom-right*.
+
 ## [0.1.0-nullsafety.7] - Feb 01, 2021
 
 * Simplify the selection logic, while also allowing for more natural transitioning between selection, non-selection and inter-object selection.
