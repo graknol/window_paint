@@ -21,6 +21,7 @@ mixin SelectOutlineMixin on DrawObject {
     if (_selected) {
       _paintOutline(canvas, selectOutline);
     }
+    _paintedSelected = _selected;
   }
 
   void _paintOutline(Canvas canvas, RectPaint outline) {
