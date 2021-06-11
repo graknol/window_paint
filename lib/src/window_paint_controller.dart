@@ -99,9 +99,12 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   /// [WindowPaintController]; however, one should not also set [mode]
   /// and [color] in a separate statement. To change both the [mode], [color]
   /// and [objects] change the controller's [value].
+  ///
+  /// Setting this will cancel the current selection, if any.
   set objects(List<DrawObject> newObjects) {
     value = value.copyWith(
       objects: newObjects,
+      selectedObjectIndex: -1,
     );
   }
 
@@ -138,9 +141,28 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   /// This method can be called from a listener added to this
   /// [WindowPaintController]; however, one should not call it repeatedly.
   /// To remove multiple [DrawObject] call [removeObjectsWhere()].
+  ///
+  /// Calling this will cancel the current selection if [object] is
+  /// the currently selected object.
   void removeObject(DrawObject object) {
-    objects.remove(object);
-    notifyListeners();
+    final idx = objects.indexOf(object);
+    if (idx != -1) {
+      objects.removeAt(idx);
+      // This will call notifyListeners() for us
+      value = value.copyWith(
+        selectedObjectIndex: _computeNewSelectedObjectIndex(idx),
+      );
+    }
+  }
+
+  int _computeNewSelectedObjectIndex(int indexToRemove) {
+    if (selectedObjectIndex == indexToRemove) {
+      return -1;
+    }
+    if (selectedObjectIndex > indexToRemove) {
+      return selectedObjectIndex - 1;
+    }
+    return selectedObjectIndex;
   }
 
   /// Calling this will notify all the listeners of this [WindowPaintController]
@@ -150,9 +172,17 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   ///
   /// This method can be called from a listener added to this
   /// [WindowPaintController].
+  ///
+  /// Calling this will cancel the current selection if [test] returns [true]
+  /// for the currently selected object.
   void removeObjectsWhere(bool Function(DrawObject object) test) {
+    // Get the selected object instance before the list mutates
+    final selected = selectedObject;
     objects.removeWhere(test);
-    notifyListeners();
+    // This will call notifyListeners() for us
+    value = value.copyWith(
+      selectedObjectIndex: selected != null ? objects.indexOf(selected) : -1,
+    );
   }
 
   /// Stores the [color] so that it can be restored when the selection
@@ -198,7 +228,7 @@ class WindowPaintController extends ValueNotifier<WindowPaintValue> {
   /// Used to restore the last [DrawObject] that was interacted with in its
   /// entirety, not just its start or intermediate state. The reason being that
   /// we add the objects before they are done, thus [notifyListeners()] gets
-  /// called only once at the start of the interaction.
+  /// called only once; at the start of the interaction.
   void objectWasUpdated() {
     notifyListeners();
   }
