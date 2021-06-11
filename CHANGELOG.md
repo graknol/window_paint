@@ -1,3 +1,7 @@
+## [0.1.0-nullsafety.9] - June 11, 2021
+
+* Re-index the selected object when calling `WindowPaintController.removeObject()` and `WindowPaintController.removeObjectsWhere()`.
+
 ## [0.1.0-nullsafety.8] - May 11, 2021
 
 * Compute hitbox of `DrawRectangle` correctly so it works for all orientations and not just when drawing from *top-left* -> *bottom-right*.
