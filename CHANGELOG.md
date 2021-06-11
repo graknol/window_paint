@@ -1,3 +1,7 @@
+## [0.1.0-nullsafety.11] - June 11, 2021
+
+* `DragHandleMixin` keeps track of valid state to make it easier for the caller to use with multiple mixins of this kind (select, drag, finalize).
+
 ## [0.1.0-nullsafety.10] - June 11, 2021
 
 * Update `_paintedSelected` in `paintSelectOutline()` so that `shouldRepaintSelectOutline()` behaves correctly.

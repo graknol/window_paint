@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
 
 mixin DragHandleMixin on DrawObject {
+  var _dragging = false;
   var _dragHandleOffset = Offset.zero;
   Offset? _dragHandleFocalPoint;
 
@@ -42,7 +43,10 @@ mixin DragHandleMixin on DrawObject {
   ///
   /// Should not be called again before [finalizeDragHandle()] has been called.
   void prepareDragHandle(Offset focalPoint) {
-    _dragHandleFocalPoint = focalPoint;
+    if (!_dragging) {
+      _dragging = true;
+      _dragHandleFocalPoint = focalPoint;
+    }
   }
 
   /// Updates the drag handle offset.
@@ -51,16 +55,21 @@ mixin DragHandleMixin on DrawObject {
   ///
   /// Cannot be called after [finalizeDragHandle()] has been called.
   void updateDragHandle(Offset focalPoint) {
-    _dragHandleOffset = focalPoint - _dragHandleFocalPoint!;
+    if (_dragging) {
+      _dragHandleOffset = focalPoint - _dragHandleFocalPoint!;
+    }
   }
 
   /// Bakes the drag handle offset into this object's points and saves
   /// the [shouldRepaint()] variables.
   @mustCallSuper
   void finalizeDragHandle() {
-    finalizeDragHandlePoints(_dragHandleOffset);
-    _dragHandleFocalPoint = null;
-    _dragHandleOffset = Offset.zero;
+    if (_dragging) {
+      finalizeDragHandlePoints(_dragHandleOffset);
+      _dragHandleFocalPoint = null;
+      _dragHandleOffset = Offset.zero;
+      _dragging = false;
+    }
   }
 
   /// Bakes the drag handle offset into this object's points.
