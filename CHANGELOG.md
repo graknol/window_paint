@@ -1,3 +1,7 @@
+## [0.1.0-nullsafety.10] - June 11, 2021
+
+* Update `_paintedSelected` in `paintSelectOutline()` so that `shouldRepaintSelectOutline()` behaves correctly.
+
 ## [0.1.0-nullsafety.9] - June 11, 2021
 
 * Re-index the selected object when calling `WindowPaintController.removeObject()` and `WindowPaintController.removeObjectsWhere()`.
