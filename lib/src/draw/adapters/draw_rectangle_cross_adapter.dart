@@ -102,8 +102,12 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
   }
 
   @override
-  DrawRectangleCross fromJSON(Map encoded) =>
-      DrawRectangleCross.fromJSON(this, encoded);
+  DrawRectangleCross fromJSON(Map encoded, {Size? denormalizeFromSize}) =>
+      DrawRectangleCross.fromJSON(
+        this,
+        encoded,
+        denormalizeFromSize: denormalizeFromSize,
+      );
 
   DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
     final scale = transform.getMaxScaleOnAxis();

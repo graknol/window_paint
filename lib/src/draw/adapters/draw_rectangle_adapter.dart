@@ -99,7 +99,12 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
   }
 
   @override
-  DrawRectangle fromJSON(Map encoded) => DrawRectangle.fromJSON(this, encoded);
+  DrawRectangle fromJSON(Map encoded, {Size? denormalizeFromSize}) =>
+      DrawRectangle.fromJSON(
+        this,
+        encoded,
+        denormalizeFromSize: denormalizeFromSize,
+      );
 
   DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
     return DrawPoint(

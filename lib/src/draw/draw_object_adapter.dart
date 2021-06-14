@@ -80,5 +80,9 @@ abstract class DrawObjectAdapter<T extends DrawObject> {
   void selectUpdateColor(T object, Color color);
 
   /// Creates an instance of [DrawObject] from a JSON object.
-  T fromJSON(Map encoded);
+  ///
+  /// If [denormalizeFromSize] is not [null], then the coordinates given
+  /// in [encoded] should be denormalized according to it (usually used to map
+  /// them from the range [0-1] to [m-n]).
+  T fromJSON(Map encoded, {Size? denormalizeFromSize});
 }

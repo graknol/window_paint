@@ -123,28 +123,35 @@ class DrawRectangle extends DrawObject
   }
 
   factory DrawRectangle.fromJSON(
-      DrawObjectAdapter<DrawRectangle> adapter, Map encoded) {
+    DrawObjectAdapter<DrawRectangle> adapter,
+    Map encoded, {
+    Size? denormalizeFromSize,
+  }) {
+    final nx = denormalizeFromSize?.width ?? 1.0;
+    final ny = denormalizeFromSize?.height ?? 1.0;
     return DrawRectangle(
       adapter: adapter,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
-      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
+      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map).scaleOffset(nx, ny),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
     )..endpoint = Offset(
-        encoded['endpointX'] as double,
-        encoded['endpointY'] as double,
+        (encoded['endpointX'] as double) * nx,
+        (encoded['endpointY'] as double) * ny,
       );
   }
 
   @override
-  Map<String, dynamic> toJSON() {
+  Map<String, dynamic> toJSON({Size? normalizeToSize}) {
+    final nx = 1.0 / (normalizeToSize?.width ?? 1.0);
+    final ny = 1.0 / (normalizeToSize?.height ?? 1.0);
     return <String, dynamic>{
       'color': color.value,
       'strokeWidth': strokeWidth,
-      'anchor': anchor.toJSON(),
-      'endpointX': effectiveEndpoint.dx,
-      'endpointY': effectiveEndpoint.dy,
+      'anchor': anchor.scaleOffset(nx, ny).toJSON(),
+      'endpointX': effectiveEndpoint.dx * nx,
+      'endpointY': effectiveEndpoint.dy * ny,
       'hitboxExtent': hitboxExtent,
       'debugHitboxes': debugHitboxes,
     };

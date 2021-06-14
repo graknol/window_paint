@@ -79,17 +79,22 @@ class DrawRectangleCross extends DrawRectangle {
   }
 
   factory DrawRectangleCross.fromJSON(
-      DrawObjectAdapter<DrawRectangleCross> adapter, Map encoded) {
+    DrawObjectAdapter<DrawRectangleCross> adapter,
+    Map encoded, {
+    Size? denormalizeFromSize,
+  }) {
+    final nx = denormalizeFromSize?.width ?? 1.0;
+    final ny = denormalizeFromSize?.height ?? 1.0;
     return DrawRectangleCross(
       adapter: adapter,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
-      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
+      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map).scaleOffset(nx, ny),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
     )..endpoint = Offset(
-        encoded['endpointX'] as double,
-        encoded['endpointY'] as double,
+        (encoded['endpointX'] as double) * nx,
+        (encoded['endpointY'] as double) * ny,
       );
   }
 }

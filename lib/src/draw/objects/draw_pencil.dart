@@ -169,13 +169,18 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   }
 
   factory DrawPencil.fromJSON(
-      DrawObjectAdapter<DrawPencil> adapter, Map encoded) {
+    DrawObjectAdapter<DrawPencil> adapter,
+    Map encoded, {
+    Size? denormalizeFromSize,
+  }) {
+    final nx = denormalizeFromSize?.width ?? 1.0;
+    final ny = denormalizeFromSize?.height ?? 1.0;
     return DrawPencil(
       adapter: adapter,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
       points: (encoded['points'] as List)
-          .map((p) => DrawPoint.fromJSON(p as Map))
+          .map((p) => DrawPoint.fromJSON(p as Map).scaleOffset(nx, ny))
           .toList(),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
@@ -183,11 +188,13 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   }
 
   @override
-  Map<String, dynamic> toJSON() {
+  Map<String, dynamic> toJSON({Size? normalizeToSize}) {
+    final nx = 1.0 / (normalizeToSize?.width ?? 1.0);
+    final ny = 1.0 / (normalizeToSize?.height ?? 1.0);
     return <String, dynamic>{
       'color': color.value,
       'strokeWidth': strokeWidth,
-      'points': points.map((p) => p.toJSON()).toList(),
+      'points': points.map((p) => p.scaleOffset(nx, ny).toJSON()).toList(),
       'hitboxExtent': hitboxExtent,
       'debugHitboxes': debugHitboxes,
     };

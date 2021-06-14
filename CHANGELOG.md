@@ -1,3 +1,8 @@
+## [0.1.0-nullsafety.12] - June 14, 2021
+
+* `DrawObject.toJSON()` and `DrawObject.fromJSON()` now take (de)normalization arguments to be able to
+(de)normalize points to make sharing across different devices easier.
+
 ## [0.1.0-nullsafety.11] - June 11, 2021
 
 * `DragHandleMixin` keeps track of valid state to make it easier for the caller to use with multiple mixins of this kind (select, drag, finalize).

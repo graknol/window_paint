@@ -13,5 +13,8 @@ abstract class DrawObject {
   Color get primaryColor;
 
   /// Returns a representation of this object as a JSON object.
-  Map<String, dynamic> toJSON();
+  ///
+  /// If [normalizeToSize] is not [null], then the coordinates output should be
+  /// normalized according to it (usually used to map them to the range [0-1]).
+  Map<String, dynamic> toJSON({Size? normalizeToSize});
 }

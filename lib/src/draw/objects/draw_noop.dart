@@ -20,14 +20,18 @@ class DrawNoop extends DrawObject {
   @override
   bool shouldRepaint() => false;
 
-  factory DrawNoop.fromJSON(DrawObjectAdapter<DrawNoop> adapter, Map encoded) {
+  factory DrawNoop.fromJSON(
+    DrawObjectAdapter<DrawNoop> adapter,
+    Map encoded, {
+    Size? denormalizeFromSize,
+  }) {
     return DrawNoop(
       adapter: adapter,
     );
   }
 
   @override
-  Map<String, dynamic> toJSON() {
+  Map<String, dynamic> toJSON({Size? normalizeToSize}) {
     return <String, dynamic>{};
   }
 }

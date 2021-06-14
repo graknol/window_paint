@@ -34,6 +34,10 @@ class DrawPoint {
     );
   }
 
+  DrawPoint scaleOffset(double scaleX, double scaleY) {
+    return copyWith(offset: offset.scale(scaleX, scaleY));
+  }
+
   @override
   bool operator ==(Object o) {
     if (identical(this, o)) return true;
