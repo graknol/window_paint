@@ -12,6 +12,7 @@ class DrawRectangle extends DrawObject
     with SelectOutlineMixin, DragHandleMixin {
   DrawRectangle({
     required this.adapter,
+    required this.id,
     required this.color,
     required this.anchor,
     required this.strokeWidth,
@@ -21,6 +22,9 @@ class DrawRectangle extends DrawObject
 
   @override
   final DrawObjectAdapter<DrawRectangle> adapter;
+
+  @override
+  final String id;
 
   Color color;
   DrawPoint anchor;
@@ -131,6 +135,7 @@ class DrawRectangle extends DrawObject
     final ny = denormalizeFromSize?.height ?? 1.0;
     return DrawRectangle(
       adapter: adapter,
+      id: encoded['id'] as String,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
       anchor: DrawPoint.fromJSON(encoded['anchor'] as Map).scaleOffset(nx, ny),
@@ -147,6 +152,7 @@ class DrawRectangle extends DrawObject
     final nx = 1.0 / (normalizeToSize?.width ?? 1.0);
     final ny = 1.0 / (normalizeToSize?.height ?? 1.0);
     return <String, dynamic>{
+      'id': id,
       'color': color.value,
       'strokeWidth': strokeWidth,
       'anchor': anchor.scaleOffset(nx, ny).toJSON(),

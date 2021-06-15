@@ -9,6 +9,8 @@ abstract class DrawObject {
 
   DrawObjectAdapter get adapter;
 
+  String get id;
+
   /// Used primarily for updating [WindowPaintController.color] when selected.
   Color get primaryColor;
 

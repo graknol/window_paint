@@ -6,10 +6,14 @@ import 'package:window_paint/src/draw/draw_object_adapter.dart';
 class DrawNoop extends DrawObject {
   const DrawNoop({
     required this.adapter,
+    required this.id,
   });
 
   @override
   final DrawObjectAdapter<DrawObject> adapter;
+
+  @override
+  final String id;
 
   @override
   Color get primaryColor => Color(0xFF000000);
@@ -27,11 +31,14 @@ class DrawNoop extends DrawObject {
   }) {
     return DrawNoop(
       adapter: adapter,
+      id: encoded['id'] as String,
     );
   }
 
   @override
   Map<String, dynamic> toJSON({Size? normalizeToSize}) {
-    return <String, dynamic>{};
+    return <String, dynamic>{
+      'id': id,
+    };
   }
 }

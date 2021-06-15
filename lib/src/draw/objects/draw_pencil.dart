@@ -14,6 +14,7 @@ import 'package:window_paint/src/utils/simplify_utils.dart';
 class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   DrawPencil({
     required this.adapter,
+    required this.id,
     required this.color,
     required this.strokeWidth,
     List<DrawPoint>? points,
@@ -23,6 +24,9 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
 
   @override
   final DrawObjectAdapter<DrawPencil> adapter;
+
+  @override
+  final String id;
 
   Color color;
   final double strokeWidth;
@@ -177,6 +181,7 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
     final ny = denormalizeFromSize?.height ?? 1.0;
     return DrawPencil(
       adapter: adapter,
+      id: encoded['id'] as String,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
       points: (encoded['points'] as List)
@@ -192,6 +197,7 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
     final nx = 1.0 / (normalizeToSize?.width ?? 1.0);
     final ny = 1.0 / (normalizeToSize?.height ?? 1.0);
     return <String, dynamic>{
+      'id': id,
       'color': color.value,
       'strokeWidth': strokeWidth,
       'points': points.map((p) => p.scaleOffset(nx, ny).toJSON()).toList(),

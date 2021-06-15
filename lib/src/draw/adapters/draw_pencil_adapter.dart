@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+import 'package:uuid/uuid.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/draw/objects/draw_pencil.dart';
@@ -26,6 +27,9 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
   /// Render the areas that would cause that object to be selected.
   final bool debugHitboxes;
 
+  /// Used to generate unique IDs for each [DrawPencil].
+  final _uuid = const Uuid();
+
   @override
   String get typeId => 'pencil';
 
@@ -35,6 +39,7 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
     final point = _createPoint(focalPoint, color, transform);
     return DrawPencil(
       adapter: this,
+      id: _uuid.v4(),
       color: color,
       strokeWidth: width / transform.getMaxScaleOnAxis(),
       points: [point],

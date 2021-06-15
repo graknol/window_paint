@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+import 'package:uuid/uuid.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/objects/draw_noop.dart';
 
@@ -14,6 +15,9 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
   @override
   bool get selectEnabled => true;
 
+  /// Used to generate unique IDs for each [DrawNoop].
+  final _uuid = const Uuid();
+
   @override
   String get typeId => 'pan_zoom';
 
@@ -22,6 +26,7 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
       BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
     return DrawNoop(
       adapter: this,
+      id: _uuid.v4(),
     );
   }
 

@@ -8,6 +8,7 @@ import 'package:window_paint/src/geometry/line.dart';
 class DrawRectangleCross extends DrawRectangle {
   DrawRectangleCross({
     required DrawObjectAdapter<DrawRectangleCross> adapter,
+    required String id,
     required Color color,
     required double strokeWidth,
     required DrawPoint anchor,
@@ -15,6 +16,7 @@ class DrawRectangleCross extends DrawRectangle {
     bool debugHitboxes = false,
   }) : super(
           adapter: adapter,
+          id: id,
           color: color,
           strokeWidth: strokeWidth,
           anchor: anchor,
@@ -87,6 +89,7 @@ class DrawRectangleCross extends DrawRectangle {
     final ny = denormalizeFromSize?.height ?? 1.0;
     return DrawRectangleCross(
       adapter: adapter,
+      id: encoded['id'] as String,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
       anchor: DrawPoint.fromJSON(encoded['anchor'] as Map).scaleOffset(nx, ny),
