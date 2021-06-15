@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 
@@ -24,3 +26,15 @@ List<DrawObject> drawObjectsFromJSON(
       .cast<DrawObject>()
       .toList();
 }
+
+Map<String, dynamic> offsetToJSON(Offset offset) {
+  return <String, dynamic>{
+    'x': offset.dx,
+    'y': offset.dy,
+  };
+}
+
+Offset offsetFromJSON(Map encoded) => Offset(
+      encoded['x'] as double,
+      encoded['y'] as double,
+    );

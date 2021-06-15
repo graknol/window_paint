@@ -4,6 +4,7 @@ import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/draw/objects/draw_rectangle.dart';
 import 'package:window_paint/src/geometry/line.dart';
+import 'package:window_paint/src/utils/draw_object_serialization.dart';
 
 class DrawRectangleCross extends DrawRectangle {
   DrawRectangleCross({
@@ -95,9 +96,6 @@ class DrawRectangleCross extends DrawRectangle {
       anchor: DrawPoint.fromJSON(encoded['anchor'] as Map).scaleOffset(nx, ny),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
-    )..endpoint = Offset(
-        (encoded['endpointX'] as double) * nx,
-        (encoded['endpointY'] as double) * ny,
-      );
+    )..endpoint = offsetFromJSON(encoded['endpoint']).scale(nx, ny);
   }
 }

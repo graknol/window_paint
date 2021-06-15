@@ -7,6 +7,8 @@ import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/draw/rect_paint.dart';
 import 'package:window_paint/src/mixins/drag_handle_mixin.dart';
 import 'package:window_paint/src/mixins/select_outline_mixin.dart';
+import 'package:window_paint/src/extensions/offset_extensions.dart';
+import 'package:window_paint/src/utils/draw_object_serialization.dart';
 
 class DrawRectangle extends DrawObject
     with SelectOutlineMixin, DragHandleMixin {
@@ -141,10 +143,7 @@ class DrawRectangle extends DrawObject
       anchor: DrawPoint.fromJSON(encoded['anchor'] as Map).scaleOffset(nx, ny),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
-    )..endpoint = Offset(
-        (encoded['endpointX'] as double) * nx,
-        (encoded['endpointY'] as double) * ny,
-      );
+    )..endpoint = offsetFromJSON(encoded['endpoint']).scale(nx, ny);
   }
 
   @override
@@ -156,8 +155,7 @@ class DrawRectangle extends DrawObject
       'color': color.value,
       'strokeWidth': strokeWidth,
       'anchor': anchor.scaleOffset(nx, ny).toJSON(),
-      'endpointX': effectiveEndpoint.dx * nx,
-      'endpointY': effectiveEndpoint.dy * ny,
+      'endpoint': (effectiveEndpoint.scale(nx, ny)).toJSON(),
       'hitboxExtent': hitboxExtent,
       'debugHitboxes': debugHitboxes,
     };

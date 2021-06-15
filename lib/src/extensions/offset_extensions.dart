@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:window_paint/src/utils/draw_object_serialization.dart';
+
 extension OffsetExtensions on Offset {
   double squaredDistanceTo(Offset other) => (other - this).distanceSquared;
 
@@ -24,4 +26,6 @@ extension OffsetExtensions on Offset {
     final ry = py - y;
     return rx * rx + ry * ry;
   }
+
+  Map<String, dynamic> toJSON() => offsetToJSON(this);
 }
