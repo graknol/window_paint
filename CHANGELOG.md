@@ -2,6 +2,7 @@
 
 * `DrawObject` now exposes IDs, making them identifiable, which is meant to simplify collaboration efforts.
 * Removed the `nullsafety` version postfix.
+* Updated the SDK constraint to `>=2.12.0 <3.0.0`.
 
 ## [0.1.0-nullsafety.12] - June 14, 2021
 
