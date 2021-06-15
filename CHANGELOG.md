@@ -1,6 +1,7 @@
-## [0.1.0-nullsafety.13] - June 15, 2021
+## [0.2.0] - June 15, 2021
 
 * `DrawObject` now exposes IDs, making them identifiable, which is meant to simplify collaboration efforts.
+* Removed the `nullsafety` version postfix.
 
 ## [0.1.0-nullsafety.12] - June 14, 2021
 
