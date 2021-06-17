@@ -3,11 +3,15 @@ import 'dart:ui';
 
 import 'package:example/draw/objects/draw_text.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 
 class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
   const DrawTextAdapter();
+
+  /// Used to generate unique IDs for each [DrawPencil].
+  final _uuid = const Uuid();
 
   @override
   String get typeId => 'text';
@@ -18,12 +22,14 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
     Offset focalPoint,
     Color color,
     Matrix4 transform,
+    Size size,
   ) async {
     final point = _createPoint(focalPoint, transform);
     final text = await showInputDialog(context);
     if (text != null && text.isNotEmpty) {
       return DrawText(
         adapter: this,
+        id: _uuid.v4(),
         anchor: point,
         text: text,
         color: color,
@@ -35,18 +41,34 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
 
   @override
   bool update(
-      DrawText object, Offset focalPoint, Color color, Matrix4 transform) {
+    DrawText object,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  ) {
     return false;
   }
 
   @override
-  bool end(DrawText object, Color color) {
+  bool end(
+    DrawText object,
+    Color color,
+    Size size,
+  ) {
     return true;
   }
 
   @override
-  bool querySelect(DrawText object, Offset focalPoint, Matrix4 transform) {
-    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint));
+  bool querySelect(
+    DrawText object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
+    return object
+        .getHitboxes(size)
+        .any((hitbox) => hitbox.contains(focalPoint));
   }
 
   @override
@@ -60,8 +82,13 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
   }
 
   @override
-  bool selectedStart(DrawText object, Offset focalPoint, Matrix4 transform) {
-    if (object.hitboxes.any((hitbox) => hitbox.contains(focalPoint))) {
+  bool selectedStart(
+    DrawText object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
+    if (object.getHitboxes(size).any((hitbox) => hitbox.contains(focalPoint))) {
       object.prepareDragHandle(focalPoint);
       return true;
     }
@@ -69,7 +96,12 @@ class DrawTextAdapter extends DrawObjectAdapter<DrawText> {
   }
 
   @override
-  bool selectedUpdate(DrawText object, Offset focalPoint, Matrix4 transform) {
+  bool selectedUpdate(
+    DrawText object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
     object.updateDragHandle(focalPoint);
     return true;
   }

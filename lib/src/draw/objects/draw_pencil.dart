@@ -64,27 +64,18 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
     return Rect.fromLTRB(minX, minY, maxX, maxY);
   }
 
-  Iterable<Rect> get aabbHitboxes sync* {
-    for (var i = 0; i < points.length - 1; i++) {
-      final from = points[i];
-      final to = points[i + 1];
-      yield Rect.fromPoints(from.offset, to.offset)
-          .inflate(hitboxExtent / _scale);
-    }
-  }
-
-  Iterable<Line> get hitboxes sync* {
+  Iterable<Line> getHitboxes(Size size) sync* {
     for (var i = 0; i < points.length - 1; i++) {
       final from = points[i];
       final to = points[i + 1];
       final diff = to.offset - from.offset;
       final extent = Vector2(diff.dx, diff.dy)
         ..normalize()
-        ..scale(hitboxExtent / _scale);
+        ..scale(hitboxExtent / _scale / size.shortestSide);
       yield Line(
         start: from.offset.translate(-extent.x, -extent.y),
         end: to.offset.translate(extent.x, extent.y),
-        extent: hitboxExtent / _scale,
+        extent: hitboxExtent / _scale / size.shortestSide,
       );
     }
   }
@@ -102,44 +93,49 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
       );
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, Denormalize denormalize) {
     final paint = Paint()
       ..strokeCap = StrokeCap.round
       ..isAntiAlias = true
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
-    prePaintDragHandle(canvas, size);
+    prePaintDragHandle(canvas, size, denormalize);
     for (var i = 0; i < points.length - 1; i++) {
       final from = points[i];
       final to = points[i + 1];
-      canvas.drawLine(from.offset, to.offset, paint);
+      canvas.drawLine(
+        denormalize(from.offset),
+        denormalize(to.offset),
+        paint,
+      );
     }
     if (!kReleaseMode && debugHitboxes) {
-      _paintHitboxes(canvas, size);
+      _paintHitboxes(canvas, size, denormalize);
     }
-    paintSelectOutline(canvas, size);
+    paintSelectOutline(canvas, size, denormalize);
     postPaintDragHandle(canvas, size);
     _paintedColor = color;
     _paintedCount = points.length;
     _paintedSelected = selected;
   }
+  // TODO: Continue denormalizing coordinates in paint
 
   /// Useful for debugging hitboxes.
-  void _paintHitboxes(Canvas canvas, Size size) {
+  void _paintHitboxes(Canvas canvas, Size size, Denormalize denormalize) {
     final paint = Paint()
       ..color = Color(0x8A000000)
       ..strokeWidth = 1.0 / _scale
       ..style = PaintingStyle.stroke;
-    for (final hitbox in hitboxes) {
+    for (final hitbox in getHitboxes(size)) {
       final a = Offset(hitbox.a.x, hitbox.a.y);
       final b = Offset(hitbox.b.x, hitbox.b.y);
       final c = Offset(hitbox.c.x, hitbox.c.y);
       final d = Offset(hitbox.d.x, hitbox.d.y);
-      canvas.drawLine(a, b, paint);
-      canvas.drawLine(b, c, paint);
-      canvas.drawLine(c, d, paint);
-      canvas.drawLine(d, a, paint);
+      canvas.drawLine(denormalize(a), denormalize(b), paint);
+      canvas.drawLine(denormalize(b), denormalize(c), paint);
+      canvas.drawLine(denormalize(c), denormalize(d), paint);
+      canvas.drawLine(denormalize(d), denormalize(a), paint);
     }
   }
 
@@ -166,26 +162,24 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
     points.add(point);
   }
 
-  void simplify() {
-    final simplified = simplifyPoints(points, tolerance: 1.0 / _scale);
+  void simplify(Size size) {
+    final simplified = simplifyPoints(
+      points,
+      tolerance: 1.0 / _scale / size.shortestSide,
+    );
     points.clear();
     points.addAll(simplified);
   }
 
   factory DrawPencil.fromJSON(
-    DrawObjectAdapter<DrawPencil> adapter,
-    Map encoded, {
-    Size? denormalizeFromSize,
-  }) {
-    final nx = denormalizeFromSize?.width ?? 1.0;
-    final ny = denormalizeFromSize?.height ?? 1.0;
+      DrawObjectAdapter<DrawPencil> adapter, Map encoded) {
     return DrawPencil(
       adapter: adapter,
       id: encoded['id'] as String,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
       points: (encoded['points'] as List)
-          .map((p) => DrawPoint.fromJSON(p as Map).scaleOffset(nx, ny))
+          .map((p) => DrawPoint.fromJSON(p as Map))
           .toList(),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
@@ -193,16 +187,27 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   }
 
   @override
-  Map<String, dynamic> toJSON({Size? normalizeToSize}) {
-    final nx = 1.0 / (normalizeToSize?.width ?? 1.0);
-    final ny = 1.0 / (normalizeToSize?.height ?? 1.0);
+  Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'id': id,
       'color': color.value,
       'strokeWidth': strokeWidth,
-      'points': points.map((p) => p.scaleOffset(nx, ny).toJSON()).toList(),
+      'points': points.map((p) => p.toJSON()).toList(),
       'hitboxExtent': hitboxExtent,
       'debugHitboxes': debugHitboxes,
     };
+  }
+
+  @override
+  DrawPencil clone() {
+    return DrawPencil(
+      adapter: adapter,
+      id: id,
+      color: Color(color.value),
+      strokeWidth: strokeWidth,
+      points: points.map((p) => p.clone()).toList(),
+      hitboxExtent: hitboxExtent,
+      debugHitboxes: debugHitboxes,
+    );
   }
 }

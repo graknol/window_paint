@@ -48,21 +48,21 @@ class DrawRectangle extends DrawObject
 
   Rect get rect => Rect.fromPoints(anchor.offset, effectiveEndpoint);
 
-  Iterable<Rect> get hitboxes sync* {
+  Iterable<Rect> getHitboxes(Size size) sync* {
     final a = anchor.offset;
     final e = effectiveEndpoint;
     // top
     yield Rect.fromPoints(Offset(a.dx, a.dy), Offset(e.dx, a.dy))
-        .inflate(hitboxExtent / anchor.scale);
+        .inflate(hitboxExtent / anchor.scale / size.shortestSide);
     // right
     yield Rect.fromPoints(Offset(e.dx, a.dy), Offset(e.dx, e.dy))
-        .inflate(hitboxExtent / anchor.scale);
+        .inflate(hitboxExtent / anchor.scale / size.shortestSide);
     // bottom
     yield Rect.fromPoints(Offset(a.dx, e.dy), Offset(e.dx, e.dy))
-        .inflate(hitboxExtent / anchor.scale);
+        .inflate(hitboxExtent / anchor.scale / size.shortestSide);
     // left
     yield Rect.fromPoints(Offset(a.dx, a.dy), Offset(a.dx, e.dy))
-        .inflate(hitboxExtent / anchor.scale);
+        .inflate(hitboxExtent / anchor.scale / size.shortestSide);
   }
 
   @override
@@ -78,19 +78,23 @@ class DrawRectangle extends DrawObject
       );
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, Denormalize denormalize) {
     final paint = Paint()
       ..strokeCap = StrokeCap.round
       ..isAntiAlias = true
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
-    prePaintDragHandle(canvas, size);
-    canvas.drawRect(rect, paint);
+    prePaintDragHandle(canvas, size, denormalize);
+    final dnRect = Rect.fromPoints(
+      denormalize(rect.topLeft),
+      denormalize(rect.bottomRight),
+    );
+    canvas.drawRect(dnRect, paint);
     if (!kReleaseMode && debugHitboxes) {
-      paintHitboxes(canvas, size);
+      paintHitboxes(canvas, size, denormalize);
     }
-    paintSelectOutline(canvas, size);
+    paintSelectOutline(canvas, size, denormalize);
     postPaintDragHandle(canvas, size);
     _paintedColor = color;
     _paintedAnchor = anchor;
@@ -99,13 +103,17 @@ class DrawRectangle extends DrawObject
 
   /// Useful for debugging hitboxes.
   @protected
-  void paintHitboxes(Canvas canvas, Size size) {
+  void paintHitboxes(Canvas canvas, Size size, Denormalize denormalize) {
     final paint = Paint()
       ..color = Color(0x8A000000)
       ..strokeWidth = 1.0 / anchor.scale
       ..style = PaintingStyle.stroke;
-    for (final hitbox in hitboxes) {
-      canvas.drawRect(hitbox, paint);
+    for (final hitbox in getHitboxes(size)) {
+      final rect = Rect.fromPoints(
+        denormalize(hitbox.topLeft),
+        denormalize(hitbox.bottomRight),
+      );
+      canvas.drawRect(rect, paint);
     }
   }
 
@@ -130,34 +138,42 @@ class DrawRectangle extends DrawObject
 
   factory DrawRectangle.fromJSON(
     DrawObjectAdapter<DrawRectangle> adapter,
-    Map encoded, {
-    Size? denormalizeFromSize,
-  }) {
-    final nx = denormalizeFromSize?.width ?? 1.0;
-    final ny = denormalizeFromSize?.height ?? 1.0;
+    Map encoded,
+  ) {
     return DrawRectangle(
       adapter: adapter,
       id: encoded['id'] as String,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
-      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map).scaleOffset(nx, ny),
+      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
-    )..endpoint = offsetFromJSON(encoded['endpoint']).scale(nx, ny);
+    )..endpoint = offsetFromJSON(encoded['endpoint']);
   }
 
   @override
-  Map<String, dynamic> toJSON({Size? normalizeToSize}) {
-    final nx = 1.0 / (normalizeToSize?.width ?? 1.0);
-    final ny = 1.0 / (normalizeToSize?.height ?? 1.0);
+  Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'id': id,
       'color': color.value,
       'strokeWidth': strokeWidth,
-      'anchor': anchor.scaleOffset(nx, ny).toJSON(),
-      'endpoint': (effectiveEndpoint.scale(nx, ny)).toJSON(),
+      'anchor': anchor.toJSON(),
+      'endpoint': effectiveEndpoint.toJSON(),
       'hitboxExtent': hitboxExtent,
       'debugHitboxes': debugHitboxes,
     };
+  }
+
+  @override
+  DrawRectangle clone() {
+    return DrawRectangle(
+      adapter: adapter,
+      id: id,
+      color: Color(color.value),
+      anchor: anchor.clone(),
+      strokeWidth: strokeWidth,
+      hitboxExtent: hitboxExtent,
+      debugHitboxes: debugHitboxes,
+    )..endpoint = Offset(effectiveEndpoint.dx, effectiveEndpoint.dy);
   }
 }

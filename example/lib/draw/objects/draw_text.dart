@@ -12,6 +12,7 @@ import 'package:window_paint/src/mixins/select_outline_mixin.dart';
 class DrawText extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   DrawText({
     required this.adapter,
+    required this.id,
     required this.color,
     required this.anchor,
     this.text = '',
@@ -21,6 +22,9 @@ class DrawText extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   @override
   final DrawObjectAdapter<DrawText> adapter;
 
+  @override
+  final String id;
+
   Color color;
   DrawPoint anchor;
   String text;
@@ -29,18 +33,18 @@ class DrawText extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   Color? _paintedColor;
   DrawPoint? _paintedAnchor;
   String? _paintedText;
-  Size? _paintedSize;
+  Size? _paintedNormalizedSize;
 
   Rect get rect => Rect.fromLTWH(
         anchor.offset.dx,
         anchor.offset.dy,
-        _paintedSize?.width ?? 0.0,
-        _paintedSize?.height ?? 0.0,
+        _paintedNormalizedSize?.width ?? 0.0,
+        _paintedNormalizedSize?.height ?? 0.0,
       );
 
-  Iterable<Rect> get hitboxes sync* {
-    if (_paintedSize != null) {
-      yield rect.inflate(5.0 / anchor.scale);
+  Iterable<Rect> getHitboxes(Size size) sync* {
+    if (_paintedNormalizedSize != null) {
+      yield rect.inflate(5.0 / anchor.scale / size.shortestSide);
     }
   }
 
@@ -66,22 +70,23 @@ class DrawText extends DrawObject with SelectOutlineMixin, DragHandleMixin {
       );
 
   @override
-  void paint(Canvas canvas, Size size) {
+  void paint(Canvas canvas, Size size, Denormalize denormalize) {
+    final dnAnchorOffset = denormalize(anchor.offset);
     final textPainter = TextPainter(
       text: textSpan,
       textAlign: TextAlign.left,
       textDirection: TextDirection.ltr,
     )..layout(
-        maxWidth: size.width - anchor.offset.dx,
+        maxWidth: size.width - dnAnchorOffset.dx,
       );
-    prePaintDragHandle(canvas, size);
-    textPainter.paint(canvas, anchor.offset);
-    paintSelectOutline(canvas, size);
+    prePaintDragHandle(canvas, size, denormalize);
+    textPainter.paint(canvas, dnAnchorOffset);
+    paintSelectOutline(canvas, size, denormalize);
     postPaintDragHandle(canvas, size);
     _paintedColor = color;
     _paintedAnchor = anchor;
     _paintedText = text;
-    _paintedSize = textPainter.size;
+    _paintedNormalizedSize = textPainter.size / size.shortestSide;
   }
 
   @override
@@ -103,6 +108,7 @@ class DrawText extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   factory DrawText.fromJSON(DrawObjectAdapter<DrawText> adapter, Map encoded) {
     return DrawText(
       adapter: adapter,
+      id: encoded['id'] as String,
       color: Color(encoded['color'] as int),
       anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
       text: encoded['text'] as String,
@@ -113,10 +119,21 @@ class DrawText extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   @override
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
+      'id': id,
       'color': color.value,
       'anchor': anchor.toJSON(),
       'text': text,
       'fontSize': fontSize,
     };
+  }
+
+  @override
+  DrawText clone() {
+    return DrawText(
+      adapter: adapter,
+      id: id,
+      color: Color(color.value),
+      anchor: anchor.clone(),
+    );
   }
 }

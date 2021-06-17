@@ -34,6 +34,14 @@ class DrawPoint {
     );
   }
 
+  /// Returns a deep clone of this point.
+  DrawPoint clone() {
+    return DrawPoint(
+      offset: Offset(offset.dx, offset.dy),
+      scale: scale,
+    );
+  }
+
   DrawPoint scaleOffset(double scaleX, double scaleY) {
     return copyWith(offset: offset.scale(scaleX, scaleY));
   }

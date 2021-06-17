@@ -17,15 +17,23 @@ mixin SelectOutlineMixin on DrawObject {
   bool shouldRepaintSelectOutline() => _selected != _paintedSelected;
 
   /// Paints the select outline if [showSelectOutline()] has been called.
-  void paintSelectOutline(Canvas canvas, Size size) {
+  void paintSelectOutline(Canvas canvas, Size size, Denormalize denormalize) {
     if (_selected) {
-      _paintOutline(canvas, selectOutline);
+      _paintOutline(canvas, selectOutline, denormalize);
     }
     _paintedSelected = _selected;
   }
 
-  void _paintOutline(Canvas canvas, RectPaint outline) {
-    canvas.drawRect(outline.rect, outline.paint);
+  void _paintOutline(
+    Canvas canvas,
+    RectPaint outline,
+    Denormalize denormalize,
+  ) {
+    final rect = Rect.fromPoints(
+      denormalize(outline.rect.topLeft),
+      denormalize(outline.rect.bottomRight),
+    );
+    canvas.drawRect(rect, outline.paint);
   }
 
   /// Shows the select outline.

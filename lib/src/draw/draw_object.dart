@@ -1,10 +1,12 @@
 import 'package:flutter/widgets.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 
+typedef Denormalize = Offset Function(Offset normalized);
+
 abstract class DrawObject {
   const DrawObject();
 
-  void paint(Canvas canvas, Size size);
+  void paint(Canvas canvas, Size size, Denormalize denormalize);
   bool shouldRepaint();
 
   DrawObjectAdapter get adapter;
@@ -15,8 +17,8 @@ abstract class DrawObject {
   Color get primaryColor;
 
   /// Returns a representation of this object as a JSON object.
-  ///
-  /// If [normalizeToSize] is not [null], then the coordinates output should be
-  /// normalized according to it (usually used to map them to the range [0-1]).
-  Map<String, dynamic> toJSON({Size? normalizeToSize});
+  Map<String, dynamic> toJSON();
+
+  /// Returns a deep clone of this object.
+  DrawObject clone();
 }

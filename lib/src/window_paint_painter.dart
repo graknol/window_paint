@@ -12,7 +12,11 @@ class WindowPaintPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    object.paint(canvas, size);
+    object.paint(
+      canvas,
+      size,
+      (offset) => offset.scale(size.width, size.height),
+    );
   }
 
   @override

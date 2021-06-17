@@ -22,9 +22,10 @@ mixin DragHandleMixin on DrawObject {
   /// Must be called at the start of [paint()].
   @protected
   @mustCallSuper
-  void prePaintDragHandle(Canvas canvas, Size size) {
+  void prePaintDragHandle(Canvas canvas, Size size, Denormalize denormalize) {
     canvas.save();
-    canvas.translate(_dragHandleOffset.dx, _dragHandleOffset.dy);
+    final dragHandle = denormalize(_dragHandleOffset);
+    canvas.translate(dragHandle.dx, dragHandle.dy);
   }
 
   /// Restores the canvas and saves the [shouldRepaint()] variables.

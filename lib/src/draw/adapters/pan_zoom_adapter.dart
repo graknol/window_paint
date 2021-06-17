@@ -23,7 +23,12 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
 
   @override
   FutureOr<DrawNoop?> start(
-      BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  ) {
     return DrawNoop(
       adapter: this,
       id: _uuid.v4(),
@@ -32,17 +37,31 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
 
   @override
   bool update(
-      DrawNoop object, Offset focalPoint, Color color, Matrix4 transform) {
+    DrawNoop object,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  ) {
     return false;
   }
 
   @override
-  bool end(DrawNoop object, Color color) {
+  bool end(
+    DrawNoop object,
+    Color color,
+    Size size,
+  ) {
     return false;
   }
 
   @override
-  bool querySelect(DrawNoop object, Offset focalPoint, Matrix4 transform) {
+  bool querySelect(
+    DrawNoop object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
     return false;
   }
 
@@ -53,12 +72,22 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
   void cancelSelect(DrawNoop object) {}
 
   @override
-  bool selectedStart(DrawNoop object, Offset focalPoint, Matrix4 transform) {
+  bool selectedStart(
+    DrawNoop object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
     return false;
   }
 
   @override
-  bool selectedUpdate(DrawNoop object, Offset focalPoint, Matrix4 transform) {
+  bool selectedUpdate(
+    DrawNoop object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
     return false;
   }
 
@@ -69,10 +98,5 @@ class PanZoomAdapter extends DrawObjectAdapter<DrawNoop> {
   void selectUpdateColor(DrawNoop object, Color color) {}
 
   @override
-  DrawNoop fromJSON(Map encoded, {Size? denormalizeFromSize}) =>
-      DrawNoop.fromJSON(
-        this,
-        encoded,
-        denormalizeFromSize: denormalizeFromSize,
-      );
+  DrawNoop fromJSON(Map encoded) => DrawNoop.fromJSON(this, encoded);
 }

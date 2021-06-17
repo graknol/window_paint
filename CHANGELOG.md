@@ -1,3 +1,8 @@
+## [0.4.0] - June 16, 2021
+
+- All coordinates are now normalized to the given screen size; making sharing and collaboration easier.
+- Added `DrawObject.clone()` which returns a deep clone of the object; making diff'ing easier.
+
 ## [0.3.0] - June 15, 2021
 
 - `DrawRectangle` and `DrawRectangleCross` serializes `endpoint` as `endpoint.x` and `endpoint.y` instead of `endpointX` and `endpointY`.

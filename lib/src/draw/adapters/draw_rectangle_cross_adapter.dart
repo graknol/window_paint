@@ -35,7 +35,12 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
 
   @override
   FutureOr<DrawRectangleCross?> start(
-      BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  ) {
     final point = _createPoint(focalPoint, color, transform);
     return DrawRectangleCross(
       adapter: this,
@@ -49,22 +54,39 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
   }
 
   @override
-  bool update(DrawRectangleCross object, Offset focalPoint, Color color,
-      Matrix4 transform) {
+  bool update(
+    DrawRectangleCross object,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  ) {
     object.endpoint = focalPoint;
     return true;
   }
 
   @override
-  bool end(DrawRectangleCross object, Color color) {
+  bool end(
+    DrawRectangleCross object,
+    Color color,
+    Size size,
+  ) {
     return true;
   }
 
   @override
   bool querySelect(
-      DrawRectangleCross object, Offset focalPoint, Matrix4 transform) {
-    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint)) ||
-        object.innerHitboxes.any((hitbox) => hitbox.contains(focalPoint));
+    DrawRectangleCross object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
+    return object
+            .getHitboxes(size)
+            .any((hitbox) => hitbox.contains(focalPoint)) ||
+        object
+            .getInnerHitboxes(size)
+            .any((hitbox) => hitbox.contains(focalPoint));
   }
 
   @override
@@ -79,9 +101,15 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
 
   @override
   bool selectedStart(
-      DrawRectangleCross object, Offset focalPoint, Matrix4 transform) {
-    if (object.hitboxes.any((hitbox) => hitbox.contains(focalPoint)) ||
-        object.innerHitboxes.any((hitbox) => hitbox.contains(focalPoint))) {
+    DrawRectangleCross object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
+    if (object.getHitboxes(size).any((hitbox) => hitbox.contains(focalPoint)) ||
+        object
+            .getInnerHitboxes(size)
+            .any((hitbox) => hitbox.contains(focalPoint))) {
       object.prepareDragHandle(focalPoint);
       return true;
     }
@@ -90,7 +118,11 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
 
   @override
   bool selectedUpdate(
-      DrawRectangleCross object, Offset focalPoint, Matrix4 transform) {
+    DrawRectangleCross object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
     object.updateDragHandle(focalPoint);
     return true;
   }
@@ -107,12 +139,8 @@ class DrawRectangleCrossAdapter extends DrawObjectAdapter<DrawRectangleCross> {
   }
 
   @override
-  DrawRectangleCross fromJSON(Map encoded, {Size? denormalizeFromSize}) =>
-      DrawRectangleCross.fromJSON(
-        this,
-        encoded,
-        denormalizeFromSize: denormalizeFromSize,
-      );
+  DrawRectangleCross fromJSON(Map encoded) =>
+      DrawRectangleCross.fromJSON(this, encoded);
 
   DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
     final scale = transform.getMaxScaleOnAxis();

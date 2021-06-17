@@ -35,7 +35,12 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
 
   @override
   FutureOr<DrawPencil?> start(
-      BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  ) {
     final point = _createPoint(focalPoint, color, transform);
     return DrawPencil(
       adapter: this,
@@ -50,21 +55,37 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
 
   @override
   bool update(
-      DrawPencil object, Offset focalPoint, Color color, Matrix4 transform) {
+    DrawPencil object,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  ) {
     final point = _createPoint(focalPoint, color, transform);
     object.addPoint(point);
     return true;
   }
 
   @override
-  bool end(DrawPencil object, Color color) {
-    object.simplify();
+  bool end(
+    DrawPencil object,
+    Color color,
+    Size size,
+  ) {
+    object.simplify(size);
     return true;
   }
 
   @override
-  bool querySelect(DrawPencil object, Offset focalPoint, Matrix4 transform) {
-    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint));
+  bool querySelect(
+    DrawPencil object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
+    return object
+        .getHitboxes(size)
+        .any((hitbox) => hitbox.contains(focalPoint));
   }
 
   @override
@@ -78,8 +99,13 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
   }
 
   @override
-  bool selectedStart(DrawPencil object, Offset focalPoint, Matrix4 transform) {
-    if (object.hitboxes.any((hitbox) => hitbox.contains(focalPoint))) {
+  bool selectedStart(
+    DrawPencil object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
+    if (object.getHitboxes(size).any((hitbox) => hitbox.contains(focalPoint))) {
       object.prepareDragHandle(focalPoint);
       return true;
     }
@@ -87,7 +113,12 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
   }
 
   @override
-  bool selectedUpdate(DrawPencil object, Offset focalPoint, Matrix4 transform) {
+  bool selectedUpdate(
+    DrawPencil object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
     object.updateDragHandle(focalPoint);
     return true;
   }
@@ -104,12 +135,7 @@ class DrawPencilAdapter extends DrawObjectAdapter<DrawPencil> {
   }
 
   @override
-  DrawPencil fromJSON(Map encoded, {Size? denormalizeFromSize}) =>
-      DrawPencil.fromJSON(
-        this,
-        encoded,
-        denormalizeFromSize: denormalizeFromSize,
-      );
+  DrawPencil fromJSON(Map encoded) => DrawPencil.fromJSON(this, encoded);
 
   DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
     return DrawPoint(

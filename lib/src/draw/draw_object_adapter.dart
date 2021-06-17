@@ -31,14 +31,25 @@ abstract class DrawObjectAdapter<T extends DrawObject> {
   /// those events until the [Future] completes. The [Future] should complete
   /// with either a fully constructed [DrawObject] or [null] to discard it.
   FutureOr<T?> start(
-      BuildContext context, Offset focalPoint, Color color, Matrix4 transform);
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  );
 
   /// Returning [true] will trigger a re-paint.
   ///
   /// Useful for pan/zoom where you don't paint anything.
   ///
   /// NOTE: Will not be called if [start()] returned a [Future].
-  bool update(T object, Offset focalPoint, Color color, Matrix4 transform);
+  bool update(
+    T object,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  );
 
   /// Returning [true] will keep the object, [false] will discard it.
   ///
@@ -46,12 +57,21 @@ abstract class DrawObjectAdapter<T extends DrawObject> {
   /// draw anything.
   ///
   /// NOTE: Will not be called if [start()] returned a [Future].
-  bool end(T object, Color color);
+  bool end(
+    T object,
+    Color color,
+    Size size,
+  );
 
   /// Returning [true] will select the object.
   ///
   /// This is needed as the consumer can't know a DrawObject's size or position.
-  bool querySelect(T object, Offset focalPoint, Matrix4 transform);
+  bool querySelect(
+    T object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  );
 
   /// The object has been chosen as the selected object. It should render its
   /// hitbox and interactive handles, if any.
@@ -66,12 +86,22 @@ abstract class DrawObjectAdapter<T extends DrawObject> {
   /// same interaction.
   ///
   /// Useful for resize handles or moving the object.
-  bool selectedStart(T object, Offset focalPoint, Matrix4 transform);
+  bool selectedStart(
+    T object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  );
 
   /// Returning [true] will trigger a re-paint.
   ///
   /// Useful for interacting with resize handles or moving the object.
-  bool selectedUpdate(T object, Offset focalPoint, Matrix4 transform);
+  bool selectedUpdate(
+    T object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  );
 
   /// Returning [false] will cancel the selection of the object.
   bool selectedEnd(T object);
@@ -80,9 +110,5 @@ abstract class DrawObjectAdapter<T extends DrawObject> {
   void selectUpdateColor(T object, Color color);
 
   /// Creates an instance of [DrawObject] from a JSON object.
-  ///
-  /// If [denormalizeFromSize] is not [null], then the coordinates given
-  /// in [encoded] should be denormalized according to it (usually used to map
-  /// them from the range [0-1] to [m-n]).
-  T fromJSON(Map encoded, {Size? denormalizeFromSize});
+  T fromJSON(Map encoded);
 }

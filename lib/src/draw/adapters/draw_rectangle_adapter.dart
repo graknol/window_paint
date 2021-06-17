@@ -35,7 +35,12 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
 
   @override
   FutureOr<DrawRectangle?> start(
-      BuildContext context, Offset focalPoint, Color color, Matrix4 transform) {
+    BuildContext context,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  ) {
     final point = _createPoint(focalPoint, color, transform);
     return DrawRectangle(
       adapter: this,
@@ -50,19 +55,35 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
 
   @override
   bool update(
-      DrawRectangle object, Offset focalPoint, Color color, Matrix4 transform) {
+    DrawRectangle object,
+    Offset focalPoint,
+    Color color,
+    Matrix4 transform,
+    Size size,
+  ) {
     object.endpoint = focalPoint;
     return true;
   }
 
   @override
-  bool end(DrawRectangle object, Color color) {
+  bool end(
+    DrawRectangle object,
+    Color color,
+    Size size,
+  ) {
     return true;
   }
 
   @override
-  bool querySelect(DrawRectangle object, Offset focalPoint, Matrix4 transform) {
-    return object.hitboxes.any((hitbox) => hitbox.contains(focalPoint));
+  bool querySelect(
+    DrawRectangle object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
+    return object
+        .getHitboxes(size)
+        .any((hitbox) => hitbox.contains(focalPoint));
   }
 
   @override
@@ -77,8 +98,12 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
 
   @override
   bool selectedStart(
-      DrawRectangle object, Offset focalPoint, Matrix4 transform) {
-    if (object.hitboxes.any((hitbox) => hitbox.contains(focalPoint))) {
+    DrawRectangle object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
+    if (object.getHitboxes(size).any((hitbox) => hitbox.contains(focalPoint))) {
       object.prepareDragHandle(focalPoint);
       return true;
     }
@@ -87,7 +112,11 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
 
   @override
   bool selectedUpdate(
-      DrawRectangle object, Offset focalPoint, Matrix4 transform) {
+    DrawRectangle object,
+    Offset focalPoint,
+    Matrix4 transform,
+    Size size,
+  ) {
     object.updateDragHandle(focalPoint);
     return true;
   }
@@ -104,12 +133,7 @@ class DrawRectangleAdapter extends DrawObjectAdapter<DrawRectangle> {
   }
 
   @override
-  DrawRectangle fromJSON(Map encoded, {Size? denormalizeFromSize}) =>
-      DrawRectangle.fromJSON(
-        this,
-        encoded,
-        denormalizeFromSize: denormalizeFromSize,
-      );
+  DrawRectangle fromJSON(Map encoded) => DrawRectangle.fromJSON(this, encoded);
 
   DrawPoint _createPoint(Offset offset, Color color, Matrix4 transform) {
     return DrawPoint(

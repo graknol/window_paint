@@ -19,7 +19,7 @@ class DrawNoop extends DrawObject {
   Color get primaryColor => Color(0xFF000000);
 
   @override
-  void paint(Canvas canvas, Size size) {}
+  void paint(Canvas canvas, Size size, Denormalize denormalize) {}
 
   @override
   bool shouldRepaint() => false;
@@ -36,9 +36,17 @@ class DrawNoop extends DrawObject {
   }
 
   @override
-  Map<String, dynamic> toJSON({Size? normalizeToSize}) {
+  Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'id': id,
     };
+  }
+
+  @override
+  DrawNoop clone() {
+    return DrawNoop(
+      adapter: adapter,
+      id: id,
+    );
   }
 }

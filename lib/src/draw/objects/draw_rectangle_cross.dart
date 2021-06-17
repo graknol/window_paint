@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/draw/draw_point.dart';
 import 'package:window_paint/src/draw/objects/draw_rectangle.dart';
@@ -29,73 +30,87 @@ class DrawRectangleCross extends DrawRectangle {
   DrawObjectAdapter<DrawRectangleCross> get adapter =>
       super.adapter as DrawObjectAdapter<DrawRectangleCross>;
 
-  Iterable<Line> get innerHitboxes sync* {
+  Iterable<Line> getInnerHitboxes(Size size) sync* {
     final a = anchor.offset;
     final e = effectiveEndpoint;
     // top-left -> bottom-right
     yield Line(
       start: a,
       end: e,
-      extent: hitboxExtent / anchor.scale,
+      extent: hitboxExtent / anchor.scale / size.shortestSide,
     );
     // bottom-left -> top-right
     yield Line(
       start: Offset(a.dx, e.dy),
       end: Offset(e.dx, a.dy),
-      extent: hitboxExtent / anchor.scale,
+      extent: hitboxExtent / anchor.scale / size.shortestSide,
     );
   }
 
   @override
-  void paint(Canvas canvas, Size size) {
-    super.paint(canvas, size);
+  void paint(Canvas canvas, Size size, Denormalize denormalize) {
+    super.paint(canvas, size, denormalize);
     final paint = Paint()
       ..strokeCap = StrokeCap.round
       ..isAntiAlias = true
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
-    prePaintDragHandle(canvas, size);
-    canvas.drawRect(rect, paint);
-    canvas.drawLine(rect.topLeft, rect.bottomRight, paint);
-    canvas.drawLine(rect.bottomLeft, rect.topRight, paint);
+    final dnRect = Rect.fromPoints(
+      denormalize(rect.topLeft),
+      denormalize(rect.bottomRight),
+    );
+    prePaintDragHandle(canvas, size, denormalize);
+    canvas.drawRect(dnRect, paint);
+    canvas.drawLine(dnRect.topLeft, dnRect.bottomRight, paint);
+    canvas.drawLine(dnRect.bottomLeft, dnRect.topRight, paint);
     postPaintDragHandle(canvas, size);
   }
 
   @override
-  void paintHitboxes(Canvas canvas, Size size) {
-    super.paintHitboxes(canvas, size);
+  void paintHitboxes(Canvas canvas, Size size, Denormalize denormalize) {
+    super.paintHitboxes(canvas, size, denormalize);
     final paint = Paint()
       ..color = Color(0x8A000000)
       ..strokeWidth = 1.0 / anchor.scale
       ..style = PaintingStyle.stroke;
-    for (final hitbox in innerHitboxes) {
+    for (final hitbox in getInnerHitboxes(size)) {
       final a = Offset(hitbox.a.x, hitbox.a.y);
       final b = Offset(hitbox.b.x, hitbox.b.y);
       final c = Offset(hitbox.c.x, hitbox.c.y);
       final d = Offset(hitbox.d.x, hitbox.d.y);
-      canvas.drawLine(a, b, paint);
-      canvas.drawLine(b, c, paint);
-      canvas.drawLine(c, d, paint);
-      canvas.drawLine(d, a, paint);
+      canvas.drawLine(denormalize(a), denormalize(b), paint);
+      canvas.drawLine(denormalize(b), denormalize(c), paint);
+      canvas.drawLine(denormalize(c), denormalize(d), paint);
+      canvas.drawLine(denormalize(d), denormalize(a), paint);
     }
   }
 
   factory DrawRectangleCross.fromJSON(
     DrawObjectAdapter<DrawRectangleCross> adapter,
-    Map encoded, {
-    Size? denormalizeFromSize,
-  }) {
-    final nx = denormalizeFromSize?.width ?? 1.0;
-    final ny = denormalizeFromSize?.height ?? 1.0;
+    Map encoded,
+  ) {
     return DrawRectangleCross(
       adapter: adapter,
       id: encoded['id'] as String,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
-      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map).scaleOffset(nx, ny),
+      anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
       hitboxExtent: encoded['hitboxExtent'] as double,
       debugHitboxes: encoded['debugHitboxes'] as bool,
-    )..endpoint = offsetFromJSON(encoded['endpoint']).scale(nx, ny);
+    )..endpoint = offsetFromJSON(encoded['endpoint']);
+  }
+
+  @override
+  DrawRectangleCross clone() {
+    return DrawRectangleCross(
+      adapter: adapter,
+      id: id,
+      color: Color(color.value),
+      anchor: anchor.clone(),
+      strokeWidth: strokeWidth,
+      hitboxExtent: hitboxExtent,
+      debugHitboxes: debugHitboxes,
+    )..endpoint = Offset(effectiveEndpoint.dx, effectiveEndpoint.dy);
   }
 }

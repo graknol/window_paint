@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:measurer/measurer.dart';
 import 'package:window_paint/src/draw/adapters/draw_pencil_adapter.dart';
 import 'package:window_paint/src/draw/adapters/draw_rectangle_adapter.dart';
 import 'package:window_paint/src/draw/adapters/draw_rectangle_cross_adapter.dart';
@@ -79,6 +80,26 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
 
   DrawObjectAdapter get _activeAdapter =>
       widget.adapters[_effectiveController.mode]!;
+
+  /// The current size of the painting surface's child. This is used to
+  /// calculate the relative coordinates, as to not depend on the screen size.
+  Size? _size;
+
+  /// The value of [_size] at the start of this interaction. This is a safeguard
+  /// in case [_onMeasure] gets called in the middle of an interaction.
+  Size? _interactionSize;
+
+  bool _hasInteractionSize() {
+    return _interactionSize != null;
+  }
+
+  Offset _normalizeInteractionOffset(Offset offset) {
+    final size = _interactionSize;
+    if (size == null) {
+      throw StateError('[_interactionSize] must not be null');
+    }
+    return offset.scale(1.0 / size.width, 1.0 / size.height);
+  }
 
   @override
   void initState() {
@@ -196,36 +217,46 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
     super.dispose();
   }
 
+  void _onMeasure(Size size, BoxConstraints? constraints) {
+    // We do not want to call [setState] here, as we don't use it in
+    // the [build] method.
+    _size = size;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: InteractiveViewer(
-        transformationController: _transformationController,
-        minScale: widget.minScale,
-        maxScale: widget.maxScale,
-        onInteractionStart: (details) => _onInteractionStart(context, details),
-        onInteractionUpdate: _onInteractionUpdate,
-        onInteractionEnd: _onInteractionEnd,
-        child: ValueListenableBuilder<WindowPaintValue>(
-          valueListenable: _effectiveController,
-          builder: (context, value, child) {
-            return Stack(
-              children: [
-                child!,
-                ...value.objects.map((object) {
-                  return Positioned.fill(
-                    child: CustomPaint(
-                      painter: WindowPaintPainter(
-                        object: object,
+    return Measurer(
+      onMeasure: _onMeasure,
+      child: ClipRect(
+        child: InteractiveViewer(
+          transformationController: _transformationController,
+          minScale: widget.minScale,
+          maxScale: widget.maxScale,
+          onInteractionStart: (details) =>
+              _onInteractionStart(context, details),
+          onInteractionUpdate: _onInteractionUpdate,
+          onInteractionEnd: _onInteractionEnd,
+          child: ValueListenableBuilder<WindowPaintValue>(
+            valueListenable: _effectiveController,
+            builder: (context, value, child) {
+              return Stack(
+                children: [
+                  child!,
+                  ...value.objects.map((object) {
+                    return Positioned.fill(
+                      child: CustomPaint(
+                        painter: WindowPaintPainter(
+                          object: object,
+                        ),
+                        willChange: _hasActiveInteraction,
                       ),
-                      willChange: _hasActiveInteraction,
-                    ),
-                  );
-                }).toList(),
-              ],
-            );
-          },
-          child: widget.child,
+                    );
+                  }).toList(),
+                ],
+              );
+            },
+            child: widget.child,
+          ),
         ),
       ),
     );
@@ -235,18 +266,25 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
     BuildContext context,
     ScaleStartDetails details,
   ) async {
-    final focalPointScene = _transformationController.toScene(
-      details.localFocalPoint,
+    _interactionSize = _size;
+    if (!_hasInteractionSize()) {
+      return;
+    }
+    final focalPoint = _normalizeInteractionOffset(
+      _transformationController.toScene(
+        details.localFocalPoint,
+      ),
     );
     final transform = _transformationController.value.clone();
-    if (_attemptToSelect(focalPointScene, transform)) {
+    if (_attemptToSelect(focalPoint, transform)) {
       return;
     }
     final pending = _activeAdapter.start(
       context,
-      focalPointScene,
+      focalPoint,
       _effectiveController.color,
       transform,
+      _interactionSize!,
     );
     if (pending is DrawObject?) {
       _onInteractionStartSync(pending);
@@ -282,7 +320,12 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
 
   void _onInteractionStartSelected(Offset focalPoint, Matrix4 transform) {
     final object = _effectiveController.selectedObject!;
-    if (object.adapter.selectedStart(object, focalPoint, transform)) {
+    if (object.adapter.selectedStart(
+      object,
+      focalPoint,
+      transform,
+      _interactionSize!,
+    )) {
       _startInteraction();
     } else {
       _cancelSelectObject();
@@ -311,22 +354,26 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
       return;
     }
     if (_hasActiveInteraction) {
-      final focalPointScene = _transformationController.toScene(
-        details.localFocalPoint,
+      final focalPoint = _normalizeInteractionOffset(
+        _transformationController.toScene(
+          details.localFocalPoint,
+        ),
       );
       final transform = _transformationController.value.clone();
       final selectedObject = _effectiveController.selectedObject;
       final repaint = selectedObject != null
           ? selectedObject.adapter.selectedUpdate(
               selectedObject,
-              focalPointScene,
+              focalPoint,
               transform,
+              _interactionSize!,
             )
           : _effectiveController.objects.last.adapter.update(
               _effectiveController.objects.last,
-              focalPointScene,
+              focalPoint,
               _effectiveController.color,
               transform,
+              _interactionSize!,
             );
       if (repaint) {
         setState(() {});
@@ -335,6 +382,9 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   }
 
   void _onInteractionEnd(ScaleEndDetails details) {
+    // Keep a copy of the interaction size for the `object.adapter.end` method.
+    final tempInteractionSize = _interactionSize;
+    _interactionSize = null;
     if (_pendingObject != null) {
       /// We do not need to call [setState] when setting [_pendingObject] as
       /// it's not used in the [build] method.
@@ -350,7 +400,11 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
         }
       } else {
         final object = _effectiveController.objects.last;
-        final keep = object.adapter.end(object, _effectiveController.color);
+        final keep = object.adapter.end(
+          object,
+          _effectiveController.color,
+          tempInteractionSize!,
+        );
         if (!keep) {
           _removeObject(object);
         }
@@ -362,7 +416,12 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   bool _trySelectObject(Offset focalPoint, Matrix4 transform) {
     if (_activeAdapter.selectEnabled) {
       for (final object in _effectiveController.objects.reversed) {
-        if (object.adapter.querySelect(object, focalPoint, transform)) {
+        if (object.adapter.querySelect(
+          object,
+          focalPoint,
+          transform,
+          _interactionSize!,
+        )) {
           _selectObject(object);
           return true;
         }
