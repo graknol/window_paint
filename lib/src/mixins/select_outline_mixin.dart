@@ -10,7 +10,7 @@ mixin SelectOutlineMixin on DrawObject {
 
   /// The dimensions and appearance of the outline to render when this
   /// is selected.
-  RectPaint get selectOutline;
+  RectPaint getSelectOutline(Size size);
 
   /// Must be called in [shouldRepaint()].
   @protected
@@ -19,7 +19,7 @@ mixin SelectOutlineMixin on DrawObject {
   /// Paints the select outline if [showSelectOutline()] has been called.
   void paintSelectOutline(Canvas canvas, Size size, Denormalize denormalize) {
     if (_selected) {
-      _paintOutline(canvas, selectOutline, denormalize);
+      _paintOutline(canvas, getSelectOutline(size), denormalize);
     }
     _paintedSelected = _selected;
   }

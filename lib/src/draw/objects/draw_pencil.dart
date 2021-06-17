@@ -84,8 +84,8 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   Color get primaryColor => color;
 
   @override
-  RectPaint get selectOutline => RectPaint(
-        rect: rect.inflate(hitboxExtent / _scale),
+  RectPaint getSelectOutline(Size size) => RectPaint(
+        rect: rect.inflate(hitboxExtent / _scale / size.shortestSide),
         paint: Paint()
           ..color = Color(0x8A000000)
           ..strokeWidth = 1.0 / _scale
@@ -119,7 +119,6 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
     _paintedCount = points.length;
     _paintedSelected = selected;
   }
-  // TODO: Continue denormalizing coordinates in paint
 
   /// Useful for debugging hitboxes.
   void _paintHitboxes(Canvas canvas, Size size, Denormalize denormalize) {

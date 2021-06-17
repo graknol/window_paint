@@ -1,3 +1,7 @@
+## [0.5.0] - June 16, 2021
+
+- Changed `SelectOutlineMixin.selectOutline` to `getSelectOutline(Size size)` to correctly display the select outline.
+
 ## [0.4.0] - June 16, 2021
 
 - All coordinates are now normalized to the given screen size; making sharing and collaboration easier.

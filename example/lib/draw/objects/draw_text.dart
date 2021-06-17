@@ -61,8 +61,8 @@ class DrawText extends DrawObject with SelectOutlineMixin, DragHandleMixin {
   Color get primaryColor => color;
 
   @override
-  RectPaint get selectOutline => RectPaint(
-        rect: rect.inflate(5.0 / anchor.scale),
+  RectPaint getSelectOutline(Size size) => RectPaint(
+        rect: rect.inflate(5.0 / anchor.scale / size.shortestSide),
         paint: Paint()
           ..color = Color(0x8A000000)
           ..strokeWidth = 1.0 / anchor.scale
