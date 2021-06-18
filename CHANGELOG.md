@@ -1,3 +1,10 @@
+## [0.6.0] - June 18, 2021
+
+- Added `WindowPaint.onAdd` and `WindowPaint.onChange` which are triggered by
+interacting with the UI. Programmatic changes do not trigger these; meaning
+that any change by using `WindowPaintController` will have to be handled by
+the caller.
+
 ## [0.5.0] - June 17, 2021
 
 - Changed `SelectOutlineMixin.selectOutline` to `getSelectOutline(Size size)` to correctly display the select outline.

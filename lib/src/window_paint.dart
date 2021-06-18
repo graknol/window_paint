@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:measurer/measurer.dart';
 import 'package:window_paint/src/draw/adapters/draw_pencil_adapter.dart';
@@ -10,6 +11,9 @@ import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:window_paint/src/draw/draw_object_adapter.dart';
 import 'package:window_paint/src/window_paint_controller.dart';
 import 'package:window_paint/src/window_paint_painter.dart';
+
+typedef OnAddCallback = void Function(DrawObject object);
+typedef OnChangeCallback = void Function(DrawObject before, DrawObject after);
 
 class WindowPaint extends StatefulWidget {
   WindowPaint({
@@ -25,6 +29,8 @@ class WindowPaint extends StatefulWidget {
       DrawRectangleCrossAdapter(),
     ],
     required this.child,
+    this.onAdd,
+    this.onChange,
     this.restorationId,
   })  : adapters = Map<String, DrawObjectAdapter>.fromIterable(adapters,
             key: (a) => a.typeId),
@@ -36,6 +42,18 @@ class WindowPaint extends StatefulWidget {
   final double maxScale;
   final Map<String, DrawObjectAdapter> adapters;
   final Widget child;
+
+  /// Called when an object has been added by the user interactively through
+  /// the UI.
+  ///
+  /// Will not get triggered on programmatically added objects.
+  final OnAddCallback? onAdd;
+
+  /// Called when a *selected* object has been changed by the user interactively
+  /// through the UI.
+  ///
+  /// Will not get triggered on programmatically changed objects.
+  final OnChangeCallback? onChange;
 
   /// Restoration ID to save and restore the state of the window paint widget.
   ///
@@ -88,6 +106,11 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   /// The value of [_size] at the start of this interaction. This is a safeguard
   /// in case [_onMeasure] gets called in the middle of an interaction.
   Size? _interactionSize;
+
+  /// A clone of the object being selected during [_onInteractionStart].
+  /// This is used to compare it to the same object in [_onInteractionEnd] and
+  /// ultimately trigger `widget.onChange` if it has changed.
+  DrawObject? _interactionObject;
 
   bool _hasInteractionSize() {
     return _interactionSize != null;
@@ -277,6 +300,7 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
     );
     final transform = _transformationController.value.clone();
     if (_attemptToSelect(focalPoint, transform)) {
+      _interactionObject = _effectiveController.selectedObject!.clone();
       return;
     }
     final pending = _activeAdapter.start(
@@ -340,12 +364,21 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   }
 
   Future<void> _onInteractionStartAsync(Future<DrawObject?> pending) async {
+    DrawObject? onAddObject;
+
     /// We do not need to call [setState] when setting [_pendingObject] as it's
     /// not used in the [build] method.
     _pendingObject = pending;
     final object = await pending;
     if (object != null) {
+      onAddObject = object.clone();
       _addObject(object);
+    }
+
+    // We call this last, just to be sure we don't introduce any side effects
+    // with the state.
+    if (onAddObject != null) {
+      widget.onAdd?.call(onAddObject);
     }
   }
 
@@ -382,9 +415,29 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
   }
 
   void _onInteractionEnd(ScaleEndDetails details) {
-    // Keep a copy of the interaction size for the `object.adapter.end` method.
+    // Keep a copy of the interaction size for the `object.adapter.end` method
     final tempInteractionSize = _interactionSize;
     _interactionSize = null;
+
+    // Keep a copy of the interaction object for the [detectChange] method
+    final onChangeObjectFrom = _interactionObject;
+    _interactionObject = null;
+
+    DrawObject? onChangeObjectTo;
+    DrawObject? onAddObject;
+
+    void detectChange(DrawObject object) {
+      if (onChangeObjectFrom != null) {
+        // Make sure it's still the same object
+        if (onChangeObjectFrom.id == object.id) {
+          final equals = const DeepCollectionEquality().equals;
+          if (!equals(onChangeObjectFrom.toJSON(), object.toJSON())) {
+            onChangeObjectTo = object.clone();
+          }
+        }
+      }
+    }
+
     if (_pendingObject != null) {
       /// We do not need to call [setState] when setting [_pendingObject] as
       /// it's not used in the [build] method.
@@ -398,6 +451,7 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
         if (!remain) {
           _cancelSelectObject();
         }
+        detectChange(object);
       } else {
         final object = _effectiveController.objects.last;
         final keep = object.adapter.end(
@@ -405,11 +459,22 @@ class _WindowPaintState extends State<WindowPaint> with RestorationMixin {
           _effectiveController.color,
           tempInteractionSize!,
         );
-        if (!keep) {
+        if (keep) {
+          onAddObject = object.clone();
+        } else {
           _removeObject(object);
         }
       }
       _endInteraction();
+    }
+
+    // We call these last, just to be sure we don't introduce any side effects
+    // with the state.
+    if (onChangeObjectFrom != null && onChangeObjectTo != null) {
+      widget.onChange?.call(onChangeObjectFrom, onChangeObjectTo!);
+    }
+    if (onAddObject != null) {
+      widget.onAdd?.call(onAddObject);
     }
   }
 

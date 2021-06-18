@@ -105,6 +105,18 @@ class _MyHomePageState extends State<MyHomePage> with RestorationMixin {
                   ),
                   height: 400,
                 ),
+                onAdd: (object) {
+                  print('###ADD###');
+                  print(object.toJSON());
+                  print('~~~END~~~');
+                },
+                onChange: (from, to) {
+                  print('###CHANGE###');
+                  print(from.toJSON());
+                  print('###TO###');
+                  print(to.toJSON());
+                  print('~~~END~~~');
+                },
               ),
             ],
           ),
