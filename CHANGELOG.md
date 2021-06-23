@@ -1,3 +1,7 @@
+## [0.6.1] - June 23, 2021
+
+- Handle missing non-required properties in `DrawObject.fromJSON` by providing sensible defaults.
+
 ## [0.6.0] - June 18, 2021
 
 - Added `WindowPaint.onAdd` and `WindowPaint.onChange` which are triggered by

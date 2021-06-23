@@ -96,9 +96,11 @@ class DrawRectangleCross extends DrawRectangle {
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
       anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
-      hitboxExtent: encoded['hitboxExtent'] as double,
-      debugHitboxes: encoded['debugHitboxes'] as bool,
-    )..endpoint = offsetFromJSON(encoded['endpoint']);
+      hitboxExtent: encoded['hitboxExtent'] ?? 5.0,
+      debugHitboxes: encoded['debugHitboxes'] ?? false,
+    )..endpoint = encoded['endpoint'] != null
+        ? offsetFromJSON(encoded['endpoint'])
+        : null as Offset;
   }
 
   @override

@@ -177,11 +177,11 @@ class DrawPencil extends DrawObject with SelectOutlineMixin, DragHandleMixin {
       id: encoded['id'] as String,
       color: Color(encoded['color'] as int),
       strokeWidth: encoded['strokeWidth'] as double,
-      points: (encoded['points'] as List)
-          .map((p) => DrawPoint.fromJSON(p as Map))
+      points: (encoded['points'] as List?)
+          ?.map((p) => DrawPoint.fromJSON(p as Map))
           .toList(),
-      hitboxExtent: encoded['hitboxExtent'] as double,
-      debugHitboxes: encoded['debugHitboxes'] as bool,
+      hitboxExtent: encoded['hitboxExtent'] ?? 5.0,
+      debugHitboxes: encoded['debugHitboxes'] ?? false,
     );
   }
 

@@ -111,8 +111,8 @@ class DrawText extends DrawObject with SelectOutlineMixin, DragHandleMixin {
       id: encoded['id'] as String,
       color: Color(encoded['color'] as int),
       anchor: DrawPoint.fromJSON(encoded['anchor'] as Map),
-      text: encoded['text'] as String,
-      fontSize: encoded['fontSize'] as double,
+      text: encoded['text'] ?? '',
+      fontSize: encoded['fontSize'] ?? 16.0,
     );
   }
 
