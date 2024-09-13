@@ -40,7 +40,7 @@ class DrawRectangle extends DrawObject
   DrawPoint? _paintedAnchor;
   Offset? _paintedEndpoint;
 
-  set endpoint(Offset endpoint) {
+  set endpoint(Offset? endpoint) {
     _endpoint = endpoint;
   }
 
@@ -150,7 +150,7 @@ class DrawRectangle extends DrawObject
       debugHitboxes: encoded['debugHitboxes'] ?? false,
     )..endpoint = encoded['endpoint'] != null
         ? offsetFromJSON(encoded['endpoint'])
-        : null as Offset;
+        : null;
   }
 
   @override

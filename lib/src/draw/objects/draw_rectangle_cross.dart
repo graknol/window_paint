@@ -100,7 +100,7 @@ class DrawRectangleCross extends DrawRectangle {
       debugHitboxes: encoded['debugHitboxes'] ?? false,
     )..endpoint = encoded['endpoint'] != null
         ? offsetFromJSON(encoded['endpoint'])
-        : null as Offset;
+        : null;
   }
 
   @override

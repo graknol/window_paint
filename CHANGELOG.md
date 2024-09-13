@@ -1,3 +1,7 @@
+## [0.7.0] - September 13, 2024
+
+- Update packages and SDK version constraints to their latest versions
+
 ## [0.6.1] - June 23, 2021
 
 - Handle missing non-required properties in `DrawObject.fromJSON` by providing sensible defaults.
@@ -5,9 +9,9 @@
 ## [0.6.0] - June 18, 2021
 
 - Added `WindowPaint.onAdd` and `WindowPaint.onChange` which are triggered by
-interacting with the UI. Programmatic changes do not trigger these; meaning
-that any change by using `WindowPaintController` will have to be handled by
-the caller.
+  interacting with the UI. Programmatic changes do not trigger these; meaning
+  that any change by using `WindowPaintController` will have to be handled by
+  the caller.
 
 ## [0.5.0] - June 17, 2021
 
