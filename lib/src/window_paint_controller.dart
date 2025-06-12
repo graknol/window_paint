@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
@@ -332,7 +330,7 @@ class WindowPaintValue {
   }
 
   @override
-  int get hashCode => hashValues(
+  int get hashCode => Object.hash(
         mode.hashCode,
         color.hashCode,
         objects.hashCode,

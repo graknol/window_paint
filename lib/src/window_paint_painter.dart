@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:window_paint/src/draw/draw_object.dart';
 import 'package:flutter/widgets.dart';
 

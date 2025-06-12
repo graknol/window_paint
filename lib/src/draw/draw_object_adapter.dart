@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 import 'package:window_paint/src/draw/draw_object.dart';
-import 'package:flutter/foundation.dart';
 
 @immutable
 abstract class DrawObjectAdapter<T extends DrawObject> {
