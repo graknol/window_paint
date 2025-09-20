@@ -1,3 +1,54 @@
+## [2.0.0] - 2024
+
+🚀 **MAJOR RELEASE - Complete Architecture Rewrite**
+
+### New V2.0 Architecture
+
+- **✅ Clean Architecture**: Complete rewrite following Flutter best practices with proper separation of concerns
+- **✅ Type Safety**: Enum-based tool types replacing error-prone string identifiers
+- **✅ Modern State Management**: Immutable state with command pattern for built-in undo/redo functionality
+- **✅ Enhanced Extensibility**: Plugin-based architecture making it easy to add custom drawing tools
+- **✅ Better Serialization**: Clean JSON schema designed for easy server-side rendering with iTextSharp
+- **✅ Backward Compatibility**: Original v1.x API still available for gradual migration
+
+### New Features
+
+- Built-in undo/redo support via command pattern
+- Type-safe drawing tool system with `DrawToolType` enum
+- Immutable state management following Flutter best practices
+- Plugin architecture for custom tools (see `CUSTOM_TOOLS_GUIDE.md`)
+- Enhanced JSON serialization for server compatibility
+- Comprehensive documentation and examples
+
+### Breaking Changes
+
+- New v2.0 API available via `import 'package:window_paint/window_paint_v2.dart'`
+- Original v1.x API moved to legacy status but remains functional
+- Tool modes now use type-safe enums instead of strings
+
+### Migration
+
+- v1.x code continues to work unchanged
+- New projects should use v2.0 API
+- See migration guide in README.md
+
+### Documentation
+
+- Added `ARCHITECTURE_V2.md` explaining the new architecture
+- Added `CUSTOM_TOOLS_GUIDE.md` with step-by-step tool creation guide
+- Updated README.md with v2.0 examples and migration guide
+- Complete v2.0 example in `example/lib/main_v2.dart`
+
+### Under the Hood
+
+- Domain layer with clean interfaces and entities
+- Data layer with proper serialization models
+- Presentation layer with reactive state management
+- Comprehensive error handling and validation
+- Performance optimizations for large drawing datasets
+
+---
+
 ## [0.7.0] - September 13, 2024
 
 - Update packages and SDK version constraints to their latest versions
