@@ -1,10 +1,227 @@
-# Painting with power
+# Window Paint - Drawing Widget for Flutter
 
-`WindowPaint` lets you pan, zoom and paint over any other widget.
+A powerful, extensible drawing widget for Flutter that lets you pan, zoom and paint over any other widget. Perfect for PDF annotations, markup tools, and collaborative drawing applications.
 
-It uses the new `InteractiveViewer` coupled with `CustomPainter`; giving you the bare minimum to get you started.
+## 🚀 Version 2.0 - New Architecture!
 
-## Getting Started
+We've completely rewritten window_paint with a clean, modern architecture following Flutter best practices. The new v2.0 offers:
+
+- **✅ Clean Architecture** - Proper separation of concerns with domain, data, and presentation layers
+- **✅ Type Safety** - Enum-based tool types instead of error-prone strings
+- **✅ Better State Management** - Immutable state with command pattern for undo/redo
+- **✅ Enhanced Extensibility** - Plugin-based architecture for adding new drawing tools
+- **✅ Improved Serialization** - Clean JSON schema for easy server-side rendering
+- **✅ Modern Flutter Patterns** - ValueNotifier, proper disposal, reactive updates
+
+### Quick Start with v2.0
+
+```dart
+import 'package:window_paint/window_paint_v2.dart';
+
+class MyDrawingWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final controller = WindowPaintController();
+    final tools = {
+      DrawToolType.pencil: PencilDrawingTool(),
+      // Add more tools as needed
+    };
+
+    return WindowPaintV2(
+      controller: controller,
+      tools: tools,
+      child: Container(
+        width: 400,
+        height: 300,
+        color: Colors.white,
+      ),
+      onObjectAdded: (objectId) => print('Added: $objectId'),
+    );
+  }
+}
+```
+
+## Legacy v1.x Support
+
+The original window_paint implementation is still available for backward compatibility:
+
+```dart
+import 'package:window_paint/window_paint.dart'; // v1.x (legacy)
+```
+
+For new projects, we strongly recommend using v2.0:
+
+```dart
+import 'package:window_paint/window_paint_v2.dart'; // v2.0 (recommended)
+```
+
+## V2.0 Features & Benefits
+
+### 🏗️ Clean Architecture
+The new architecture follows clean code principles with clear separation of concerns:
+
+- **Domain Layer**: Business logic and entities
+- **Data Layer**: Serialization and data models  
+- **Presentation Layer**: UI components and state management
+
+### 🔧 Extensible Tool System
+Easily add new drawing tools by implementing simple interfaces:
+
+```dart
+class MyCustomTool implements IDrawingTool {
+  @override
+  DrawToolType get toolType => DrawToolType.custom;
+  
+  @override
+  Future<IDrawableObject?> startDrawing({...}) async {
+    // Your custom drawing logic
+  }
+  
+  // Implement other required methods...
+}
+```
+
+### 📦 Perfect for Server-Side Rendering
+Clean JSON serialization makes it easy to render the same drawings on the server:
+
+```dart
+// Export drawing data
+final jsonData = controller.exportToJson();
+
+// JSON structure is clean and server-friendly:
+[
+  {
+    "id": "uuid-here",
+    "toolType": "pencil",
+    "color": 4294901760,
+    "strokeWidth": 2.0,
+    "points": [...],
+    "metadata": {}
+  }
+]
+```
+
+### ↩️ Undo/Redo Support
+Built-in command pattern for full undo/redo functionality:
+
+```dart
+controller.undo();   // Undo last action
+controller.redo();   // Redo last undone action
+```
+
+### 🎯 Type Safety
+No more string-based tool modes - everything is strongly typed:
+
+```dart
+// Old v1 way (error-prone):
+controller.mode = 'pencil';
+
+// New v2 way (type-safe):
+controller.setActiveTool(DrawToolType.pencil);
+```
+
+## Architecture Overview
+
+See [ARCHITECTURE_V2.md](ARCHITECTURE_V2.md) for a detailed explanation of the v2.0 architecture, design principles, and examples.
+
+## Examples
+
+### Basic Drawing App
+
+Check out the complete example in `example/lib/main_v2.dart` which demonstrates:
+
+- Tool selection (pencil, rectangle, etc.)
+- Color picker
+- Stroke width adjustment
+- Undo/redo functionality
+- Object selection and manipulation
+
+### Adding Custom Tools
+
+```dart
+class CircleDrawingTool implements ISelectableTool {
+  @override
+  DrawToolType get toolType => DrawToolType.circle; // You'd add this enum value
+  
+  @override
+  Future<IDrawableObject?> startDrawing({...}) async {
+    return CircleDrawableObject(
+      center: startPoint,
+      radius: 0,
+      color: color,
+    );
+  }
+  
+  @override
+  bool updateDrawing({...}) {
+    if (object is CircleDrawableObject) {
+      final distance = (currentPoint - object.center).distance;
+      object.radius = distance;
+      return true; // Request repaint
+    }
+    return false;
+  }
+  
+  // Implement other required methods...
+}
+```
+
+## Migration Guide
+
+### From v1 to v2
+
+1. **Install both versions** (they can coexist):
+   ```dart
+   import 'package:window_paint/window_paint.dart'; // v1
+   import 'package:window_paint/window_paint_v2.dart'; // v2
+   ```
+
+2. **Replace widgets gradually**:
+   ```dart
+   // Old v1:
+   WindowPaint(
+     controller: oldController,
+     adapters: adapters,
+     child: myChild,
+   )
+   
+   // New v2:
+   WindowPaintV2(
+     controller: newController,
+     tools: tools,
+     child: myChild,
+   )
+   ```
+
+3. **Update state management**:
+   ```dart
+   // Old v1:
+   final controller = WindowPaintController(
+     initialMode: 'pencil',
+     initialColor: Colors.red,
+   );
+   
+   // New v2:
+   final controller = WindowPaintController(
+     initialState: WindowPaintState(
+       activeTool: DrawToolType.pencil,
+       activeColor: Colors.red,
+     ),
+   );
+   ```
+
+## API Comparison
+
+| Feature | v1.x (Legacy) | v2.0 (Recommended) |
+|---------|---------------|-------------------|
+| Tool Selection | `controller.mode = 'pencil'` | `controller.setActiveTool(DrawToolType.pencil)` |
+| Color Change | `controller.color = Colors.red` | `controller.setActiveColor(Colors.red)` |
+| Adding Objects | `controller.addObject(object)` | `controller.addObject(object)` |
+| Undo/Redo | ❌ Not built-in | ✅ `controller.undo()` / `controller.redo()` |
+| Type Safety | ❌ String-based | ✅ Enum-based |
+| Architecture | ❌ Monolithic | ✅ Clean Architecture |
+| Extensibility | ⚠️ Complex | ✅ Interface-based |
+| State Management | ⚠️ Mutable | ✅ Immutable |
 
 For the general use case you should manage to get up and running by playing around with `example/lib/main.dart`.
 

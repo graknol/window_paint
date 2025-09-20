@@ -1,3 +1,12 @@
+/// Window Paint v1.x (Legacy) - Original implementation
+/// 
+/// This is the original window_paint implementation. While functional,
+/// it has some architectural limitations. For new projects, consider
+/// using window_paint v2.0 which provides better architecture,
+/// type safety, and extensibility.
+/// 
+/// Import v2.0 with: `import 'package:window_paint/window_paint_v2.dart';`
+
 export 'package:window_paint/src/draw/adapters/draw_pencil_adapter.dart';
 export 'package:window_paint/src/draw/adapters/draw_rectangle_adapter.dart';
 export 'package:window_paint/src/draw/adapters/draw_rectangle_cross_adapter.dart';
