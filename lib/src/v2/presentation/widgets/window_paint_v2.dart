@@ -225,12 +225,6 @@ class _WindowPaintV2Painter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Set canvas size in controller if it changed
-    if (state.canvasSize != size) {
-      // Note: This is a bit of a hack since we can't modify state from here
-      // In a real implementation, you'd handle this differently
-    }
-
     // Create denormalization function
     Offset denormalize(Offset normalized) {
       return Offset(
@@ -241,7 +235,11 @@ class _WindowPaintV2Painter extends CustomPainter {
 
     // Render all objects
     for (final object in state.objects) {
-      object.render(canvas, size, denormalize);
+      try {
+        object.render(canvas, size, denormalize);
+      } catch (e) {
+        debugPrint('Error rendering object ${object.id}: $e');
+      }
     }
   }
 

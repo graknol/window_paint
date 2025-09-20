@@ -2,11 +2,9 @@
 /// 
 /// This is the original window_paint implementation. While functional,
 /// it has some architectural limitations. For new projects, consider
-/// using the simple version or v2.0 which provide better architecture,
-/// type safety, and extensibility.
+/// using v2.0 which provides better architecture, type safety, and extensibility.
 /// 
-/// Simple version: `import 'package:window_paint/window_paint_simple.dart';`
-/// Full v2.0: `import 'package:window_paint/window_paint_v2.dart';`
+/// v2.0: `import 'package:window_paint/window_paint_v2.dart';`
 
 export 'package:window_paint/src/draw/adapters/draw_pencil_adapter.dart';
 export 'package:window_paint/src/draw/adapters/draw_rectangle_adapter.dart';

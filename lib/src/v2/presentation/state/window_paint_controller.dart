@@ -60,7 +60,11 @@ class WindowPaintController extends ValueNotifier<WindowPaintState> {
   void setActiveColor(Color color) {
     // If an object is selected, update its color
     if (selectedObject != null) {
-      final tool = _tools[DrawToolType.fromId(selectedObject!.toolType)];
+      final toolType = DrawToolType.values.firstWhere(
+        (type) => type.toString().split('.').last == selectedObject!.toolType,
+        orElse: () => DrawToolType.pencil,
+      );
+      final tool = _tools[toolType];
       if (tool is ISelectableTool) {
         tool.updateColor(object: selectedObject!, newColor: color);
         notifyListeners(); // Trigger repaint
@@ -198,7 +202,11 @@ class WindowPaintController extends ValueNotifier<WindowPaintState> {
     // Check objects in reverse order (topmost first)
     for (int i = objects.length - 1; i >= 0; i--) {
       final object = objects[i];
-      final tool = _tools[DrawToolType.fromId(object.toolType)];
+      final toolType = DrawToolType.values.firstWhere(
+        (type) => type.toString().split('.').last == object.toolType,
+        orElse: () => DrawToolType.pencil,
+      );
+      final tool = _tools[toolType];
       
       if (tool is ISelectableTool) {
         if (tool.canSelect(
@@ -308,8 +316,12 @@ class WindowPaintController extends ValueNotifier<WindowPaintState> {
     
     for (final json in jsonData) {
       try {
-        final toolType = DrawToolType.fromId(json['toolType'] as String);
-        if (toolType != null) {
+        final toolTypeStr = json['toolType'] as String?;
+        if (toolTypeStr != null) {
+          final toolType = DrawToolType.values.firstWhere(
+            (type) => type.toString().split('.').last == toolTypeStr,
+            orElse: () => DrawToolType.pencil,
+          );
           final tool = _tools[toolType];
           final object = tool?.createFromJson(json);
           if (object != null) {
