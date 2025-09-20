@@ -126,6 +126,19 @@ enum DrawingTool {
   circle,
 }
 
+/// Helper class to reduce parameter duplication
+class _DrawingParams {
+  const _DrawingParams({
+    required this.point,
+    required this.color,
+    required this.strokeWidth,
+  });
+
+  final Offset point;
+  final int color;
+  final double strokeWidth;
+}
+
 /// Simple controller for managing drawing state
 class WindowPaintController extends ChangeNotifier {
   WindowPaintController({
@@ -177,39 +190,64 @@ class WindowPaintController extends ChangeNotifier {
 
   // Drawing operations
   void _startDrawing(Offset point, Matrix4 transform, Size canvasSize) {
+    if (_tool == DrawingTool.pan) return;
+    
     _canvasSize = canvasSize;
     final normalizedPoint = _normalizePoint(point);
     
-    switch (_tool) {
-      case DrawingTool.pencil:
-        _currentDrawing = PencilDrawing.start(
-          point: normalizedPoint,
-          color: _color.value,
-          strokeWidth: _strokeWidth,
-        );
-        break;
-      case DrawingTool.rectangle:
-        _currentDrawing = RectangleDrawing.start(
-          point: normalizedPoint,
-          color: _color.value,
-          strokeWidth: _strokeWidth,
-        );
-        break;
-      case DrawingTool.circle:
-        _currentDrawing = CircleDrawing.start(
-          point: normalizedPoint,
-          color: _color.value,
-          strokeWidth: _strokeWidth,
-        );
-        break;
-      case DrawingTool.pan:
-        return;
-    }
+    _currentDrawing = _createDrawingForTool(normalizedPoint);
     
     if (_currentDrawing != null) {
       _drawings.add(_currentDrawing!);
       notifyListeners();
     }
+  }
+
+  /// Creates a new drawing object based on the current tool
+  DrawingObject? _createDrawingForTool(Offset point) {
+    final commonParams = _DrawingParams(
+      point: point,
+      color: _color.value,
+      strokeWidth: _strokeWidth,
+    );
+
+    switch (_tool) {
+      case DrawingTool.pencil:
+        return _createPencilDrawing(commonParams);
+      case DrawingTool.rectangle:
+        return _createRectangleDrawing(commonParams);
+      case DrawingTool.circle:
+        return _createCircleDrawing(commonParams);
+      case DrawingTool.pan:
+        return null;
+    }
+  }
+
+  /// Creates a new pencil drawing with the given parameters
+  PencilDrawing _createPencilDrawing(_DrawingParams params) {
+    return PencilDrawing.start(
+      point: params.point,
+      color: params.color,
+      strokeWidth: params.strokeWidth,
+    );
+  }
+
+  /// Creates a new rectangle drawing with the given parameters
+  RectangleDrawing _createRectangleDrawing(_DrawingParams params) {
+    return RectangleDrawing.start(
+      point: params.point,
+      color: params.color,
+      strokeWidth: params.strokeWidth,
+    );
+  }
+
+  /// Creates a new circle drawing with the given parameters
+  CircleDrawing _createCircleDrawing(_DrawingParams params) {
+    return CircleDrawing.start(
+      point: params.point,
+      color: params.color,
+      strokeWidth: params.strokeWidth,
+    );
   }
 
   void _updateDrawing(Offset point, Matrix4 transform) {
@@ -235,18 +273,32 @@ class WindowPaintController extends ChangeNotifier {
 
   void _selectAt(Offset point) {
     final normalizedPoint = _normalizePoint(point);
+    final selectedDrawing = _findDrawingAt(normalizedPoint);
     
+    if (selectedDrawing != null) {
+      _selectDrawing(selectedDrawing);
+    } else {
+      _clearSelection();
+    }
+  }
+
+  DrawingObject? _findDrawingAt(Offset point) {
     // Check drawings in reverse order (top to bottom)
     for (int i = _drawings.length - 1; i >= 0; i--) {
-      if (_drawings[i].containsPoint(normalizedPoint)) {
-        _selectedId = _drawings[i].id;
-        _color = Color(_drawings[i].color);
-        notifyListeners();
-        return;
+      if (_drawings[i].containsPoint(point)) {
+        return _drawings[i];
       }
     }
-    
-    // No drawing selected
+    return null;
+  }
+
+  void _selectDrawing(DrawingObject drawing) {
+    _selectedId = drawing.id;
+    _color = Color(drawing.color);
+    notifyListeners();
+  }
+
+  void _clearSelection() {
     _selectedId = null;
     notifyListeners();
   }
@@ -280,15 +332,23 @@ class WindowPaintController extends ChangeNotifier {
   }
 
   void fromJson(List<Map<String, dynamic>> json) {
+    _clearDrawings();
+    _loadDrawingsFromJson(json);
+    notifyListeners();
+  }
+
+  void _clearDrawings() {
     _drawings.clear();
+    _selectedId = null;
+  }
+
+  void _loadDrawingsFromJson(List<Map<String, dynamic>> json) {
     for (final item in json) {
       final drawing = DrawingObject.fromJson(item);
       if (drawing != null) {
         _drawings.add(drawing);
       }
     }
-    _selectedId = null;
-    notifyListeners();
   }
 }
 
@@ -314,18 +374,23 @@ abstract class DrawingObject {
 
   static DrawingObject? fromJson(Map<String, dynamic> json) {
     try {
-      switch (json['type']) {
-        case 'pencil':
-          return PencilDrawing.fromJson(json);
-        case 'rectangle':
-          return RectangleDrawing.fromJson(json);
-        case 'circle':
-          return CircleDrawing.fromJson(json);
-        default:
-          return null;
-      }
+      final type = json['type'] as String;
+      return _createDrawingFromType(type, json);
     } catch (e) {
       return null;
+    }
+  }
+
+  static DrawingObject? _createDrawingFromType(String type, Map<String, dynamic> json) {
+    switch (type) {
+      case 'pencil':
+        return PencilDrawing.fromJson(json);
+      case 'rectangle':
+        return RectangleDrawing.fromJson(json);
+      case 'circle':
+        return CircleDrawing.fromJson(json);
+      default:
+        return null;
     }
   }
 }
@@ -363,23 +428,31 @@ class PencilDrawing extends DrawingObject {
   void paint(Canvas canvas, Size size) {
     if (points.length < 2) return;
 
-    final paint = Paint()
+    final paint = _createPaint();
+    _drawLineSegments(canvas, size, paint);
+  }
+
+  Paint _createPaint() {
+    return Paint()
       ..color = Color(color)
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
+  }
 
+  void _drawLineSegments(Canvas canvas, Size size, Paint paint) {
     for (int i = 0; i < points.length - 1; i++) {
-      final from = Offset(
-        points[i].dx * size.width,
-        points[i].dy * size.height,
-      );
-      final to = Offset(
-        points[i + 1].dx * size.width,
-        points[i + 1].dy * size.height,
-      );
+      final from = _denormalizePoint(points[i], size);
+      final to = _denormalizePoint(points[i + 1], size);
       canvas.drawLine(from, to, paint);
     }
+  }
+
+  Offset _denormalizePoint(Offset point, Size size) {
+    return Offset(
+      point.dx * size.width,
+      point.dy * size.height,
+    );
   }
 
   @override
@@ -447,17 +520,30 @@ class RectangleDrawing extends DrawingObject {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    final paint = _createPaint();
+    final rect = _calculateRect(size);
+    canvas.drawRect(rect, paint);
+  }
+
+  Paint _createPaint() {
+    return Paint()
       ..color = Color(color)
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
+  }
 
-    final rect = Rect.fromPoints(
-      Offset(startPoint.dx * size.width, startPoint.dy * size.height),
-      Offset(endPoint.dx * size.width, endPoint.dy * size.height),
+  Rect _calculateRect(Size size) {
+    return Rect.fromPoints(
+      _denormalizePoint(startPoint, size),
+      _denormalizePoint(endPoint, size),
     );
+  }
 
-    canvas.drawRect(rect, paint);
+  Offset _denormalizePoint(Offset point, Size size) {
+    return Offset(
+      point.dx * size.width,
+      point.dy * size.height,
+    );
   }
 
   @override
@@ -532,18 +618,29 @@ class CircleDrawing extends DrawingObject {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
+    final paint = _createPaint();
+    final centerPx = _denormalizePoint(center, size);
+    final radiusPx = _calculateRadius(size);
+    
+    canvas.drawCircle(centerPx, radiusPx, paint);
+  }
+
+  Paint _createPaint() {
+    return Paint()
       ..color = Color(color)
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
+  }
 
-    final centerPx = Offset(
-      center.dx * size.width,
-      center.dy * size.height,
+  Offset _denormalizePoint(Offset point, Size size) {
+    return Offset(
+      point.dx * size.width,
+      point.dy * size.height,
     );
-    final radiusPx = radius * size.shortestSide;
+  }
 
-    canvas.drawCircle(centerPx, radiusPx, paint);
+  double _calculateRadius(Size size) {
+    return radius * size.shortestSide;
   }
 
   @override
@@ -606,50 +703,77 @@ class _WindowPainter extends CustomPainter {
   }
 
   void _paintSelection(Canvas canvas, Size size, DrawingObject drawing) {
-    final paint = Paint()
+    final paint = _createSelectionPaint();
+
+    if (drawing is PencilDrawing) {
+      _paintPencilSelection(canvas, size, drawing, paint);
+    } else if (drawing is RectangleDrawing) {
+      _paintRectangleSelection(canvas, size, drawing, paint);
+    } else if (drawing is CircleDrawing) {
+      _paintCircleSelection(canvas, size, drawing, paint);
+    }
+  }
+
+  Paint _createSelectionPaint() {
+    return Paint()
       ..color = const Color(0x80000000)
       ..strokeWidth = 1
       ..style = PaintingStyle.stroke;
+  }
 
-    // Simple selection outline - just draw a bounding box
-    if (drawing is PencilDrawing) {
-      final bounds = _getBounds(drawing.points, size);
-      canvas.drawRect(bounds.inflate(5), paint);
-    } else if (drawing is RectangleDrawing) {
-      final rect = Rect.fromPoints(
-        Offset(drawing.startPoint.dx * size.width, drawing.startPoint.dy * size.height),
-        Offset(drawing.endPoint.dx * size.width, drawing.endPoint.dy * size.height),
-      );
-      canvas.drawRect(rect.inflate(5), paint);
-    } else if (drawing is CircleDrawing) {
-      final center = Offset(
-        drawing.center.dx * size.width,
-        drawing.center.dy * size.height,
-      );
-      canvas.drawCircle(center, drawing.radius * size.shortestSide + 5, paint);
-    }
+  void _paintPencilSelection(Canvas canvas, Size size, PencilDrawing drawing, Paint paint) {
+    final bounds = _getBounds(drawing.points, size);
+    canvas.drawRect(bounds.inflate(5), paint);
+  }
+
+  void _paintRectangleSelection(Canvas canvas, Size size, RectangleDrawing drawing, Paint paint) {
+    final rect = _denormalizeRect(drawing.startPoint, drawing.endPoint, size);
+    canvas.drawRect(rect.inflate(5), paint);
+  }
+
+  void _paintCircleSelection(Canvas canvas, Size size, CircleDrawing drawing, Paint paint) {
+    final center = _denormalizePoint(drawing.center, size);
+    final radius = drawing.radius * size.shortestSide + 5;
+    canvas.drawCircle(center, radius, paint);
+  }
+
+  Offset _denormalizePoint(Offset point, Size size) {
+    return Offset(
+      point.dx * size.width,
+      point.dy * size.height,
+    );
+  }
+
+  Rect _denormalizeRect(Offset start, Offset end, Size size) {
+    return Rect.fromPoints(
+      _denormalizePoint(start, size),
+      _denormalizePoint(end, size),
+    );
   }
 
   Rect _getBounds(List<Offset> points, Size size) {
     if (points.isEmpty) return Rect.zero;
     
+    final bounds = _calculateNormalizedBounds(points);
+    return _denormalizeRect(bounds.topLeft, bounds.bottomRight, size);
+  }
+
+  Rect _calculateNormalizedBounds(List<Offset> points) {
     double minX = points.first.dx, maxX = points.first.dx;
     double minY = points.first.dy, maxY = points.first.dy;
     
     for (final point in points) {
-      if (point.dx < minX) minX = point.dx;
-      if (point.dx > maxX) maxX = point.dx;
-      if (point.dy < minY) minY = point.dy;
-      if (point.dy > maxY) maxY = point.dy;
+      minX = _min(minX, point.dx);
+      maxX = _max(maxX, point.dx);
+      minY = _min(minY, point.dy);
+      maxY = _max(maxY, point.dy);
     }
     
-    return Rect.fromLTRB(
-      minX * size.width,
-      minY * size.height,
-      maxX * size.width,
-      maxY * size.height,
-    );
+    return Rect.fromLTRB(minX, minY, maxX, maxY);
   }
+
+  double _min(double a, double b) => a < b ? a : b;
+  double _max(double a, double b) => a > b ? a : b;
 
   @override
   bool shouldRepaint(_WindowPainter oldDelegate) {
