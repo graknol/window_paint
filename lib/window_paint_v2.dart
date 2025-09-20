@@ -87,6 +87,7 @@ export 'src/v2/domain/entities/draw_tool_type.dart';
 export 'src/v2/domain/interfaces/drawable_object.dart';
 export 'src/v2/domain/interfaces/drawing_tool.dart';
 export 'src/v2/domain/entities/pencil_drawable_object.dart';
+export 'src/v2/domain/entities/rectangle_drawable_object.dart';
 
 // Data layer exports
 export 'src/v2/data/models/draw_point_data.dart';
@@ -99,3 +100,5 @@ export 'src/v2/presentation/widgets/window_paint_v2.dart';
 
 // Tools exports
 export 'src/v2/tools/pencil_drawing_tool.dart';
+export 'src/v2/tools/rectangle_drawing_tool.dart';
+export 'src/v2/tools/pan_zoom_drawing_tool.dart';

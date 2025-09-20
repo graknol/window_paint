@@ -42,9 +42,14 @@ class _MyHomePageState extends State<MyHomePage> {
     
     // Initialize drawing tools
     _tools = {
+      DrawToolType.panZoom: PanZoomDrawingTool(),
       DrawToolType.pencil: PencilDrawingTool(
         defaultStrokeWidth: 2.0,
         autoSimplify: true,
+      ),
+      DrawToolType.rectangle: RectangleDrawingTool(
+        defaultStrokeWidth: 2.0,
+        filled: false,
       ),
       // Add more tools here as they're implemented
     };
@@ -52,7 +57,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // Initialize controller
     _controller = WindowPaintController(
       initialState: const WindowPaintState(
-        activeTool: DrawToolType.pencil,
+        activeTool: DrawToolType.panZoom,
         activeColor: Colors.red,
         strokeWidth: 2.0,
       ),
