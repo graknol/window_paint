@@ -1,8 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:window_paint/src/v2/domain/interfaces/drawable_object.dart';
-import 'package:window_paint/src/v2/data/models/drawable_object_data.dart';
-import 'package:window_paint/src/v2/data/models/draw_point_data.dart';
+import 'package:window_paint/src/v2/data/models/simple_drawable_object_data.dart';
 
 /// Concrete implementation of a pencil/freehand drawing object.
 /// 
@@ -14,8 +13,7 @@ class PencilDrawableObject implements IDrawableObject {
     this.isDragging = false,
   });
 
-  /// The underlying data model
-  final PencilObjectData data;
+  final DrawableObjectData data;
   
   /// Whether this object is currently selected
   bool isSelected;
@@ -34,7 +32,8 @@ class PencilDrawableObject implements IDrawableObject {
 
   @override
   void render(Canvas canvas, Size size, Offset Function(Offset) denormalize) {
-    if (data.points.isEmpty) return;
+    final points = _getPoints();
+    if (points.isEmpty) return;
 
     final paint = Paint()
       ..color = primaryColor
@@ -43,29 +42,29 @@ class PencilDrawableObject implements IDrawableObject {
       ..isAntiAlias = true
       ..style = PaintingStyle.stroke;
 
-    // Draw the pencil stroke
-    for (int i = 0; i < data.points.length - 1; i++) {
-      final from = data.points[i];
-      final to = data.points[i + 1];
-      
+    for (int i = 0; i < points.length - 1; i++) {
       canvas.drawLine(
-        denormalize(from.toOffset()),
-        denormalize(to.toOffset()),
+        denormalize(points[i]),
+        denormalize(points[i + 1]),
         paint,
       );
     }
 
-    // Draw selection outline if selected
     if (isSelected) {
       _renderSelectionOutline(canvas, size, denormalize);
     }
   }
 
-  void _renderSelectionOutline(Canvas canvas, Size size, Offset Function(Offset) denormalize) {
-    if (data.points.isEmpty) return;
+  List<Offset> _getPoints() {
+    final pointsData = data.data['points'] as List<dynamic>? ?? [];
+    return pointsData.map((p) => Offset(p['x'] as double, p['y'] as double)).toList();
+  }
 
+  void _renderSelectionOutline(Canvas canvas, Size size, Offset Function(Offset) denormalize) {
     final bounds = getBounds();
-    final padding = 5.0 / size.shortestSide; // Normalized padding
+    if (bounds == Rect.zero) return;
+
+    final padding = 5.0 / size.shortestSide;
     final selectionRect = bounds.inflate(padding);
 
     final selectionPaint = Paint()
