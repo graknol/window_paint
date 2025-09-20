@@ -2,60 +2,203 @@
 
 A powerful, extensible drawing widget for Flutter that lets you pan, zoom and paint over any other widget. Perfect for PDF annotations, markup tools, and collaborative drawing applications.
 
-## 🚀 Version 2.0 - New Architecture!
+## 🚀 Choose Your Approach
 
-We've completely rewritten window_paint with a clean, modern architecture following Flutter best practices. The new v2.0 offers:
+We offer **three different versions** to match your needs:
 
-- **✅ Clean Architecture** - Proper separation of concerns with domain, data, and presentation layers
-- **✅ Type Safety** - Enum-based tool types instead of error-prone strings
-- **✅ Better State Management** - Immutable state with command pattern for undo/redo
-- **✅ Enhanced Extensibility** - Plugin-based architecture for adding new drawing tools
-- **✅ Improved Serialization** - Clean JSON schema for easy server-side rendering
-- **✅ Modern Flutter Patterns** - ValueNotifier, proper disposal, reactive updates
+### 🎯 Simple Version (Recommended for Most Use Cases)
 
-### Quick Start with v2.0
+Clean, straightforward API with minimal boilerplate - perfect for most drawing applications:
 
 ```dart
-import 'package:window_paint/window_paint_v2.dart';
+import 'package:window_paint/window_paint_simple.dart';
 
 class MyDrawingWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = WindowPaintController();
-    final tools = {
-      DrawToolType.pencil: PencilDrawingTool(),
-      // Add more tools as needed
-    };
 
-    return WindowPaintV2(
+    return WindowPaint(
       controller: controller,
-      tools: tools,
-      child: Container(
-        width: 400,
-        height: 300,
-        color: Colors.white,
-      ),
-      onObjectAdded: (objectId) => print('Added: $objectId'),
+      child: Container(width: 400, height: 300, color: Colors.white),
+      onDrawingAdded: (drawing) => print('Drawing added: ${drawing.id}'),
     );
   }
 }
 ```
 
-## Legacy v1.x Support
+**Features:**
+- ✅ **Minimal Setup** - Just a few lines of code to get started
+- ✅ **Built-in Tools** - Pencil, rectangle, circle, and pan/zoom
+- ✅ **Clean JSON Export** - Perfect for server-side PDF rendering
+- ✅ **Selection & Editing** - Tap to select and modify drawings
+- ✅ **Type Safety** - Enum-based tools and strong typing
 
-The original window_paint implementation is still available for backward compatibility:
+### 🏗️ Full v2.0 Architecture (Advanced Use Cases)
+
+Complete architectural solution with clean architecture principles:
+
+```dart
+import 'package:window_paint/window_paint_v2.dart';
+
+// For applications requiring extensive customization,
+// plugin architectures, and complex state management
+```
+
+**Features:**
+- ✅ **Clean Architecture** - Domain, data, and presentation layers
+- ✅ **Plugin System** - Easy to add custom drawing tools
+- ✅ **Command Pattern** - Built-in undo/redo functionality
+- ✅ **Advanced State Management** - Immutable state with reactive updates
+
+### 📦 Legacy v1.x (Backward Compatibility)
+
+Original implementation for existing applications:
 
 ```dart
 import 'package:window_paint/window_paint.dart'; // v1.x (legacy)
 ```
 
-For new projects, we strongly recommend using v2.0:
+## 📊 Version Comparison
+
+| Feature | Simple | Full v2.0 | Legacy v1.x |
+|---------|--------|-----------|-------------|
+| **Setup Complexity** | 🟢 Minimal | 🟡 Moderate | 🔴 Complex |
+| **API Simplicity** | 🟢 Very Easy | 🟡 Structured | 🔴 Verbose |
+| **Drawing Tools** | 🟢 Built-in (4 tools) | 🟢 Extensible | 🟡 Limited |
+| **JSON Export** | 🟢 Clean Schema | 🟢 Structured | 🟡 Basic |
+| **Undo/Redo** | 🔴 Not Built-in | 🟢 Full Support | 🔴 None |
+| **Type Safety** | 🟢 Strong Types | 🟢 Full Type Safety | 🔴 String-based |
+| **Custom Tools** | 🟡 Possible | 🟢 Plugin System | 🔴 Difficult |
+| **File Size** | 🟢 Single File | 🟡 Structured | 🟡 Multiple Files |
+| **Learning Curve** | 🟢 5 minutes | 🟡 30 minutes | 🔴 Several hours |
+
+## 🎯 Which Version Should You Use?
+
+### Choose **Simple** if you:
+- Want to add drawing functionality quickly
+- Need basic tools (pencil, shapes, pan/zoom)
+- Prefer minimal boilerplate and setup
+- Want clean JSON export for server-side PDF rendering
+- Are building a straightforward drawing/annotation app
+
+### Choose **Full v2.0** if you:
+- Need extensive customization and custom tools
+- Want built-in undo/redo functionality
+- Require plugin architecture for third-party tools
+- Are building a complex drawing application
+- Want clean architecture with proper separation of concerns
+
+### Choose **Legacy v1.x** if you:
+- Have existing code using the original API
+- Need backward compatibility
+- Are maintaining legacy applications
+
+## 🚀 Quick Start Examples
+
+### Simple Version (Most Common)
 
 ```dart
-import 'package:window_paint/window_paint_v2.dart'; // v2.0 (recommended)
+import 'package:flutter/material.dart';
+import 'package:window_paint/window_paint_simple.dart';
+
+class QuickDrawingApp extends StatefulWidget {
+  @override
+  _QuickDrawingAppState createState() => _QuickDrawingAppState();
+}
+
+class _QuickDrawingAppState extends State<QuickDrawingApp> {
+  final controller = WindowPaintController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Quick Drawing'),
+        actions: [
+          // Tool selector
+          DropdownButton<DrawingTool>(
+            value: controller.tool,
+            onChanged: (tool) => controller.setTool(tool!),
+            items: [
+              DropdownMenuItem(value: DrawingTool.pan, child: Text('Pan')),
+              DropdownMenuItem(value: DrawingTool.pencil, child: Text('Pencil')),
+              DropdownMenuItem(value: DrawingTool.rectangle, child: Text('Rectangle')),
+              DropdownMenuItem(value: DrawingTool.circle, child: Text('Circle')),
+            ],
+          ),
+          // Clear button
+          IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: controller.clearAll,
+          ),
+        ],
+      ),
+      body: WindowPaint(
+        controller: controller,
+        child: Container(
+          color: Colors.grey[100],
+          child: Center(
+            child: Text('Draw here!', style: TextStyle(fontSize: 24)),
+          ),
+        ),
+        onDrawingAdded: (drawing) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Drawing added: ${drawing.type}')),
+          );
+        },
+      ),
+    );
+  }
+  
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+}
 ```
 
-## V2.0 Features & Benefits
+### API Comparison
+
+```dart
+// Simple Version - Minimal boilerplate
+final controller = WindowPaintController();
+controller.setTool(DrawingTool.pencil);
+controller.setColor(Colors.red);
+
+WindowPaint(
+  controller: controller,
+  child: myWidget,
+)
+
+// Full v2.0 - More configuration options
+final controller = WindowPaintController(
+  tools: {
+    DrawToolType.pencil: PencilDrawingTool(),
+    DrawToolType.rectangle: RectangleDrawingTool(),
+  },
+);
+
+WindowPaintV2(
+  controller: controller,
+  tools: tools,
+  child: myWidget,
+)
+
+// Legacy v1.x - Complex setup
+final adapters = [
+  DrawPencilAdapter(),
+  DrawRectangleAdapter(),
+];
+final controller = WindowPaintController();
+
+WindowPaint(
+  controller: controller,
+  adapters: adapters,
+  child: myWidget,
+)
+```
 
 ### 🏗️ Clean Architecture
 The new architecture follows clean code principles with clear separation of concerns:
