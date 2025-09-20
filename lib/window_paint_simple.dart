@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 /// Simple, clean drawing widget for window_paint v2.0
@@ -118,12 +119,33 @@ class _WindowPaintState extends State<WindowPaint> {
   }
 }
 
-/// Simple drawing tools enum
+/// Simple drawing tools enum - extensible with custom tools
 enum DrawingTool {
   pan,
   pencil,
   rectangle,
   circle,
+  custom, // For custom registered tools
+}
+
+/// Factory function type for creating drawing objects
+typedef DrawingFactory = DrawingObject Function({
+  required Offset point,
+  required int color,
+  required double strokeWidth,
+});
+
+/// Custom tool definition
+class CustomTool {
+  const CustomTool({
+    required this.id,
+    required this.name,
+    required this.factory,
+  });
+
+  final String id;
+  final String name;
+  final DrawingFactory factory;
 }
 
 /// Helper class to reduce parameter duplication
@@ -145,9 +167,11 @@ class WindowPaintController extends ChangeNotifier {
     DrawingTool tool = DrawingTool.pencil,
     Color color = const Color(0xFF000000),
     double strokeWidth = 2.0,
+    Map<String, CustomTool>? customTools,
   }) : _tool = tool,
        _color = color,
-       _strokeWidth = strokeWidth;
+       _strokeWidth = strokeWidth,
+       _customTools = customTools ?? {};
 
   DrawingTool _tool;
   Color _color;
@@ -156,6 +180,8 @@ class WindowPaintController extends ChangeNotifier {
   String? _selectedId;
   DrawingObject? _currentDrawing;
   Size _canvasSize = Size.zero;
+  final Map<String, CustomTool> _customTools;
+  String? _activeCustomToolId; // Tracks which custom tool is active
 
   // Getters
   DrawingTool get tool => _tool;
@@ -165,13 +191,50 @@ class WindowPaintController extends ChangeNotifier {
   String? get selectedId => _selectedId;
   DrawingObject? get selectedDrawing => 
       _drawings.where((d) => d.id == _selectedId).firstOrNull;
+  Map<String, CustomTool> get customTools => Map.unmodifiable(_customTools);
+  String? get activeCustomToolId => _activeCustomToolId;
 
   // Simple setters
   void setTool(DrawingTool tool) {
     _tool = tool;
+    if (tool != DrawingTool.custom) {
+      _activeCustomToolId = null; // Clear custom tool when switching to built-in
+    }
     _selectedId = null; // Clear selection when changing tools
     notifyListeners();
   }
+
+  /// Register a new custom drawing tool
+  void registerCustomTool(CustomTool tool) {
+    _customTools[tool.id] = tool;
+    notifyListeners();
+  }
+
+  /// Unregister a custom drawing tool
+  void unregisterCustomTool(String toolId) {
+    _customTools.remove(toolId);
+    if (_activeCustomToolId == toolId) {
+      // Switch back to pencil if current custom tool is removed
+      setTool(DrawingTool.pencil);
+    }
+    notifyListeners();
+  }
+
+  /// Set active custom tool by ID
+  void setCustomTool(String toolId) {
+    if (_customTools.containsKey(toolId)) {
+      _tool = DrawingTool.custom;
+      _activeCustomToolId = toolId;
+      _selectedId = null; // Clear selection when changing tools
+      notifyListeners();
+    } else {
+      throw ArgumentError('Custom tool with ID "$toolId" is not registered');
+    }
+  }
+
+  /// Get currently active custom tool, if any
+  CustomTool? get activeCustomTool => 
+      _activeCustomToolId != null ? _customTools[_activeCustomToolId] : null;
 
   void setColor(Color color) {
     _color = color;
@@ -218,9 +281,23 @@ class WindowPaintController extends ChangeNotifier {
         return _createRectangleDrawing(commonParams);
       case DrawingTool.circle:
         return _createCircleDrawing(commonParams);
+      case DrawingTool.custom:
+        return _createCustomDrawing(commonParams);
       case DrawingTool.pan:
         return null;
     }
+  }
+
+  /// Creates a custom drawing using the active custom tool
+  DrawingObject? _createCustomDrawing(_DrawingParams params) {
+    final customTool = activeCustomTool;
+    if (customTool == null) return null;
+    
+    return customTool.factory(
+      point: params.point,
+      color: params.color,
+      strokeWidth: params.strokeWidth,
+    );
   }
 
   /// Creates a new pencil drawing with the given parameters
@@ -389,6 +466,10 @@ abstract class DrawingObject {
         return RectangleDrawing.fromJson(json);
       case 'circle':
         return CircleDrawing.fromJson(json);
+      case 'line':
+        return LineDrawing.fromJson(json);
+      case 'arrow':
+        return ArrowDrawing.fromJson(json);
       default:
         return null;
     }
@@ -779,4 +860,274 @@ class _WindowPainter extends CustomPainter {
   bool shouldRepaint(_WindowPainter oldDelegate) {
     return controller != oldDelegate.controller;
   }
+}
+
+/// Example custom drawing tools to demonstrate extensibility
+
+/// Example: Line drawing tool
+class LineDrawing extends DrawingObject {
+  LineDrawing({
+    required super.id,
+    required super.color,
+    required super.strokeWidth,
+    required this.startPoint,
+    required this.endPoint,
+  }) : super(type: 'line');
+
+  final Offset startPoint;
+  Offset endPoint;
+
+  factory LineDrawing.start({
+    required Offset point,
+    required int color,
+    required double strokeWidth,
+  }) {
+    return LineDrawing(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      color: color,
+      strokeWidth: strokeWidth,
+      startPoint: point,
+      endPoint: point,
+    );
+  }
+
+  @override
+  void update(Offset point) {
+    endPoint = point;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(color)
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final start = Offset(
+      startPoint.dx * size.width,
+      startPoint.dy * size.height,
+    );
+    final end = Offset(
+      endPoint.dx * size.width,
+      endPoint.dy * size.height,
+    );
+
+    canvas.drawLine(start, end, paint);
+  }
+
+  @override
+  bool containsPoint(Offset point) {
+    // Simple distance-to-line calculation
+    const threshold = 0.02;
+    final d = _distanceToLine(point, startPoint, endPoint);
+    return d < threshold;
+  }
+
+  double _distanceToLine(Offset point, Offset lineStart, Offset lineEnd) {
+    final dx = lineEnd.dx - lineStart.dx;
+    final dy = lineEnd.dy - lineStart.dy;
+    final length = (dx * dx + dy * dy);
+    
+    if (length == 0) return (point - lineStart).distance;
+    
+    final t = ((point.dx - lineStart.dx) * dx + (point.dy - lineStart.dy) * dy) / length;
+    final projection = Offset(
+      lineStart.dx + t * dx,
+      lineStart.dy + t * dy,
+    );
+    
+    return (point - projection).distance;
+  }
+
+  @override
+  bool isValid() {
+    const minLength = 0.01;
+    return (startPoint - endPoint).distance > minLength;
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'type': type,
+    'color': color,
+    'strokeWidth': strokeWidth,
+    'startPoint': {'x': startPoint.dx, 'y': startPoint.dy},
+    'endPoint': {'x': endPoint.dx, 'y': endPoint.dy},
+  };
+
+  static LineDrawing fromJson(Map<String, dynamic> json) {
+    final start = json['startPoint'];
+    final end = json['endPoint'];
+    
+    return LineDrawing(
+      id: json['id'],
+      color: json['color'],
+      strokeWidth: json['strokeWidth'],
+      startPoint: Offset(start['x'], start['y']),
+      endPoint: Offset(end['x'], end['y']),
+    );
+  }
+}
+
+/// Example: Arrow drawing tool
+class ArrowDrawing extends DrawingObject {
+  ArrowDrawing({
+    required super.id,
+    required super.color,
+    required super.strokeWidth,
+    required this.startPoint,
+    required this.endPoint,
+  }) : super(type: 'arrow');
+
+  final Offset startPoint;
+  Offset endPoint;
+
+  factory ArrowDrawing.start({
+    required Offset point,
+    required int color,
+    required double strokeWidth,
+  }) {
+    return ArrowDrawing(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      color: color,
+      strokeWidth: strokeWidth,
+      startPoint: point,
+      endPoint: point,
+    );
+  }
+
+  @override
+  void update(Offset point) {
+    endPoint = point;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Color(color)
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+
+    final start = Offset(
+      startPoint.dx * size.width,
+      startPoint.dy * size.height,
+    );
+    final end = Offset(
+      endPoint.dx * size.width,
+      endPoint.dy * size.height,
+    );
+
+    // Draw main line
+    canvas.drawLine(start, end, paint);
+
+    // Draw arrowhead
+    _drawArrowhead(canvas, start, end, paint);
+  }
+
+  void _drawArrowhead(Canvas canvas, Offset start, Offset end, Paint paint) {
+    final direction = (end - start);
+    if (direction.distance < 10) return; // Too short for arrowhead
+    
+    final angle = direction.direction;
+    final headLength = strokeWidth * 8;
+    const headAngle = 0.5; // radians
+    
+    final head1 = end + Offset(
+      headLength * math.cos(angle + math.pi - headAngle),
+      headLength * math.sin(angle + math.pi - headAngle),
+    );
+    final head2 = end + Offset(
+      headLength * math.cos(angle + math.pi + headAngle),
+      headLength * math.sin(angle + math.pi + headAngle),
+    );
+    
+    canvas.drawLine(end, head1, paint);
+    canvas.drawLine(end, head2, paint);
+  }
+
+  @override
+  bool containsPoint(Offset point) {
+    const threshold = 0.02;
+    final d = _distanceToLine(point, startPoint, endPoint);
+    return d < threshold;
+  }
+
+  double _distanceToLine(Offset point, Offset lineStart, Offset lineEnd) {
+    final dx = lineEnd.dx - lineStart.dx;
+    final dy = lineEnd.dy - lineStart.dy;
+    final length = (dx * dx + dy * dy);
+    
+    if (length == 0) return (point - lineStart).distance;
+    
+    final t = ((point.dx - lineStart.dx) * dx + (point.dy - lineStart.dy) * dy) / length;
+    final projection = Offset(
+      lineStart.dx + t * dx,
+      lineStart.dy + t * dy,
+    );
+    
+    return (point - projection).distance;
+  }
+
+  @override
+  bool isValid() {
+    const minLength = 0.01;
+    return (startPoint - endPoint).distance > minLength;
+  }
+
+  @override
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'type': type,
+    'color': color,
+    'strokeWidth': strokeWidth,
+    'startPoint': {'x': startPoint.dx, 'y': startPoint.dy},
+    'endPoint': {'x': endPoint.dx, 'y': endPoint.dy},
+  };
+
+  static ArrowDrawing fromJson(Map<String, dynamic> json) {
+    final start = json['startPoint'];
+    final end = json['endPoint'];
+    
+    return ArrowDrawing(
+      id: json['id'],
+      color: json['color'],
+      strokeWidth: json['strokeWidth'],
+      startPoint: Offset(start['x'], start['y']),
+      endPoint: Offset(end['x'], end['y']),
+    );
+  }
+}
+
+/// Utility functions for creating common custom tools
+
+/// Creates a line drawing tool
+CustomTool createLineTool() {
+  return CustomTool(
+    id: 'line',
+    name: 'Line',
+    factory: ({required point, required color, required strokeWidth}) {
+      return LineDrawing.start(
+        point: point,
+        color: color,
+        strokeWidth: strokeWidth,
+      );
+    },
+  );
+}
+
+/// Creates an arrow drawing tool  
+CustomTool createArrowTool() {
+  return CustomTool(
+    id: 'arrow',
+    name: 'Arrow',
+    factory: ({required point, required color, required strokeWidth}) {
+      return ArrowDrawing.start(
+        point: point,
+        color: color,
+        strokeWidth: strokeWidth,
+      );
+    },
+  );
 }

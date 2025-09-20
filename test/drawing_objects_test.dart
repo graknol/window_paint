@@ -273,17 +273,41 @@ void main() {
         'radius': 0.3,
       };
 
+      final lineJson = {
+        'type': 'line',
+        'id': 'test4',
+        'color': Colors.orange.value,
+        'strokeWidth': 2.0,
+        'startPoint': {'x': 0.0, 'y': 0.0},
+        'endPoint': {'x': 1.0, 'y': 1.0},
+      };
+
+      final arrowJson = {
+        'type': 'arrow',
+        'id': 'test5',
+        'color': Colors.purple.value,
+        'strokeWidth': 3.0,
+        'startPoint': {'x': 0.2, 'y': 0.2},
+        'endPoint': {'x': 0.8, 'y': 0.8},
+      };
+
       final pencil = DrawingObject.fromJson(pencilJson);
       final rectangle = DrawingObject.fromJson(rectangleJson);
       final circle = DrawingObject.fromJson(circleJson);
+      final line = DrawingObject.fromJson(lineJson);
+      final arrow = DrawingObject.fromJson(arrowJson);
 
       expect(pencil, isA<PencilDrawing>());
       expect(rectangle, isA<RectangleDrawing>());
       expect(circle, isA<CircleDrawing>());
+      expect(line, isA<LineDrawing>());
+      expect(arrow, isA<ArrowDrawing>());
 
       expect(pencil!.id, equals('test1'));
       expect(rectangle!.id, equals('test2'));
       expect(circle!.id, equals('test3'));
+      expect(line!.id, equals('test4'));
+      expect(arrow!.id, equals('test5'));
     });
 
     test('should return null for invalid JSON', () {
@@ -304,6 +328,166 @@ void main() {
 
       final result = DrawingObject.fromJson(malformedJson);
       expect(result, isNull);
+    });
+  });
+
+  group('LineDrawing', () {
+    test('should create with start and end points', () {
+      final line = LineDrawing.start(
+        point: const Offset(0.1, 0.2),
+        color: Colors.red.value,
+        strokeWidth: 2.0,
+      );
+
+      expect(line.type, equals('line'));
+      expect(line.color, equals(Colors.red.value));
+      expect(line.strokeWidth, equals(2.0));
+      expect(line.startPoint, equals(const Offset(0.1, 0.2)));
+      expect(line.endPoint, equals(const Offset(0.1, 0.2))); // Same as start initially
+      expect(line.id, isNotEmpty);
+    });
+
+    test('should update end point', () {
+      final line = LineDrawing.start(
+        point: const Offset(0.0, 0.0),
+        color: Colors.blue.value,
+        strokeWidth: 1.0,
+      );
+
+      line.update(const Offset(1.0, 1.0));
+
+      expect(line.endPoint, equals(const Offset(1.0, 1.0)));
+      expect(line.startPoint, equals(const Offset(0.0, 0.0))); // Unchanged
+    });
+
+    test('should be valid when length is above minimum', () {
+      final line = LineDrawing.start(
+        point: const Offset(0.0, 0.0),
+        color: Colors.black.value,
+        strokeWidth: 1.0,
+      );
+
+      expect(line.isValid(), isFalse); // Zero length
+
+      line.update(const Offset(0.1, 0.1));
+      expect(line.isValid(), isTrue); // Has length
+    });
+
+    test('should serialize and deserialize correctly', () {
+      final original = LineDrawing.start(
+        point: const Offset(0.2, 0.3),
+        color: Colors.green.value,
+        strokeWidth: 3.0,
+      );
+      original.update(const Offset(0.8, 0.7));
+
+      final json = original.toJson();
+      final deserialized = LineDrawing.fromJson(json);
+
+      expect(deserialized.id, equals(original.id));
+      expect(deserialized.type, equals(original.type));
+      expect(deserialized.color, equals(original.color));
+      expect(deserialized.strokeWidth, equals(original.strokeWidth));
+      expect(deserialized.startPoint, equals(const Offset(0.2, 0.3)));
+      expect(deserialized.endPoint, equals(const Offset(0.8, 0.7)));
+    });
+  });
+
+  group('ArrowDrawing', () {
+    test('should create with start and end points', () {
+      final arrow = ArrowDrawing.start(
+        point: const Offset(0.3, 0.4),
+        color: Colors.orange.value,
+        strokeWidth: 4.0,
+      );
+
+      expect(arrow.type, equals('arrow'));
+      expect(arrow.color, equals(Colors.orange.value));
+      expect(arrow.strokeWidth, equals(4.0));
+      expect(arrow.startPoint, equals(const Offset(0.3, 0.4)));
+      expect(arrow.endPoint, equals(const Offset(0.3, 0.4))); // Same as start initially
+      expect(arrow.id, isNotEmpty);
+    });
+
+    test('should update end point', () {
+      final arrow = ArrowDrawing.start(
+        point: const Offset(0.2, 0.2),
+        color: Colors.purple.value,
+        strokeWidth: 2.0,
+      );
+
+      arrow.update(const Offset(0.8, 0.8));
+
+      expect(arrow.endPoint, equals(const Offset(0.8, 0.8)));
+      expect(arrow.startPoint, equals(const Offset(0.2, 0.2))); // Unchanged
+    });
+
+    test('should be valid when length is above minimum', () {
+      final arrow = ArrowDrawing.start(
+        point: const Offset(0.5, 0.5),
+        color: Colors.cyan.value,
+        strokeWidth: 1.0,
+      );
+
+      expect(arrow.isValid(), isFalse); // Zero length
+
+      arrow.update(const Offset(0.7, 0.7));
+      expect(arrow.isValid(), isTrue); // Has length
+    });
+
+    test('should serialize and deserialize correctly', () {
+      final original = ArrowDrawing.start(
+        point: const Offset(0.1, 0.1),
+        color: Colors.teal.value,
+        strokeWidth: 5.0,
+      );
+      original.update(const Offset(0.9, 0.9));
+
+      final json = original.toJson();
+      final deserialized = ArrowDrawing.fromJson(json);
+
+      expect(deserialized.id, equals(original.id));
+      expect(deserialized.type, equals(original.type));
+      expect(deserialized.color, equals(original.color));
+      expect(deserialized.strokeWidth, equals(original.strokeWidth));
+      expect(deserialized.startPoint, equals(const Offset(0.1, 0.1)));
+      expect(deserialized.endPoint, equals(const Offset(0.9, 0.9)));
+    });
+  });
+
+  group('Custom Tool Factories', () {
+    test('should create line tool factory', () {
+      final lineTool = createLineTool();
+      
+      expect(lineTool.id, equals('line'));
+      expect(lineTool.name, equals('Line'));
+      
+      final drawing = lineTool.factory(
+        point: const Offset(0.1, 0.2),
+        color: Colors.red.value,
+        strokeWidth: 3.0,
+      );
+      
+      expect(drawing, isA<LineDrawing>());
+      expect(drawing.color, equals(Colors.red.value));
+      expect(drawing.strokeWidth, equals(3.0));
+    });
+
+    test('should create arrow tool factory', () {
+      final arrowTool = createArrowTool();
+      
+      expect(arrowTool.id, equals('arrow'));
+      expect(arrowTool.name, equals('Arrow'));
+      
+      final drawing = arrowTool.factory(
+        point: const Offset(0.3, 0.4),
+        color: Colors.blue.value,
+        strokeWidth: 2.0,
+      );
+      
+      expect(drawing, isA<ArrowDrawing>());
+      expect(drawing.color, equals(Colors.blue.value));
+      expect(drawing.strokeWidth, equals(2.0));
     });
   });
 }

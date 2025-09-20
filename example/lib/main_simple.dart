@@ -34,8 +34,12 @@ class _SimplePaintDemoState extends State<SimplePaintDemo> {
   @override
   void initState() {
     super.initState();
-    // Simple initialization - no complex setup needed!
+    // Simple initialization with custom tools
     _controller = WindowPaintController();
+    
+    // Register custom tools
+    _controller.registerCustomTool(createLineTool());
+    _controller.registerCustomTool(createArrowTool());
   }
 
   @override
@@ -112,11 +116,14 @@ class _SimplePaintDemoState extends State<SimplePaintDemo> {
             spacing: 16,
             alignment: WrapAlignment.center,
             children: [
-              // Tool selection
+              // Built-in tool selection
               _buildToolButton(DrawingTool.pan, Icons.pan_tool, 'Pan'),
               _buildToolButton(DrawingTool.pencil, Icons.edit, 'Pencil'),
               _buildToolButton(DrawingTool.rectangle, Icons.crop_din, 'Rectangle'),
               _buildToolButton(DrawingTool.circle, Icons.circle_outlined, 'Circle'),
+              
+              // Custom tools
+              ..._buildCustomToolButtons(),
               
               SizedBox(width: 16),
               
@@ -162,7 +169,7 @@ class _SimplePaintDemoState extends State<SimplePaintDemo> {
   }
 
   Widget _buildToolButton(DrawingTool tool, IconData icon, String label) {
-    final isSelected = _controller.tool == tool;
+    final isSelected = _controller.tool == tool && _controller.activeCustomToolId == null;
     
     return GestureDetector(
       onTap: () => _controller.setTool(tool),
@@ -193,6 +200,55 @@ class _SimplePaintDemoState extends State<SimplePaintDemo> {
     );
   }
 
+  List<Widget> _buildCustomToolButtons() {
+    return _controller.customTools.values.map((tool) {
+      final isSelected = _controller.tool == DrawingTool.custom && 
+                        _controller.activeCustomToolId == tool.id;
+      
+      return GestureDetector(
+        onTap: () => _controller.setCustomTool(tool.id),
+        child: Container(
+          padding: EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.green[100] : Colors.transparent,
+            border: Border.all(
+              color: isSelected ? Colors.green : Colors.grey,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _getIconForCustomTool(tool.id), 
+                color: isSelected ? Colors.green : Colors.grey[700],
+              ),
+              SizedBox(height: 4),
+              Text(
+                tool.name,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isSelected ? Colors.green : Colors.grey[700],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }).toList();
+  }
+
+  IconData _getIconForCustomTool(String toolId) {
+    switch (toolId) {
+      case 'line':
+        return Icons.remove;
+      case 'arrow':
+        return Icons.arrow_forward;
+      default:
+        return Icons.extension;
+    }
+  }
+
   Widget _buildStatus() {
     return AnimatedBuilder(
       animation: _controller,
@@ -209,8 +265,11 @@ class _SimplePaintDemoState extends State<SimplePaintDemo> {
               SizedBox(width: 16),
               if (_controller.selectedId != null)
                 Text('Selected: ${_controller.selectedId}'),
+              SizedBox(width: 16),
+              if (_controller.tool == DrawingTool.custom && _controller.activeCustomTool != null)
+                Text('Custom Tool: ${_controller.activeCustomTool!.name}'),
               Spacer(),
-              Text('Simple Architecture'),
+              Text('Simple Architecture + Custom Tools'),
             ],
           ),
         );

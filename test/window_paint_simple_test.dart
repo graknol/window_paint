@@ -23,11 +23,12 @@ extension WindowPaintControllerTesting on WindowPaintController {
 void main() {
   group('DrawingTool enum', () {
     test('should have all expected tools', () {
-      expect(DrawingTool.values, hasLength(4));
+      expect(DrawingTool.values, hasLength(5)); // Updated count
       expect(DrawingTool.values, contains(DrawingTool.pan));
       expect(DrawingTool.values, contains(DrawingTool.pencil));
       expect(DrawingTool.values, contains(DrawingTool.rectangle));
       expect(DrawingTool.values, contains(DrawingTool.circle));
+      expect(DrawingTool.values, contains(DrawingTool.custom));
     });
   });
 
@@ -132,6 +133,102 @@ void main() {
 
       expect(controller.drawings, isEmpty);
       expect(controller.selectedId, isNull);
+    });
+
+    group('Custom Tools', () {
+      test('should register and unregister custom tools', () {
+        final customTool = CustomTool(
+          id: 'test',
+          name: 'Test Tool',
+          factory: ({required point, required color, required strokeWidth}) {
+            return PencilDrawing.start(
+              point: point,
+              color: color,
+              strokeWidth: strokeWidth,
+            );
+          },
+        );
+
+        expect(controller.customTools, isEmpty);
+
+        controller.registerCustomTool(customTool);
+        expect(controller.customTools, hasLength(1));
+        expect(controller.customTools['test'], equals(customTool));
+
+        controller.unregisterCustomTool('test');
+        expect(controller.customTools, isEmpty);
+      });
+
+      test('should switch to custom tool', () {
+        final customTool = CustomTool(
+          id: 'line',
+          name: 'Line Tool',
+          factory: ({required point, required color, required strokeWidth}) {
+            return LineDrawing.start(
+              point: point,
+              color: color,
+              strokeWidth: strokeWidth,
+            );
+          },
+        );
+
+        controller.registerCustomTool(customTool);
+        controller.setCustomTool('line');
+
+        expect(controller.tool, equals(DrawingTool.custom));
+        expect(controller.activeCustomToolId, equals('line'));
+        expect(controller.activeCustomTool, equals(customTool));
+      });
+
+      test('should throw error for unregistered custom tool', () {
+        expect(
+          () => controller.setCustomTool('nonexistent'),
+          throwsA(isA<ArgumentError>()),
+        );
+      });
+
+      test('should clear custom tool when switching to built-in tool', () {
+        final customTool = CustomTool(
+          id: 'test',
+          name: 'Test',
+          factory: ({required point, required color, required strokeWidth}) {
+            return PencilDrawing.start(
+              point: point,
+              color: color,
+              strokeWidth: strokeWidth,
+            );
+          },
+        );
+
+        controller.registerCustomTool(customTool);
+        controller.setCustomTool('test');
+        expect(controller.activeCustomToolId, equals('test'));
+
+        controller.setTool(DrawingTool.pencil);
+        expect(controller.activeCustomToolId, isNull);
+      });
+
+      test('should revert to pencil when active custom tool is unregistered', () {
+        final customTool = CustomTool(
+          id: 'temp',
+          name: 'Temp Tool',
+          factory: ({required point, required color, required strokeWidth}) {
+            return PencilDrawing.start(
+              point: point,
+              color: color,
+              strokeWidth: strokeWidth,
+            );
+          },
+        );
+
+        controller.registerCustomTool(customTool);
+        controller.setCustomTool('temp');
+        expect(controller.tool, equals(DrawingTool.custom));
+
+        controller.unregisterCustomTool('temp');
+        expect(controller.tool, equals(DrawingTool.pencil));
+        expect(controller.activeCustomToolId, isNull);
+      });
     });
   });
 
